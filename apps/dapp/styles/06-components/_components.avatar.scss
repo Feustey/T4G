@@ -1,0 +1,96 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-avatar--container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 0 auto;
+
+  .heading-4 {
+    color: var(--app-color-text);
+  }
+}
+
+.c-avatar-edit-form {
+  position: relative;
+  padding: calc(#{base.$md-unit} + (#{base.$sm-unit} / 2));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  .c-avatar--remove {
+    display: none;
+  }
+
+  input[type='file'] {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+
+    .c-button-icon-only {
+      position: absolute;
+      top: 0;
+      right: 0;
+      border-radius: 50%;
+      aspect-ratio: 1;
+      margin: 0;
+      color:  var(--app-color-background-primary);
+      border: solid 1px var(--app-button-border-color);
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+.c-avatar__thumbnail-avatar--placeholder {
+  width: var(--size);
+  height: var(--size);
+  max-width: var(--size);
+  max-height: var(--size);
+  aspect-ratio: 1;
+  // overflow: hidden;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-grey-100);
+  color: var(--color-grey-500);
+  font-family: var(--font-family-primary);
+  font-size: calc(var(--size) / 1.5);
+  cursor: pointer;
+}
+
+.c-avatar-edit-form .c-avatar__thumbnail-avatar {
+  border: dotted 1px var(--app-color-title);
+}
+.c-avatar__thumbnail-avatar {
+  width: var(--size);
+  height: var(--size);
+  aspect-ratio: 1;
+  // overflow: hidden;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  img {
+    width: var(--size);
+    height: var(--size);
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+  }
+}

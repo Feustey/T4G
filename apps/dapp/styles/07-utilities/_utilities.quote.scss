@@ -1,0 +1,17 @@
+@use '../bases.scss' as base;
+
+.u-quote {
+  position: relative;
+  padding: var(--space-0) var(--space-0) var(--space-0) var(--space-5);
+
+  &:before {
+    content: '';
+    width: 1px;
+    background-color: var(--app-border-color-secondary);
+    display: inline-flex;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+}

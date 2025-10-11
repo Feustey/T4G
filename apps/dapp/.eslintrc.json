@@ -1,0 +1,16 @@
+{
+  "extends": ["next/core-web-vitals", "prettier"],
+  "rules": {
+    "@next/next/no-server-import-in-page": "off", // give a fake error for middleware so turned to off
+
+    // Use this two rules to only see other errors
+
+    //, "import/no-cycle": "off",
+    "@nrwl/nx/enforce-module-boundaries": "off"
+  },
+  "settings": {
+    "next": {
+      "rootDir": "apps/dapp"
+    }
+  }
+}

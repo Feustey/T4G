@@ -1,0 +1,13 @@
+@use '../bases.scss' as base;
+
+.c-userNotifications {
+  display: flex;
+  flex-direction: column-reverse;
+  position: fixed;
+  top: base.$lg-unit;
+  left: base.$lg-unit;
+  right: base.$lg-unit;
+  gap: base.$lg-unit;
+  align-items: flex-end;
+  z-index: 2;
+}

@@ -1,0 +1,11 @@
+@media (prefers-color-scheme: dark) {
+  .u-color-scheme--light {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .u-color-scheme--dark {
+    display: none;
+  }
+}

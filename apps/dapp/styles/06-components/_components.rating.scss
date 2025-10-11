@@ -1,0 +1,82 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-rating {
+  display: flex;
+  margin: auto;
+  width: fit-content;
+  gap: base.$sm-unit;
+}
+
+.c-rating__stars-container {
+  display: flex;
+  margin: auto;
+  width: fit-content;
+  gap: 2px;
+}
+
+.c-rating__star {
+  color: var(--app-benefits-color-secondary);
+}
+
+.c-rating__input {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+  height: 0px;
+  width: 0px;
+}
+
+#rating1:focus ~ #rating-label1 {
+  box-shadow: var(--app-color-background-primary) 0 0 0 2px,
+    var(--app-input-outline-color) 0 0 0 4px !important;
+}
+#rating2:focus ~ #rating-label2 {
+  box-shadow: var(--app-color-background-primary) 0 0 0 2px,
+    var(--app-input-outline-color) 0 0 0 4px !important;
+}
+#rating3:focus ~ #rating-label3 {
+  box-shadow: var(--app-color-background-primary) 0 0 0 2px,
+    var(--app-input-outline-color) 0 0 0 4px !important;
+}
+#rating4:focus ~ #rating-label4 {
+  box-shadow: var(--app-color-background-primary) 0 0 0 2px,
+    var(--app-input-outline-color) 0 0 0 4px !important;
+}
+#rating5:focus ~ #rating-label5 {
+  box-shadow: var(--app-color-background-primary) 0 0 0 2px,
+    var(--app-input-outline-color) 0 0 0 4px !important;
+}
+
+.c-rating--rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: map.get(base.$concrete-sizes, 'm');
+  margin-top: map.get(base.$concrete-sizes, 'm');
+  margin-bottom: map.get(base.$concrete-sizes, 'm');
+  legend {
+    width: 100%;
+    text-align: center;
+  }
+  .c-rating__stars-container {
+    display: flex;
+    gap: map.get(base.$concrete-sizes, 'r');
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .c-rating__star {
+    cursor: pointer;
+    height: map.get(base.$concrete-sizes, 'l');
+    width: map.get(base.$concrete-sizes, 'l');
+    aspect-ratio: 1;
+    color: var(--app-button-background);
+
+    svg {
+      height: map.get(base.$concrete-sizes, 'l');
+      width: map.get(base.$concrete-sizes, 'l');
+      aspect-ratio: 1;
+    }
+  }
+}

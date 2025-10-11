@@ -1,0 +1,39 @@
+@use '../bases.scss' as base;
+
+.u-width--fill {
+  width: 100%;
+}
+.u-height--fill {
+  height: 100%;
+}
+
+.u-height--about-image {
+  height: 70%;
+}
+
+.u-width--fit {
+  width: fit-content;
+}
+
+.u-height--fit {
+  height: fit-content;
+}
+
+.u-aspect-ratio--1 {
+  aspect-ratio: 1;
+}
+.u-m-w-sm--50 {
+  @include base.media-breakpoint-up(sm) {
+    max-width: calc(50% - #{base.$lg-unit});
+  }
+}
+.u-m-w-lg--50 {
+  @include base.media-breakpoint-up(lg) {
+    max-width: calc(50% - #{base.$lg-unit});
+  }
+}
+
+.u-partners__logo {
+  width: 180px;
+  height: auto;
+}

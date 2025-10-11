@@ -1,0 +1,42 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-categorie-card {
+  background-color: var(--app-color-background-secondary);
+  border: solid 1px var(--app-border-color-primary);
+  padding: map.get(base.$concrete-sizes, 'm');
+  display: flex;
+  flex-direction: column;
+  gap: map.get(base.$concrete-sizes, 'm');
+  &--benefits {
+    @extend .c-categorie-card;
+    .c-button {
+      margin-top: auto;
+    }
+    &--disabled {
+      @extend .c-categorie-card;
+      @media (prefers-color-scheme: light) {
+        --card-disabled-color: #4c4e52;
+      }
+      @media (prefers-color-scheme: dark) {
+        --card-disabled-color: #cecfd3;
+      }
+      background-color: transparent;
+      border: solid 1px var(--card-disabled-color);
+      color: var(--card-disabled-color);
+      h2 {
+        color: var(--card-disabled-color) !important;
+      }
+      .c-button {
+        margin-top: auto;
+        cursor: default;
+      }
+      .c-icon--title--services{
+        border: 2px dotted var(--card-disabled-color);
+      }
+      .c-icon--title--benefits{
+        border: 2px dotted var(--card-disabled-color);
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "root": "libs/service/middleware",
+  "sourceRoot": "libs/service/middleware/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/service/middleware/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/service/middleware"],
+      "options": {
+        "jestConfig": "libs/service/middleware/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+.c-list__item--icon-start {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  align-items: baseline;
+  svg {
+    flex-shrink: 0;
+  }
+}
+.c-list {
+  display: flex;
+  gap: 2rem;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.c-list__main-value {
+  font-weight: 600;
+}

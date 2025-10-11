@@ -1,0 +1,22 @@
+.c-testimony {
+  transition: all 0.2s ease-in-out;
+  margin-bottom: var(--space-7);
+
+  .c-testimony__author {
+    display: inline-flex;
+    align-items: center;
+    flex-direction: row;
+    p {
+      margin-bottom: var(--space-0);
+      &.firm {
+        color: var(--app-color-title);
+      }
+    }
+  }
+
+  .c-testimony__image {
+    border-radius: 50%;
+    margin-right: var(--space-5);
+    background-color: #ccc;
+  }
+}

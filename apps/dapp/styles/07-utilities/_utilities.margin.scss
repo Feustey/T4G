@@ -1,0 +1,51 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.u-margin-t--none {
+  margin-top: 0;
+}
+
+.u-margin-t--6 {
+  margin-top: 1.5rem;
+}
+.u-margin-b--none {
+  margin-bottom: 0;
+}
+.u-margin--none {
+  margin: 0;
+}
+.u-margin--auto {
+  margin: auto;
+}
+.u-margin-l--auto {
+  margin-left: auto;
+}
+
+.u-margin-inline--auto {
+  margin-inline: auto;
+}
+
+.u-margin-t--auto {
+  margin-top: auto;
+}
+
+.u-margin-b--l {
+  margin-bottom: 2 * base.$lg-unit;
+}
+.u-margin-b--m {
+  margin-bottom: base.$lg-unit;
+}
+.u-margin-t--m {
+  margin-top: base.$lg-unit;
+}
+
+@each $breakpoint in map-keys(base.$breakpoint) {
+  @include base.media-breakpoint-up($breakpoint) {
+    $infix: base.breakpoint-infix($breakpoint, base.$breakpoint);
+    @each $name, $value in base.$concrete-sizes {
+      .u-margin#{$infix}--#{$name} {
+        margin: $value !important;
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+const defaultTheme = require("tailwindcss/defaultTheme");
+
+module.exports = {
+  darkMode: "media", // or 'media' or 'class'
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['"Work Sans"', ...defaultTheme.fontFamily.sans],
+      },
+      height: {
+        7.5: "30px",
+        25: "100px",
+        15: "15px",
+        40: "40px",
+        46: "46px",
+        48: "48px",
+        50: "50px",
+        72: "72px",
+        90: "90px",
+      },
+      width: {
+        15: "15px",
+        25: "100px",
+      },
+      margin: {
+        10: "10px",
+        16: "16px",
+        72: "72px",
+        40: "40px",
+      },
+      padding: {
+        18: "72px",
+        1.25: "5px",
+        1.75: "7px",
+      },
+      spacing: {},
+      fontSize: {
+        8: "8px",
+        10: "10px",
+        13: "13px",
+        15: "15px",
+        25: "25px",
+        51: "51px",
+        h1: "36px",
+        h3: "21px",
+        h4: "17px",
+        lg: {
+          h1: "36px",
+          h3: "21px",
+          h4: "17px",
+        },
+      },
+      opacity: {
+        12: "0.12",
+        24: "0.24",
+        37: "0.37",
+        38: "0.38",
+        87: "0.87",
+      },
+      colors: {
+        white: "#ffffff",
+        black: "#000000",
+        "gray-010": "#F8F9FD",
+        "gray-020": "#D8D8D8",
+        "gray-030": "#E9E8F4",
+        "gray-040": "rgba(255, 255, 255, 0.60)",
+        "gray-041": "rgba(248, 249, 253, 1)",
+        "blue-001": "rgba(2, 168, 192, 0.12)",
+        "blue-011": "rgba(2, 168, 192, 0.37)",
+        "blue-002": "rgba(2, 168, 192, 1)",
+        "blue-003": "rgba(46, 56, 77, 0.12)",
+        "blue-004": "rgba(46, 56, 77, 0.87)",
+        "blue-005": "rgba(46, 56, 77, 1)",
+        "blue-006": "rgba(0, 0, 68, 0.87)",
+        "blue-007": "rgba(46, 56, 77, 0.60)",
+        "blue-008": "rgba(46, 56, 77, 0.37)",
+        "blue-009": "rgba(102, 107, 128, 0.85)",
+        "orange-001": "rgba(241, 95, 43, 0.20)",
+        "orange-002": "rgba(241, 95, 43, 1)",
+        "orange-003": "rgba(243, 164, 28, 1)",
+        "green-001": "rgba(49,194,122,1)",
+        "green-002": "#83daaf",
+        "green-003": "rgba(47,111,94,1)",
+        "green-004": "rgba(49,194,122,0.37)",
+        "green-005": "rgba(49,194,122,0.20)",
+        "red-001": "rgba(252,16,13,1)",
+      },
+      backgroundImage: {
+        "watermark-desktop": "url(/assets/images/svg/bg-desktop.svg)",
+        "watermark-mobile": "url(/assets/images/svg/bg-mobile.svg)",
+        wallet: "url(/assets/images/svg/wallet.svg)",
+        "home-hero": "url(/assets/images/svg/home.svg)",
+      },
+      boxShadow: {
+        card: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
+      },
+      gridTemplateColumns: {
+        "col-5-lg": "70px auto 1fr 170px 50px",
+        "col-5": "70px auto 1fr 0px 50px",
+      },
+    },
+  },
+  variants: {
+    extend: {
+      opacity: ["active"],
+      scale: ["focus-within"],
+      backgroundColor: ["checked"],
+    },
+  },
+  plugins: [
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
+};

@@ -1,0 +1,10 @@
+.o-media {
+  position: relative;
+  &.o-media-fill {
+    img {
+      flex: 1;
+      object-fit: contain;
+      margin: 0 auto;
+    }
+  }
+}

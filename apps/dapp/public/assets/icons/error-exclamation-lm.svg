@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>attention / error</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="LM_OB_signup_state:error" transform="translate(-1316.000000, -391.000000)" fill="#E01919">
+            <path d="M1326,391 C1320.48,391 1316,395.48 1316,401 C1316,406.52 1320.48,411 1326,411 C1331.52,411 1336,406.52 1336,401 C1336,395.48 1331.52,391 1326,391 C1322.32,391 1322.32,391 1326,391 Z M1325,406 L1325,404 L1327,404 L1327,406 L1325,406 L1325,406 Z M1325,396 L1325,402 L1327,402 L1327,396 L1325,396 L1325,396 Z" id="attention-/-error"></path>
+        </g>
+    </g>
+</svg>

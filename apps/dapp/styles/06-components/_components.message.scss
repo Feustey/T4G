@@ -1,0 +1,28 @@
+.c-message {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding: var(--space-4);
+
+  &--info {
+    @extend .c-message;
+    border: 1px solid var(--app-border-color-ternary);
+    background-color: var(--app-color-background-secondary);
+  }
+
+  &--danger {
+    @extend .c-message;
+    border: 1px solid red;
+    background-color: rgb(255, 159, 159);
+    color: var(--app-color-text);
+    p {
+      font-weight: bold;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
+}

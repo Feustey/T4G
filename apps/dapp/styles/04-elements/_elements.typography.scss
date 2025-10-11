@@ -1,0 +1,110 @@
+@use '../bases.scss' as base;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.heading-1,
+.heading-2,
+.heading-3,
+.heading-4,
+.heading-5,
+.heading-6 {
+  font-family: base.$font-family-primary;
+  margin-bottom: var(--space-5);
+  color: var(--app-color-title);
+  &.subtitle {
+    color: var(--app-color-text);
+  }
+}
+
+h1,
+.heading-1 {
+  font-size: base.$txt-size-xl;
+  line-height: 3rem;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-xxl;
+    line-height: 5rem;
+  }
+}
+
+h2,
+.heading-2 {
+  font-size: base.$txt-size-big;
+  line-height: 2.5rem;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-xl;
+    line-height: 2.5rem;
+  }
+}
+
+h3,
+.heading-3 {
+  font-size: base.$txt-size-big;
+  line-height: 2.5rem;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-l;
+    line-height: 2.5rem;
+  }
+}
+
+h4,
+.heading-4 {
+  font-size: base.$txt-size-medium;
+  line-height: 1.875rem;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-medium;
+    line-height: 2.5rem;
+  }
+}
+
+h5,
+.heading-5 {
+  font-size: base.$txt-size-regular;
+  line-height: 1.5rem;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-regular;
+    line-height: 2.5rem;
+  }
+}
+
+h6,
+.heading-6 {
+  font-size: base.$txt-size-upper;
+  line-height: 1.125rem;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-upper;
+    line-height: 2.5rem;
+  }
+}
+
+.subtitle-1 {
+  font-family: base.$font-family-default;
+  font-style: normal;
+  font-weight: 700;
+  font-size: base.$txt-size-default;
+  line-height: 1.5rem;
+  color: var(--app-color-text);
+  margin: 0;
+}
+
+p,
+ul,
+ol {
+  font-family: base.$font-family-default;
+  font-size: base.$txt-size-default;
+  line-height: 1.5rem;
+  margin-bottom: var(--space-5);
+
+  &.small {
+    font-size: base.$txt-size-small;
+    line-height: 1.25rem;
+  }
+
+  &.xs {
+    font-size: base.$txt-size-xs;
+    line-height: 1.125rem;
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "root": "libs/ui/icons",
+  "sourceRoot": "libs/ui/icons/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/ui/icons/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/ui/icons"],
+      "options": {
+        "jestConfig": "libs/ui/icons/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

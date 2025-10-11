@@ -1,0 +1,43 @@
+@use 'sass:map';
+
+$base-space: 1rem;
+
+$space: (
+  0: 0,
+  1: $base-space * 0.125,
+  // 0.125rem
+  2: $base-space * 0.25,
+  // 0.25rem
+  3: $base-space * 0.5,
+  // 0.5rem
+  4: $base-space * 0.75,
+  // 0.75rem
+  5: $base-space,
+  // 1rem
+  6: $base-space * 1.5,
+  // 1.5rem
+  7: $base-space * 2,
+  // 2rem
+  8: $base-space * 2.5,
+  // 2.5rem
+  9: $base-space * 3,
+  // 3rem
+  10: $base-space * 4,
+  // 4rem
+  11: $base-space * 6,
+  // 6rem
+  12: $base-space * 7,
+  // 7rem
+  13: $base-space * 8,
+  // 8rem
+  14: $base-space * 9,
+);
+
+:root {
+  @each $key, $value in $space {
+    --space-#{$key}: #{$value};
+  }
+  @each $key, $value in $space {
+    --space-neg-#{$key}: #{-$value};
+  }
+}

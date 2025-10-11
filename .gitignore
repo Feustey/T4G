@@ -47,9 +47,13 @@ Thumbs.db
 .env.*
 
 # Hardhat files
+# (ignorer ces dossiers où qu'ils apparaissent dans le monorepo)
 cache
 artifacts/
 typechain-types/
+**/cache/
+**/artifacts/
+**/typechain-types/
 
 # Rust target directory (build artifacts)
 target/
@@ -58,13 +62,17 @@ target/
 # Next.js build outputs
 .next/
 **/.next/
+**/.swc/
 
-# Large tarballs accidentally added in history
-token4good-backend-src*.tar.gz
+# TypeScript build info
+*.tsbuildinfo
 
 # Sentry
 .sentryclirc
 .vercel
+
+# Large tarballs accidentally added in history
+token4good-backend-src*.tar.gz
 
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

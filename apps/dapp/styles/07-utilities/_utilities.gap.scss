@@ -1,0 +1,25 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.u-r-gap--md {
+  row-gap: map.get(base.$concrete-sizes, 'l');
+}
+.u-c-gap--md {
+  column-gap: map.get(base.$concrete-sizes, 'l');
+}
+.u-gap--s {
+  gap: base.$lg-unit;
+}
+.u-gap--xs {
+  gap: base.$md-unit;
+}
+.u-gap--xxs {
+  gap: base.$sm-unit;
+}
+.u-gap--m {
+  gap: map.get(base.$concrete-sizes, 'm');
+}
+
+.u-gap--6 {
+  gap: var(--space-6);
+}

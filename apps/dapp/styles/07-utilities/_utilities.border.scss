@@ -1,0 +1,5 @@
+@use '../bases.scss' as base;
+
+.u-border--ternary {
+  border: solid 1px var(--app-border-color-ternary);
+}

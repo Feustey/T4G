@@ -1,0 +1,33 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-tableSkeleton__line {
+  float: left;
+  height: map.get(base.$concrete-sizes, 'm');
+  margin-top: map.get(base.$concrete-sizes, 'r');
+  margin-bottom: map.get(base.$concrete-sizes, 'r');
+  border-radius: 7px;
+  background-image: linear-gradient(
+    90deg,
+    #f4f4f4 0px,
+    rgba(229, 229, 229, 0.8) 40px,
+    #f4f4f4 80px
+  );
+  background-size: 600px;
+  animation: shine-lines 2s infinite ease-out;
+
+  &--right {
+    @extend .c-tableSkeleton__line;
+    margin-left: 3rem;
+  }
+}
+
+@keyframes shine-lines {
+  0% {
+    background-position: -100px;
+  }
+  40%,
+  100% {
+    background-position: 140px;
+  }
+}

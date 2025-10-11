@@ -1,0 +1,57 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-toast {
+  transform: translateX(130%);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: map.get(base.$concrete-sizes, 'r');
+  inline-size: fit-content;
+  justify-content: space-between;
+  gap: map.get(base.$concrete-sizes, 'm');
+  border-radius: base.$md-unit;
+  z-index: 4;
+  width: 335px;
+  transition: all 1s ease-in-out;
+  color: var(--color-white-1000);
+  font-weight: bold;
+
+  @include base.media-breakpoint-down(sm) {
+    width: 100%;
+  }
+
+  * {
+    padding: 0;
+    padding-top: 2px;
+    margin: 0;
+    text-align: left;
+  }
+
+  .c-button--tertiary {
+    --button-color: var(--color-white-1000);
+    align-self: flex-start;
+    padding: 0;
+    aspect-ratio: 1;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: map.get(base.$concrete-sizes, 'm');
+    width: map.get(base.$concrete-sizes, 'm');
+    min-height: map.get(base.$concrete-sizes, 'm');
+    min-width: map.get(base.$concrete-sizes, 'm');
+  }
+
+  &--error {
+    @extend .c-toast;
+    background-color: var(--color-red-700);
+  }
+  &--success {
+    @extend .c-toast;
+    background-color: var(--color-blue-900);
+  }
+}
+
+.c-toast.show {
+  transform: translateX(0%);
+}

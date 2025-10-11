@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>notification/warning</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Stylesheet" transform="translate(-1243.000000, -2214.000000)" fill="#FAAD14">
+            <path d="M1253,2214 C1247.48,2214 1243,2218.48 1243,2224 C1243,2229.52 1247.48,2234 1253,2234 C1258.52,2234 1263,2229.52 1263,2224 C1263,2218.48 1258.52,2214 1253,2214 C1249.32,2214 1249.32,2214 1253,2214 Z M1252,2229 L1252,2227 L1254,2227 L1254,2229 L1252,2229 L1252,2229 Z M1252,2219 L1252,2225 L1254,2225 L1254,2219 L1252,2219 L1252,2219 Z" id="notification/warning"></path>
+        </g>
+    </g>
+</svg>

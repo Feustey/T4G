@@ -1,0 +1,45 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-breadcrumb {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  gap: base.$md-unit;
+  margin: 0;
+}
+
+.c-breadcrumb__link {
+  width: 100%;
+  display: flex;
+  gap: base.$md-unit;
+  align-items: center;
+  background-color: var(--app-color-background-secondary);
+  padding: base.$lg-unit;
+  font-weight: 700;
+  width: calc(
+    100% + #{map.get(base.$concrete-sizes, 'r')} + #{map.get(
+        base.$concrete-sizes,
+        'r'
+      )}
+  );
+  margin-left: -#{map.get(base.$concrete-sizes, 'r')};
+  margin-top: -20px;
+  svg {
+    height: map.get(base.$concrete-sizes, 'm');
+    width: map.get(base.$concrete-sizes, 'm');
+  }
+
+  @include base.media-breakpoint-up(lg) {
+    padding: 0;
+    gap: base.$md-unit;
+    background-color: transparent;
+    width: fit-content;
+    margin-left: 0;
+    margin-top: 0;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

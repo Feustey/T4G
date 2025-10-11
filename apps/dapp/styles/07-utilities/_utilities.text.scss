@@ -1,0 +1,13 @@
+@use '../bases.scss' as base;
+
+.u-text--center {
+  text-align: center;
+}
+
+.u-text--bold {
+  font-weight: bold;
+}
+
+.u-text-size--regular {
+  font-size: base.$txt-size-regular;
+}

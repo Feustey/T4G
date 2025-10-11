@@ -1,0 +1,76 @@
+@use 'sass:map';
+@use '../bases.scss' as base;
+
+.c-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-5);
+  width: 100%;
+  margin: 0 auto;
+  max-width: 1700px;
+
+  .c-button {
+    width: fit-content;
+    min-width: fit-content;
+  }
+}
+
+.c-header__logo {
+  height: 60px;
+  width: 72px;
+  @include base.media-breakpoint-up(lg) {
+    height: 70px;
+    width: 83px;
+  }
+}
+
+.c-header--connected {
+  padding: map.get(base.$concrete-sizes, 'm');
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-color: var(--app-border-color-ternary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  p {
+    margin: 0;
+    font-weight: 700;
+    font-size: base.$lg-unit;
+  }
+  .c-header__logo {
+    height: 44px;
+    width: 52px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    @include base.media-breakpoint-up(lg) {
+      height: map.get(base.$concrete-sizes, 'xxxl');
+      width: 76px;
+      position: inherit;
+      transform: translateX(0);
+    }
+  }
+}
+
+.c-header--connected__token__image {
+  height: 20px;
+  width: 20px;
+  aspect-ratio: 1;
+}
+
+.c-header--connected__token-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: base.$md-unit;
+  cursor: pointer;
+}
+.c-header--connected__avatar-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: base.$lg-unit;
+  cursor: pointer;
+}

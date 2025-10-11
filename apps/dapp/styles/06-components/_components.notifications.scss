@@ -1,0 +1,27 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-notifications {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  p,
+  span,
+  li {
+    margin: 0;
+  }
+  li {
+    padding: base.$md-unit base.$lg-unit;
+    span {
+      color: var(--app-color-text-disabled);
+      font-size: 14px;
+    }
+  }
+  li:nth-child(odd) {
+    background-color: var(--app-color-background-primary);
+  }
+  li:nth-child(even) {
+    background-color: var(--app-color-background-secondary);
+  }
+}

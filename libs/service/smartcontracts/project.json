@@ -1,0 +1,23 @@
+{
+  "root": "libs/service/smartcontracts",
+  "sourceRoot": "libs/service/smartcontracts/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/service/smartcontracts/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/service/smartcontracts"],
+      "options": {
+        "jestConfig": "libs/service/smartcontracts/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

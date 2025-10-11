@@ -1,0 +1,23 @@
+{
+  "root": "libs/ui/pages",
+  "sourceRoot": "libs/ui/pages/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/ui/pages/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/ui/pages"],
+      "options": {
+        "jestConfig": "libs/ui/pages/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

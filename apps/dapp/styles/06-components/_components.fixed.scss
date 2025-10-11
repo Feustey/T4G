@@ -1,0 +1,31 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-fixed {
+  background-color: var(--app-color-background-primary);
+  padding-top: map.get(base.$concrete-sizes, 'm');
+  padding-bottom: map.get(base.$concrete-sizes, 'm');
+  &--full {
+    @extend .c-fixed;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+  }
+  &--desktop {
+    @extend .c-fixed;
+    @include base.media-breakpoint-up(lg) {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+    }
+  }
+  &--mobile {
+    @extend .c-fixed;
+    @include base.media-breakpoint-down(sm) {
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+    }
+  }
+}

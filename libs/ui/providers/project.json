@@ -1,0 +1,23 @@
+{
+  "root": "libs/ui/providers",
+  "sourceRoot": "libs/ui/providers/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/ui/providers/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/ui/providers"],
+      "options": {
+        "jestConfig": "libs/ui/providers/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

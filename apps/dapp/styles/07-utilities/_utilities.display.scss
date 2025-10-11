@@ -1,0 +1,13 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+@each $breakpoint in map-keys(base.$breakpoint) {
+  @include base.media-breakpoint-up($breakpoint) {
+    $infix: base.breakpoint-infix($breakpoint, base.$breakpoint);
+    @each $value in base.$displays {
+      .u-d#{$infix}--#{$value} {
+        display: $value;
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Backend Rust
+  token4good-backend:
+    build: .
+    ports:
+      - "3000:3000"
+      - "18443:18443"  # Bitcoin regtest
+      - "10009:10009"  # LND gRPC
+    environment:
+      - RUST_LOG=info
+      - MONGODB_URI=mongodb://mongodb:27017
+      - DB_NAME=token4good
+      - BITCOIN_NETWORK=regtest
+      - LND_HOST=localhost
+      - LND_PORT=10009
+      - LND_MACAROON_PATH=/app/data/lnd/admin.macaroon
+      - LND_TLS_CERT_PATH=/app/data/lnd/tls.cert
+      - RGB_DATA_DIR=/app/data/rgb
+      - JWT_SECRET=your-jwt-secret-key-change-in-production
+    volumes:
+      - bitcoin_data:/app/data/bitcoin
+      - lnd_data:/app/data/lnd
+      - rgb_data:/app/data/rgb
+    depends_on:
+      - mongodb
+    networks:
+      - token4good
+
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=token4good
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - token4good
+
+  # Frontend Next.js (existant)
+  frontend:
+    build:
+      context: ../apps/dapp
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXTAUTH_URL=http://localhost:3001
+      - NEXTAUTH_SECRET=your-nextauth-secret
+    depends_on:
+      - token4good-backend
+    networks:
+      - token4good
+
+  # Monitoring avec Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - token4good
+
+  # Grafana pour les dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3003:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - token4good
+
+volumes:
+  mongodb_data:
+  bitcoin_data:
+  lnd_data:
+  rgb_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  token4good:
+    driver: bridge

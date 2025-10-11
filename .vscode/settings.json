@@ -1,0 +1,7 @@
+{
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "dev"
+    ],
+    "chatgpt.openOnStartup": true,
+    "nxConsole.generateAiAgentRules": true
+}

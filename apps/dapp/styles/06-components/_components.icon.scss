@@ -1,0 +1,66 @@
+@use '../bases.scss' as base;
+
+.c-icon {
+  &--title {
+    display: flex;
+    color: var(--app-color-text);
+
+    width: 4rem;
+    height: 4rem;
+    align-items: center;
+    border-radius: 50%;
+    justify-content: center;
+    border: 2px dotted var(--app-button-background);
+    margin-bottom: var(--space-5);
+    svg {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+    &--benefits {
+      @extend .c-icon--title;
+      border: 2px dotted var(--app-benefits-color-primary);
+      width: 3rem;
+      height: 3rem;
+      svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+      &--big {
+        @extend .c-icon--title--benefits;
+        display: none;
+        width: 4rem;
+        height: 4rem;
+        @include base.media-breakpoint-up(lg) {
+          display: flex;
+        }
+        svg {
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+      }
+    }
+    &--services {
+      @extend .c-icon--title;
+      border: 2px dotted var(--app-services-color-primary);
+      width: 3rem;
+      height: 3rem;
+      svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+      &--big {
+        @extend .c-icon--title--services;
+        display: none;
+        width: 4rem;
+        height: 4rem;
+        @include base.media-breakpoint-up(lg) {
+          display: flex;
+        }
+        svg {
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+      }
+    }
+  }
+}

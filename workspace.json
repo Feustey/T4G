@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "projects": {
+    "dapp": "apps/dapp",
+    "dapp-e2e": "apps/dapp-e2e",
+    "service-data": "libs/service/data",
+    "service-middleware": "libs/service/middleware",
+    "service-smartcontracts": "libs/service/smartcontracts",
+    "shared-types": "shared/types",
+    "types": "libs/types",
+    "ui-components": "libs/ui/components",
+    "ui-elements": "libs/ui/elements",
+    "ui-hooks": "libs/ui/hooks",
+    "ui-icons": "libs/ui/icons",
+    "ui-layouts": "libs/ui/layouts",
+    "ui-pages": "libs/ui/pages",
+    "ui-providers": "libs/ui/providers"
+  }
+}

@@ -1,0 +1,769 @@
+{
+  "navigation": {
+    "alumni": [
+      {
+        "label": "Tableau de bord",
+        "href": "/dashboard"
+      },
+      {
+        "label": "Bénéfices",
+        "href": "/benefits",
+        "childrens": [
+          {
+            "label": "Voir tout",
+            "href": "/benefits"
+          },
+          {
+            "label": "Coaching professionnel",
+            "href": "/Professional%20coaching"
+          },
+          {
+            "label": "Programmes de certification",
+            "href": "/Certification%20programs"
+          },
+          {
+            "label": "Formations",
+            "href": "/Executive%20education"
+          },
+          {
+            "label": "Recrutement et visibilité",
+            "href": "/Recruitment%20visibility"
+          },
+          {
+            "label": "Conférences et événements",
+            "href": "/Conferences%20%26%20events"
+          },
+          {
+            "label": "Savoirs et expertise",
+            "href": "/Knowledge%20%26%20expertise"
+          }
+        ]
+      },
+      {
+        "label": "Services",
+        "href": "/services"
+      },
+      {
+        "label": "Communauté T4G",
+        "href": "/community"
+      },
+      {
+        "label": "Annuaire",
+        "href": "/directory"
+      }
+    ],
+    "student": [
+      {
+        "label": "Tableau de bord",
+        "href": "/dashboard"
+      },
+      {
+        "label": "Bénéfices",
+        "href": "/benefits",
+        "childrens": [
+          {
+            "label": "Voir tout",
+            "href": "/benefits"
+          },
+          {
+            "label": "Mentoring",
+            "href": "/Mentoring"
+          },
+          {
+            "label": "Entraide étudiants",
+            "href": "/Reverse%20mentoring",
+            "inactive": true
+          }
+        ]
+      },
+      {
+        "label": "Services",
+        "href": "/services"
+      },
+      {
+        "label": "Communauté T4G",
+        "href": "/community"
+      },
+      {
+        "label": "Annuaire",
+        "href": "/directory"
+      }
+    ]
+  },
+  "userNotifications": {
+    "errors": {
+      "walletCreation": "Une erreur est survenue durant la création votre compte, veuillez réessayer"
+    },
+    "success": {
+      "walletCreation": "Votre compte a été créé avec succès\u00a0!"
+    }
+  },
+  "utils": {
+    "loading": "Chargement...",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "homeButton": "retour a l'accueil",
+    "newWindow": "Nouvelle fenêtre",
+    "keywords": "communauté, allumni, mentoring, grandes écoles, coaching, reverse-mentoring, reconversion",
+    "required": "requis",
+    "delete": "Supprimer",
+    "requiredFields": "Champs obligatoires",
+    "connecting": "Connexion à la plateforme...",
+    "tokenAlt": "Icône de jeton Token for Good",
+    "token": "jeton",
+    "tokens": "jetons",
+    "sats": "sats",
+    "soon": "Bientôt",
+    "close": "Fermer",
+    "back": "Retour",
+    "open": "Ouvrir",
+    "openMenu": "Ouvrir le menu de navigation",
+    "noResult": "Aucun résultat"
+  },
+  "page": {
+    "admin": {
+      "dashboard": {
+        "head": {
+          "title": "Tableau de bord - T4G"
+        }
+      },
+      "serviceCatalogue": {
+        "head": {
+          "title": "Catalogue de service - T4G"
+        }
+      },
+      "serviceDelivery": {
+        "head": {
+          "title": "Service delivery - T4G"
+        }
+      },
+      "wallet": {
+        "head": {
+          "title": "Portefeuille - T4G"
+        }
+      }
+    },
+    "benefits": {
+      "detail": {
+        "head": {
+          "title": "Bénéfices"
+        }
+      },
+      "index": {
+        "head": {
+          "title": "Bénéfices - T4G"
+        },
+        "main": {
+          "title": "Bénéfices",
+          "sub": "Échangez les jetons que vous avez gagnés pour profiter de ces avantages exclusifs au sein de la communauté."
+        }
+      }
+    },
+    "services": {
+      "detail": {
+        "head": {
+          "title": "Services detail - T4G"
+        }
+      },
+      "index": {
+        "head": {
+          "title": "Services - T4G"
+        }
+      }
+    },
+    "user": {
+      "error": {
+        "head": {
+          "title": "Erreur - T4G"
+        }
+      },
+      "login": {
+        "head": {
+          "title": "Connexion - T4G"
+        }
+      }
+    },
+    "home": {
+      "head": {
+        "title": "Token for good",
+        "metaDesc": "Token For Good est une plate-forme collaborative qui dynamise et valorise les contributions positives des communautés alumni et étudiantes d't4g. Les contributeurs deviennent bénéficiaires en contreparties de services."
+      },
+      "main": {
+        "section1": {
+          "title": "Célébrer l'engagement\u00a0!",
+          "p1": "L’ambition de Token for Good est de valoriser les actions à impacts positifs : dynamiser les échanges au sein d'une communauté et donner du sens au partage ! ",
+          "p2": "En contrepartie de sa contribution, le membre reçoit des jetons numériques (tokens… for good) et devient bénéficiaire de services et de nombreux avantages.",
+          "p3": "Avec sa plate-forme collaborative, Token for Good offre donc une solution innovante d’animation de communauté et s’inscrit dans une « sharing economy » qui célèbre l’engagement !",
+          "p4": "",
+          "cta": "GO\u00a0!"
+        },
+        "section2": {
+          "title": "Pourquoi rejoindre Token for Good\u00a0?",
+          "tabs": [
+            {
+              "label": "Étudiants",
+              "value": "student",
+              "listContent": [
+                {
+                  "value": "",
+                  "text": "Rencontrer des alumni à votre écoute"
+                },
+                {
+                  "value": "",
+                  "text": "Profiter de retour d’expériences et partager les connaissances"
+                },
+                {
+                  "value": "",
+                  "text": "Développer vos compétences"
+                },
+                {
+                  "value": "",
+                  "text": "Valoriser un engagement auprès de partenaires à mission"
+                },
+                {
+                  "value": "",
+                  "text": "Accéder à des événements inspirants"
+                },
+                {
+                  "value": "",
+                  "text": "Bénéficier de différents services ciblés"
+                },
+                {
+                  "value": "",
+                  "text": "Renforcer une communauté qui vous ressemble"
+                }
+              ]
+            },
+            {
+              "label": "Alumni",
+              "value": "alumni",
+              "listContent": [
+                {
+                  "value": "",
+                  "text": "Rencontrer des alumni qui partagent vos centres d’intérêts"
+                },
+                {
+                  "value": "",
+                  "text": "Croiser les expériences et partager vos connaissances"
+                },
+                {
+                  "value": "",
+                  "text": "Développer vos compétences"
+                },
+                {
+                  "value": "",
+                  "text": "Se former tout au long de la vie"
+                },
+                {
+                  "value": "",
+                  "text": "Accéder à des événements inspirants"
+                },
+                {
+                  "value": "",
+                  "text": "Bénéficier de différents services ciblés"
+                },
+                {
+                  "value": "",
+                  "text": "Renforcer une communauté qui vous ressemble"
+                }
+              ]
+            },
+            {
+              "label": "Corporate",
+              "value": "corporate",
+              "listContent": [
+                {
+                  "value": "",
+                  "text": "Fédérer vos parties prenantes au sein d’une communauté qui leur ressemble"
+                },
+                {
+                  "value": "",
+                  "text": "Favoriser le partage de connaissances et le développement de compétences"
+                },
+                {
+                  "value": "",
+                  "text": "Sécuriser et certifier la transmission des savoir-faire"
+                },
+                {
+                  "value": "",
+                  "text": "Accéder à un vivier de talents et un réseau d’experts"
+                },
+                {
+                  "value": "",
+                  "text": "Valoriser un engagement auprès de partenaires à mission"
+                },
+                {
+                  "value": "",
+                  "text": "Développer des outils contributifs et innovants avec la technologie blockchain"
+                }
+              ]
+            },
+            {
+              "label": "Écoles",
+              "value": "school",
+              "listContent": [
+                {
+                  "value": "",
+                  "text": "Fédérer et dynamiser votre communauté d’alumni"
+                },
+                {
+                  "value": "",
+                  "text": "Permettre aux étudiants et diplômés d’interagir et de développer leurs compétences"
+                },
+                {
+                  "value": "",
+                  "text": "Inciter vos parties prenantes à s’engager dans une dynamique vertueuse"
+                },
+                {
+                  "value": "",
+                  "text": "Mesurer l’impact positif des interactions de la communauté"
+                },
+                {
+                  "value": "",
+                  "text": "Renforcer la marque employeur de l’Ecole"
+                },
+                {
+                  "value": "",
+                  "text": "Développer des outils contributifs et innovants avec la technologie blockchain"
+                }
+              ]
+            }
+          ],
+          "subtitle": "Ils ont rejoint Token for Good ",
+          "comments": [
+            {
+              "name": "Jérôme Pasquet",
+              "job": "Alumni MBA 2006 - Peek’in founder",
+              "picture": "/assets/images/png/avatar_jerome_pasquet.png",
+              "comment": "“Je trouve l’initiative Token for Good intéressante d’utiliser des technologies digitales pour permettre au plus grand nombre des alumni t4g (y compris à l’international) de se mettre en relation avec les étudiants.”"
+            },
+            {
+              "name": "Laeticia Caliez",
+              "job": "t4g Alumnni Network, Development Manager",
+              "picture": "/assets/images/png/avatar_laeticia_caliez.png",
+              "comment": "“Le mentoring est un accélérateur de compétences. Cela permet de se connecter par rapport à des besoins spécifiques de son parcours professionnel et d’aller chercher de manière plus directe les expériences des autres.”"
+            }
+          ]
+        },
+        "section3": {
+          "title": "Une communauté engagée",
+          "p1": "En faisant partie et en contribuant à la plateforme Token For Good, vous aiderez d’autres étudiants ou alumni, et vous pourrez aussi accroître votre visibilité auprès de futurs employeurs, accéder à des évènements, obtenir des certifications et bien d’autres avantages encore.",
+          "cta": "S’inscrire"
+        },
+        "section4": {
+          "title": "Nos partenaires "
+        }
+      }
+    },
+    "error": {
+      "head": {
+        "error404": {
+          "title": "Erreur 404 - T4G"
+        },
+        "error500": {
+          "title": "Erreur 500 - T4G"
+        },
+        "error": {
+          "title": "Erreur - T4G"
+        }
+      },
+      "main": {
+        "title": {
+          "part1": "Oups... Erreur ",
+          "part2": "\u00a0!"
+        },
+        "quote": {
+          "quote": "“La vie c’est comme une boîte de chocolats, on ne sait jamais sur quoi on va tomber....”",
+          "author": "Forrest Gump",
+          "place": "Forrest Gump, 1994"
+        },
+        "p": {
+          "error404": "Désolé, la page que vous demandez est introuvable. Vous pouvez retourner à la page d’accueil ou nous contacter.",
+          "error500": "Désolé, la page que vous demandez est temporairement indisponible. Notre équipe est sur le coup ! Vous pouvez retourner à la page d’accueil ou nous contacter."
+        },
+        "buttonPrimary": {
+          "label": "Retour sur la plateforme",
+          "link": "/"
+        },
+        "buttonSecondary": {
+          "label": "Contact",
+          "link": "/contact"
+        }
+      }
+    },
+    "legalMention": {
+      "head": {
+        "title": "Mentions légales - T4G",
+        "metaDesc": "Token For Good est une plate-forme collaborative qui dynamise et valorise les contributions positives des communautés alumni et étudiantes d't4g. Les contributeurs deviennent bénéficiaires en contreparties de services."
+      },
+      "main": {
+        "title1": "Mentions légales du site token-for-good.com",
+        "section1": {
+          "text1": "Ce document décrit les conditions générales d'utilisation du site ",
+          "linkt4g": "token-for-good.com",
+          "text2": ". En visitant et en utilisant ce site, vous acceptez de vous conformer et de vous soumettre aux conditions générales d'utilisation suivantes.",
+          "text3": "Token for Good est un site web géré par Token for Good (ci-après \"nous\", \"notre\" ou \"Token for Good\"). La société est détenue et exploitée par Token for Good, SAS enregistré au RCS de Nantes sous l'identifiant 907997290.",
+          "text4": "Nous nous engageons à fournir des services de qualité à nos utilisateurs et à assurer leur satisfaction.",
+          "text5": "Nous nous réservons le droit de modifier les présentes Conditions générales d'utilisation à tout moment, à notre seule discrétion. Ces modifications peuvent prendre la forme d'ajouts, de retraits ou de mises à jour. Les modifications entreront en vigueur immédiatement après leur publication sur le site Web. En continuant à utiliser le site ",
+          "text6": ", vous acceptez de vous conformer aux nouvelles conditions générales d'utilisation. Si vous n'êtes pas d'accord avec les modifications apportées, vous devez cesser immédiatement d'utiliser le site.",
+          "text7": "En utilisant ce site, vous reconnaissez que vous avez lu et compris les présentes conditions d'utilisation et vous vous engagez à les respecter. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser ce site.",
+          "text8": "Le contenu du site ",
+          "text9": " est protégé par la législation sur le droit d'auteur et ne peut être reproduit, distribué, modifié ou exploité sans notre consentement préalable et écrit. Nous veillons à ce que tous les contenus présentés sur le site soient exacts et à jour. Nous nous réservons le droit de modifier ou de supprimer tout contenu du site ",
+          "text10": "à tout moment et sans préavis.",
+          "text11": "Les informations et les déclarations contenues dans le site Web sont fournies sans aucune garantie, expresse ou implicite. Nous ne garantissons pas que le contenu du site Web est complet ou exact, ou qu'il est approprié ou disponible pour une utilisation dans tous les pays. Nous n'assumons aucune responsabilité quant aux erreurs, inexactitudes ou omissions qui pourraient se trouver dans le site.",
+          "text12": "Nous ne sommes pas responsables des dommages directs, indirects, consécutifs, spéciaux ou indirects découlant de l'utilisation de ce site, y compris, sans s'y limiter, toute perte de profits, de données ou de programmes, ou toute interruption d'activité. Nous ne serons pas non plus responsables des dommages directs ou indirects découlant de l'utilisation ou de l'incapacité d'utiliser les informations contenues sur ce site.",
+          "text13": "Les liens vers d'autres sites et leurs contenus sont fournis uniquement à titre informatif. Nous ne sommes pas responsables du contenu de ces sites et ne garantissons pas leur exactitude. Nous n'offrons aucune garantie quant à l'exactitude, la fiabilité, l'actualité et la qualité des services, des informations et des autres contenus disponibles sur le site ",
+          "text14": ", et nous n'assumons aucune responsabilité à cet égard.",
+          "text15": "Nous nous réservons le droit de modifier ou de supprimer tout contenu du site ",
+          "text16": " à tout moment et sans préavis. Nous nous engageons à offrir un site Web sûr, fiable et exempt de virus et autres menaces, mais nous ne pouvons pas garantir que les contenus présentés sur le site ne seront pas exposés à des actes malveillants. Nous ne sommes pas responsables des dommages découlant de ces actes.",
+          "text17": "En utilisant ce site, vous acceptez que vous êtes seul responsable de l'utilisation et de l'interprétation des contenus du site."
+        },
+        "title2": "Limitations contractuelles sur les données techniques.",
+        "section2": {
+          "text1": "Le site utilise la technologie JavaScript.",
+          "text2": "Le site Internet ne pourra être tenu responsable de dommages matériels liés à l'utilisation du site. De plus, l'utilisateur du site s'engage à accéder au site en utilisant un matériel récent, ne contenant pas de virus et avec un navigateur de dernière génération mis-à-jour."
+        },
+        "title3": "Propriété intellectuelle et contrefaçons.",
+        "section3": {
+          "text1": "t4g Business School est propriétaire des droits de propriété intellectuelle ou détient les droits d'usage sur tous les éléments accessibles sur le site, notamment les textes, images, graphismes, logo, icônes, sons, logiciels.",
+          "text2": "Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable de : t4g Business School.",
+          "text3": "Toute exploitation non autorisée du site ou de l'un quelconque des éléments qu'il contient sera considérée comme constitutive d'une contrefaçon et poursuivie conformément aux dispositions des articles L.335-2 et suivants du Code de Propriété Intellectuelle."
+        },
+        "title4": "Protection des données personnelles.",
+        "section4": {
+          "text1": "Dans le cadre de vote utilisation du site Internet t4g.com, vous êtes informés que vos données à caractère personnel sont collectées et traitées par Token For Good, agissant en sa qualité de responsable de traitement, aux fins de permettre le cas échéant (i) votre utilisation des services du site Internet et (ii) la gestion de nos actions de communication (newsletters, évènements, information sur les programmes etc.).",
+          "text2": "Conformément aux termes et conditions du Règlement (UE) 2016/679 du 27 avril 2016 (dit « RGPD ») et de la Loi n°78-17 du 6 janvier 1978 modifiée (dite « Loi informatique et libertés »), vous bénéficiez d'un droit d'accès, de rectification et, le cas échéant, d'un droit à la portabilité et à l'effacement de vos données, ainsi que d'un droit d'opposition au traitement pour un motif légitime ou à sa limitation en vous adressant :",
+          "text3": "par courrier : 8 Route de la Jonelière - 44000 Nantes",
+          "text4": "par courriel au DPO à l'adresse : contact@token-for-good.com"
+        }
+      }
+    },
+    "contact": {
+      "head": {
+        "title": "Contact - T4G",
+        "metaDesc": "Token For Good est une plate-forme collaborative qui dynamise et valorise les contributions positives des communautés alumni et étudiantes d't4g. Les contributeurs deviennent bénéficiaires en contreparties de services."
+      },
+      "main": {
+        "title": "Contact",
+        "p": "Obtenez rapidement des informations sur Token For Good en nous contactant grace au formulaire ci-dessous."
+      }
+    },
+    "about": {
+      "head": {
+        "title": "A propos - T4G",
+        "metaDesc": "Token For Good est une plate-forme collaborative qui dynamise et valorise les contributions positives des communautés alumni et étudiantes d't4g. Les contributeurs deviennent bénéficiaires en contreparties de services."
+      },
+      "main": {
+        "title1": "À propos",
+        "section1": {
+          "title": "Le concept T4G",
+          "videoSrc": "https://www.youtube.com/watch?v=ggLwI21louw"
+        },
+        "section2": {
+          "title": "Notre histoire",
+          "text": "Token for Good est une start-up propulsée par t4g, et issue de son Plan stratégique ECOS 2025. \n Intégrée à l'Incubateur Centrale-t4g-Ensa depuis septembre 2022, Token for Good est pilotée par Laure Diakov, diplômée EMBA 2018 t4g, et ambassadrice du Groupe Thématique Alumni, d'où a émergé l'idée de cette plate-forme collaborative. L'équipe s'est étoffée avec Stéphane Courant, Product Owner, et des compétences de UX designer, Lead and Front Development, Community management... \n Token for Good s'inscrit dans un réseau large de 8000 étudiants sur 14 campus en France et à l'international, et 47000 alumni."
+        },
+        "section3": {
+          "title": "Notre vision",
+          "text": "“ Valoriser le partage de compétences et de savoirs dans un cercle vertueux où chaque contributeur devient bénéficiaire ai sein d'une communauté engagée.” "
+        },
+        "section4": {
+          "title": "Nos valeurs",
+          "values": [
+            {
+              "value": "Innovation :",
+              "text": " le dispositif blockchain de Token for Good valorise automatiquement la chaine de valeurs contributions-contreparties-services et mesure ses impacts positifs."
+            },
+            {
+              "value": "Collaboration :",
+              "text": " Token for Good s'appuie sur une plateforme collaborative qui favorise l'échange au sein d'une communauté de confiance."
+            },
+            {
+              "value": "Durabilité :",
+              "text": " Token for Good utilise une technologie neutre en émission carbone. (Voir le green manifeste de Polygon, notre blockchain)"
+            }
+          ]
+        },
+        "section5": {
+          "title": "Nos partenaires"
+        }
+      }
+    },
+    "community": {
+      "head": {
+        "title": "Communauté - T4G"
+      },
+      "main": {
+        "title1": "À propos de la communauté Token For Good",
+        "sub1": "Ce qui se passe dans notre communauté. Consultez les derniers numéros d'activités, de dynamiques et découvrez la technologie dans les coulisses.",
+        "title2": "Métriques de la communauté",
+        "title3": "Transactions sur la Blockchain",
+        "section1": {
+          "met1": "Membres totaux",
+          "met2": "Étudiant(e)s",
+          "met3": "Alumni",
+          "met4": "Interactions entre membres",
+          "met5": "Tokens créés",
+          "met6": "Tokens échangés"
+        },
+        "section2": {
+          "text1": "Toutes les actions à impact positif des membres de notre communauté et les mouvements de Tokens associés sont enregistrés sur la blockchain en tant que transactions. Tout cela se passe via un ensemble prédéfini de règles définies par Token for Good et exécutées par un logiciel stocké sur la blockchain, appelé « contrat intelligent ». Toutes les transactions Token for Good se déroulent dans le cadre de ce contrat intelligent et sont enregistrées sur la blockchain de manière à ce qu'elles soient infalsifiables et entièrement traçables par quiconque.",
+          "text2": "Smart contract address",
+          "linktext": "Plus de détails sur Polygonscan",
+          "text3": "À propos de Polygonscan",
+          "text4": "Token for Good utilise la blockchain Polygon. Polygonscan est l'outil qui permet une vue totalement transparente sur toutes les transactions qui se produisent sur Polygon. Il sert de moteur de recherche pour toutes les données du réseau Polygon et donne des informations sur tous les détails des transactions. Toutes les transactions Token for Good peuvent être suivies sur la blockchain à l'aide de Polygonscan."
+        }
+      }
+    },
+    "dashboard": {
+      "head": {
+        "title": "Tableau de bord - T4G"
+      },
+      "main": {
+        "title1": "En attente",
+        "section1": {
+          "text1": "Bienvenue ",
+          "text2": " sur la nouvelle plateforme de ",
+          "text3": "Token for Good"
+        },
+        "section2": {
+          "text1": "Tout  ",
+          "text2": "impact positif",
+          "text3": " de vos actions auprès des membres de la communauté sera valorisé par des jetons utilitaires. Vous les passerez à en choisir un dans la liste des services disponibles... mais bien d'autres services à venir prochainement avec des partenaires locaux et corporatifs : restez connectés !"
+        },
+        "section3": {
+          "text1": "Notre ",
+          "text2": "chat",
+          "text3": " reste à votre disposition en bas de page pour discuter et partager des commentaires avec l'équipe !"
+        },
+        "title2": "Notifications",
+        "title3": "Des avantages exclusifs pour vous",
+        "title4": "Ton wallet",
+        "title5": "Ton impact",
+        "title6": "Faits communautaires",
+        "va": "Voir tout",
+        "vw": "Voir wallet",
+        "vm": "Voir plus"
+      }
+    },
+    "notifications": {
+      "head": {
+        "title": "Notifications - T4G"
+      }
+    },
+    "onboarding": {
+      "head": {
+        "title": "Inscription - T4G"
+      },
+      "main": {
+        "title": "Bienvenue sur Token for Good\u00a0!",
+        "message": {
+          "part1": "Pour assurer au mieux les interactions avec la communauté,",
+          "part2": "prenez un instant pour confirmer vos informations\u00a0!"
+        },
+        "studies": {
+          "title": "Formation t4g"
+        },
+        "experience": {
+          "title": "Expérience professionnelle"
+        },
+        "accessButton": "Accéder à la plateforme"
+      }
+    },
+    "profile": {
+      "head": {
+        "title": "Mon profil - T4G"
+      }
+    },
+    "wallet": {
+      "head": {
+        "title": "Portefeuille - T4G"
+      }
+    },
+    "partners": {
+      "head": {
+        "title": "Partners - T4G",
+        "metaDesc": "Token For Good est une plate-forme collaborative qui dynamise et valorise les contributions positives des communautés alumni et étudiantes d't4g. Les contributeurs deviennent bénéficiaires en contreparties de services."
+      },
+      "main": {
+        "title": "Nos partenaires",
+        "text": "Token for Good est fier de travailler avec des partenaires qui nous aident à construire une communauté d’alumni et d’étudiants dynamique.",
+        "partners": [
+          {
+            "logoSrcLightTheme": "/assets/images/png/t4g-alumni.png",
+            "logoSrcDarkTheme": "/assets/images/png/t4g-alumni-blanc.png",
+            "name": "t4g alumni",
+            "text": " fédère un réseau de plus de 32.000 anciens diplômés, d’une centaine de nationalités différentes, et répartis sur tous les continents.",
+            "linkName": "t4g alumni",
+            "linkUrl": "https://www.t4g.com/"
+          },
+          {
+            "logoSrcLightTheme": "/assets/images/png/gaia.png",
+            "logoSrcDarkTheme": "/assets/images/png/gaia-blanc.png",
+            "name": "Gaïa",
+            "text": " est la première École de la transition écologique et sociale adossée à une Business School. Sa raison d'être : Accompagner la transition vertueuse des organisations.",
+            "linkName": "Gaïa",
+            "linkUrl": "https://about.t4g.com/t4g/gaia-lecole-de-la-transition-ecologique-et-sociale/"
+          },
+          {
+            "logoSrcLightTheme": "/assets/images/png/ocode.png",
+            "logoSrcDarkTheme": "/assets/images/png/ocode-blanc.png",
+            "name": "Ocode",
+            "text": " est spécialisé dans l'identité numérique des biens, des documents et des personnes, grâce à la technologie Blockchain.",
+            "linkName": "Ocode",
+            "linkUrl": "https://www.ocode.team/"
+          },
+          {
+            "logoSrcLightTheme": "/assets/images/png/onepoint.png",
+            "logoSrcDarkTheme": "/assets/images/png/onepoint-blanc.png",
+            "name": "Onepoint",
+            "text": " est un acteur unique qui mixe technologie et humain pour accompagner la transformation numérique de ses clients.",
+            "linkName": "Onepoint",
+            "linkUrl": "https://www.groupeonepoint.com/"
+          },
+          {
+            "logoSrcLightTheme": "/assets/images/png/incubateur.png",
+            "logoSrcDarkTheme": "/assets/images/png/incubateur-blanc.png",
+            "name": "Incubateur Centrale-t4g-Ensa",
+            "text": " est un programme d’accompagnement qui a pour finalité la création d’entreprises innovantes en région Pays de la Loire.",
+            "linkName": "Incubateur Centrale-t4g-Ensa",
+            "linkUrl": "https://incubateur.centrale-t4g-ensa.com/"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "filters": {
+      "country": "Filtrer par pays",
+      "sorting": "trier",
+      "deleteAllButton": "Tout effacer",
+      "proposedServices": "Filtrer par sujet",
+      "activity": "Activités"
+    },
+    "breadcrumb": {
+      "dashboard": {
+        "label": "Accueil",
+        "link": "/dashboard"
+      },
+      "benefits": {
+        "label": "Bénéfices",
+        "link": "/benefits"
+      },
+      "services": {
+        "label": "Services",
+        "link": "/services"
+      },
+      "wallet": {
+        "label": "Portefeuille",
+        "link": "/wallet"
+      },
+      "community": {
+        "label": "Communauté",
+        "link": "/community"
+      },
+      "profile": {
+        "label": "Mon compte",
+        "link": "/profile"
+      }
+    },
+    "alumniBenefitPage": {
+      "token": "jeton",
+      "tokens": "jetons",
+      "choose": "Choisir",
+      "about": "À propos de ce service"
+    },
+    "studentBenefitPage": {
+      "token": "jeton",
+      "tokens": "jetons",
+      "scheduleAppointment": "Planifier un rendez-vous",
+      "serviceOffered": "Service proposé",
+      "aboutProvider": "À propos de {{name}}",
+      "professionalExperience": "Expérience professionnelle",
+      "education": "Formation"
+    },
+    "footerConnected": {
+      "links": {
+        "part1": [
+          {
+            "link": "https://token-for-good.com/help/",
+            "label": "Aide",
+            "iconName": "questionMarkCircle"
+          },
+          {
+            "link": "https://www.token-for-good.com/legal-mention",
+            "label": "Mentions légales",
+            "iconName": "arrowRight"
+          }
+        ]
+      }
+    },
+    "addExperience": {
+      "jobTitle": "Intitulé du poste",
+      "jobCompany": "Nom de l'entreprise",
+      "jobCity": "Ville",
+      "jobCountry": "Pays",
+      "jobIndustry": "Industry",
+      "jobIsCurrent": "J'occupe actuellement ce poste",
+      "jobStartDate": "Date de début",
+      "monthFrom": "Mois de début",
+      "yearFrom": "Année de début",
+      "jobEndDate": "Date de fin",
+      "monthTo": "Mois de fin",
+      "yearTo": "Année de fin",
+      "dateError": "La date de fin est supérieure à la date de début du poste"
+    },
+    "addStudies": {
+      "program": "Programme",
+      "programTopic": "Domaine d'étude",
+      "graduatedYear": {
+        "alumni": "Date d'obtention",
+        "student": "Date de début"
+      }
+    },
+    "firstDashboardAccessModal": {
+      "title": "Félicitation\u00a0!",
+      "p": "Votre inscription vous a permis de gagner"
+    },
+    "avatar": {
+      "import": "Importer une photo"
+    },
+    "newsletter": {
+      "cta": "Découvrir la newsletter",
+      "title": "Newsletter ",
+      "desc": "Chaque semaine, toute l’actualité tech, nos offres d’emploi et bien plus\u00a0!"
+    },
+    "footer": {
+      "header": {
+        "links": [
+          {
+            "link": "/about",
+            "label": "À propos",
+            "iconName": "arrowRight"
+          },
+          {
+            "link": "/partners",
+            "label": "Partenaires",
+            "iconName": "arrowRight"
+          },
+          {
+            "link": "/contact",
+            "label": "Contact",
+            "iconName": "arrowRight"
+          }
+        ],
+        "socialTitle": "We are social"
+      },
+      "bottom": {
+        "links": [
+          {
+            "link": "/legal-mention",
+            "label": "Mentions légales",
+            "iconName": "arrowRight"
+          }
+        ],
+        "copy": "© 2018 Token for Good"
+      }
+    }
+  }
+}

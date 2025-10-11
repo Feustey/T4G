@@ -1,0 +1,38 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-side-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 16.25rem;
+  overflow: hidden;
+  border-right-width: 1px;
+  border-right-color: var(--app-border-color-ternary);
+
+  div,
+  ul,
+  li {
+    width: 100%;
+    margin: 0;
+  }
+
+  .c-custom-link {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    padding: map.get(base.$concrete-sizes, 'm') base.$lg-unit;
+    font-size: base.$lg-unit;
+    font-weight: 700;
+    gap: base.$sm-unit;
+
+    svg {
+      max-width: map.get(base.$concrete-sizes, 'r');
+      max-height: map.get(base.$concrete-sizes, 'r');
+      color: var(--app-button-background);
+    }
+  }
+}

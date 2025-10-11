@@ -1,0 +1,40 @@
+$sm-unit: 0.25rem; // 4px
+$md-unit: 0.5rem; // 8px
+$lg-unit: 1rem; // 16px
+
+$concrete-sizes: (
+  xxs: $sm-unit / 2,
+  // 2px
+  xs: $sm-unit,
+  // 4px
+  s: $md-unit,
+  // 8px
+  r: $sm-unit + $md-unit,
+  // 12px
+  d: $lg-unit,
+  // 16px
+  m: $md-unit + $lg-unit,
+  // 24px
+  l: 4 * $md-unit,
+  // 32px
+  xl: 5 * $md-unit,
+  // 40px
+  xxl: 6 * $md-unit,
+  // 48px
+  xxxl: 8 * $md-unit,
+  // 64px
+  max: 12 * $md-unit,
+  // 96px
+  maxplus: 16 * $md-unit,
+  // 128px
+  auto: auto,
+  none: 0,
+);
+
+$relative-sizes: (
+  25: 25%,
+  50: 50%,
+  75: 75%,
+  100: 100%,
+  auto: auto,
+);

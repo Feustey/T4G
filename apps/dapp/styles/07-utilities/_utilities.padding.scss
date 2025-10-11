@@ -1,0 +1,14 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.u-padding-t--none {
+  padding-top: 0;
+}
+
+.u-padding--none {
+  padding: 0;
+}
+
+.u-padding--m {
+  padding: base.$lg-unit;
+}

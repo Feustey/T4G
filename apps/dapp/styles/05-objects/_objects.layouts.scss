@@ -1,0 +1,74 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.o-benefits {
+  h1:not(.subtitle),
+  h2:not(.subtitle),
+  h3:not(.subtitle) {
+    color: var(--app-benefits-color-primary);
+    margin: 0;
+  }
+}
+
+.o-services {
+  h1:not(.subtitle),
+  h2:not(.subtitle),
+  h3:not(.subtitle) {
+    color: var(--app-services-color-primary);
+    margin: 0;
+  }
+}
+
+.o-layout--grid--auto {
+  --grid-gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min-size), 1fr));
+  grid-gap: var(--grid-gap);
+  grid-auto-rows: auto;
+  & > *:not(.u-width--fill):only-child {
+    max-width: 100%;
+
+    @include base.media-breakpoint-up(sm) {
+      max-width: fit-content;
+    }
+  }
+
+  @include base.media-breakpoint-up(lg) {
+    grid-template-columns: repeat(auto-fit, 1fr);
+  }
+}
+
+.o-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  width: 100%;
+  gap: 20px;
+  .o-dahboard-content {
+    flex: 1;
+    min-width: 70%;
+    display: flex;
+    flex-direction: column;
+    gap: map.get(base.$concrete-sizes, 'l');
+  }
+}
+
+.o-card {
+  background-color: var(--app-color-background-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.5rem;
+  gap: base.$lg-unit;
+  border: solid 1px var(--app-border-color-ternary);
+  max-width: 100%;
+}
+
+.AppLayout__Modal::-webkit-scrollbar {
+  display: none;
+}
+
+.AppLayout__Modal {
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+} 

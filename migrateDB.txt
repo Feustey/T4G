@@ -1,0 +1,10 @@
+//set Services.serviceProvider as string
+db.services.updateMany(
+  { serviceProvider : { $type: 7 } },
+  [{ $set: { serviceProvider: { $toString: "$serviceProvider" } } }]
+);
+//set Services.category as string
+db.services.updateMany(
+  { category : { $type: 7 } },
+  [{ $set: { category: { $toString: "$category" } } }]
+);

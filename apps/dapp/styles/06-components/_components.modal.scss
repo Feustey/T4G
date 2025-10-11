@@ -1,0 +1,104 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+html:has(.c-modal) {
+  overflow: hidden;
+}
+
+.c-modal__background-overlay {
+  background: hsla(0, 0%, 0%, 0.75);
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.c-modal__content {
+  background-color: var(--app-color-background-secondary);
+  padding: base.$lg-unit map.get(base.$concrete-sizes, 'l')
+    map.get(base.$concrete-sizes, 'xxl') map.get(base.$concrete-sizes, 'l');
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  transform: translate(-50%, 50%);
+  position: fixed;
+  overflow-y: auto;
+  flex: auto;
+  gap: map.get(base.$concrete-sizes, 'm');
+  width: fit-content;
+  max-width: 90vw;
+  inset-block-end: 50%;
+  inset-inline-start: 50%;
+  @include base.media-breakpoint-down(sm) {
+    width: calc(100% - #{base.$lg-unit} - #{base.$lg-unit});
+  }
+}
+
+.c-modal__header {
+  display: flex;
+  inline-size: 100%;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  align-items: center;
+}
+.c-modal__header__close {
+  align-self: flex-end;
+  padding: 0;
+  aspect-ratio: 1;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.c-modal__header__title {
+  align-self: center;
+  margin: 0;
+  // fake h3
+  font-size: base.$txt-size-big;
+  line-height: 2.5rem;
+  color: var(--app-color-title) !important;
+  @include base.media-breakpoint-up(lg) {
+    font-size: base.$txt-size-l;
+    line-height: 2.5rem;
+  }
+}
+
+.c-modal__actions {
+  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 0;
+  margin-right: 0;
+  gap: 1.5rem;
+
+  .c-button--primary {
+    order: 1;
+    @include base.media-breakpoint-up(lg) {
+      order: 2;
+    }
+  }
+  .c-button--secondary {
+    order: 2;
+    @include base.media-breakpoint-up(lg) {
+      order: 1;
+    }
+  }
+
+  .c-button {
+    justify-content: center;
+    margin: 0;
+    width: 100%;
+    flex: 1;
+  }
+}
+
+.c-modal .c-menu-item__submenu {
+  background-color: var(--app-color-background-secondary);
+}
+.c-modal [aria-expanded='true'],
+.c-modal [aria-expanded='true'] ~ .c-menu-item__submenu {
+  background-color: var(--app-color-background-secondary);
+}
+
+.c-modal .c-menu-item__submenu__item button {
+  text-align: left;
+}

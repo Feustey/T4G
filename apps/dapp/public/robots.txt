@@ -1,0 +1,26 @@
+# Block all crawlers from indexing this pages
+User-agent: *
+User-agent: AdsBot-Google
+Disallow: /user/
+Disallow: /admin/
+Disallow: /benefits/
+Disallow: /services/
+Disallow: /community
+Disallow: /dashboard
+Disallow: /notifications
+Disallow: /onboarding
+Disallow: /profile
+Disallow: /wallet
+Disallow: /en/user/
+Disallow: /en/admin/
+Disallow: /en/benefits/
+Disallow: /en/services/
+Disallow: /en/community
+Disallow: /en/dashboard
+Disallow: /en/notifications
+Disallow: /en/onboarding
+Disallow: /en/profile
+Disallow: /en/wallet
+
+Sitemap: https://token-for-good.com/sitemap-fr.xml
+Sitemap: https://token-for-good.com/sitemap-en.xml

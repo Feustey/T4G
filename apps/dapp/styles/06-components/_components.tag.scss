@@ -1,0 +1,49 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-tag {
+  display: flex;
+  gap: base.$md-unit;
+  background-color: #dee2ff;
+  color: #372986;
+  width: fit-content;
+  height: fit-content;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: base.$lg-unit;
+  cursor: pointer;
+  p {
+    margin: 0;
+  }
+}
+
+.c-tag__remove-button {
+  background-color: #372986;
+  color: #dee2ff;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  height: base.$lg-unit;
+  width: base.$lg-unit;
+  padding: base.$sm-unit;
+  svg {
+    height: base.$md-unit;
+    width: base.$md-unit;
+  }
+}
+
+.c-tag--soon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: map.get(base.$concrete-sizes, 'xxs') 0.375rem;
+  border-radius: map.get(base.$concrete-sizes, 'r');
+  background: #dee2ff;
+  color: #372986;
+  font-size: base.$txt-size-small;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  font-family: base.$font-family-default;
+  gap: base.$sm-unit;
+}

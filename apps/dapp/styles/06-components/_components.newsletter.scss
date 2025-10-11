@@ -1,0 +1,50 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-newsletter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: map.get(base.$concrete-sizes, 'm');
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  background: var(--app-color-background-secondary);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
+  @include base.media-breakpoint-up(md) {
+    width: 560px;
+  }
+
+  h3 {
+    align-self: flex-start;
+  }
+
+  .o-media {
+    @include base.media-breakpoint-up(sm) {
+      display: inline-flex;
+      margin-right: 1rem;
+    }
+  }
+
+  .c-button {
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.c-newsletter__icon {
+  width: 0;
+  height: 0;
+  @include base.media-breakpoint-up(sm) {
+    width: 80px;
+    height: 77px;
+  }
+}
+
+.c-newsletter__buton-container {
+  display: flex;
+  justify-content: center;
+}

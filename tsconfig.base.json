@@ -1,0 +1,40 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2017", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "@t4g/service/blockchain": ["libs/service/blockchain/src/index.ts"],
+      "@t4g/service/data": ["libs/service/data/src/index.ts"],
+      "@t4g/service/middleware": ["libs/service/middleware/src/index.ts"],
+      "@t4g/service/services": ["libs/service/services/src/index.ts"],
+      "@t4g/service/smartcontracts": [
+        "libs/service/smartcontracts/src/index.ts"
+      ],
+      "@t4g/service/users": ["libs/service/users/src/index.ts"],
+      "@t4g/types": ["libs/types/src/index.ts"],
+      "@t4g/ui/components": ["libs/ui/components/src/index.ts"],
+      "@t4g/ui/elements": ["libs/ui/elements/src/index.ts"],
+      "@t4g/ui/hooks": ["libs/ui/hooks/src/index.ts"],
+      "@t4g/ui/icons": ["libs/ui/icons/src/index.ts"],
+      "@t4g/ui/layouts": ["libs/ui/layouts/src/index.ts"],
+      "@t4g/ui/pages": ["libs/ui/pages/src/index.ts"],
+      "@t4g/ui/providers": ["libs/ui/providers/src/index.ts"],
+      "@shared/types": ["shared/types/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"],
+  "include": ["apps/dapp/types/next-auth.d.ts"]
+}

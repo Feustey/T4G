@@ -1,0 +1,101 @@
+@use '../bases.scss' as base;
+
+.c-tabs {
+  list-style: none;
+  position: relative;
+  overflow: hidden;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: -#{base.$sm-unit};
+  padding-top: base.$sm-unit;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: height 0.3s;
+}
+
+.c-tabs__list {
+  display: flex;
+  align-items: flex-end;
+  overflow-x: auto;
+  width: 100%;
+  min-height: 3rem;
+  z-index: 1;
+  scrollbar-color: var(--app-color-background-secondary);
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 2px;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+
+  /* Handle on hover */
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+.c-tabs__tab {
+  color: var(--app-color-text);
+  font-size: 1.125rem;
+  @include base.media-breakpoint-up(md) {
+    font-size: 1.5rem;
+  }
+
+  &[aria-selected='true'] {
+    color: var(--app-color-text);
+    position: relative;
+
+    &::after {
+      content: '';
+      display: block;
+      height: var(--space-1);
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: var(--color-gradient-primary);
+    }
+  }
+
+  &:hover {
+    color: var(--app-color-text);
+  }
+}
+
+.c-tabs__shadow::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0.25rem;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2.5rem;
+  z-index: 2;
+  // box-shadow: inset 0 0 0 0 #161616, inset 0 0 0 0 #161616;
+  opacity: 1;
+  pointer-events: none;
+  transition: box-shadow 0.3s;
+}
+
+// .c-tabs__shadow--left::before {
+//   box-shadow: inset 2rem 0 1.5rem -2rem #161616, inset 0 0 0 0 #161616;
+// }
+
+// .c-tabs__shadow--right::before {
+//   box-shadow: inset 0 0 0 0 #161616, inset -2rem 0 1.5rem -2rem #161616;
+// }
+
+// .c-tabs__shadow--left.c-tabs__shadow--right::before {
+//   box-shadow: inset 2rem 0 1.5rem -2rem #161616, inset -2rem 0 1.5rem -2rem #161616;
+// }

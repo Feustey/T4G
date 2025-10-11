@@ -1,0 +1,103 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: base.$lg-unit;
+  flex: 1;
+  min-width: 300px;
+
+  @media (prefers-color-scheme: light) {
+    @include base.media-breakpoint-up(sm) {
+      background-color: #e5e6e8;
+      padding: base.$lg-unit;
+    }
+  }
+
+  >section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: border 0.2s;
+    width: 100%;
+    padding: map.get(base.$concrete-sizes, 'm');
+    background-color: var(--app-color-background-secondary);
+    gap: map.get(base.$concrete-sizes, 'l');
+    border: 1px solid transparent;
+    &:hover {
+      border: 1px solid var(--app-comunity-color);
+    }
+  }
+}
+
+.c-metrics__wallet-container {
+  position: relative;
+  width: 100%;
+}
+
+.c-metrics__wallet-container__img {
+  width: 120px;
+  height: 120px;
+  margin: auto;
+}
+
+.c-metrics__wallet-container__balance {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  color: #ffffff;
+  font-family: base.$font-family-primary;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 48px;
+  text-align: center;
+}
+
+.c-metrics__wallet-container__token {
+  margin: auto;
+  margin-top: map.get(base.$concrete-sizes, 'r');
+  font-weight: 700;
+  text-align: center;
+}
+
+//
+
+.c-metrics__metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: map.get(base.$concrete-sizes, 'r');
+
+  p {
+    margin: 0;
+  }
+
+  .c-metrics__metric__number {
+    color: var(--metric-theme);
+    font-family: base.$font-family-primary;
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 48px;
+  }
+
+  &--token {
+    --metric-theme: var(--app-token-color);
+    @extend .c-metrics__metric;
+  }
+
+  &--community {
+    --metric-theme: var(--app-comunity-color);
+    @extend .c-metrics__metric;
+  }
+
+  &--benefits {
+    --metric-theme: var(--app-benefits-color-secondary);
+    @extend .c-metrics__metric;
+  }
+}

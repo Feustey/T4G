@@ -1,0 +1,146 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-footer--public {
+  --app-color-title: var(--app-color-footer-text);
+  background-color: var(--app-color-footer-background);
+  color: var(--app-color-footer-text);
+
+  p {
+    margin-bottom: var(--space-3);
+  }
+
+  &-nav {
+    flex: 1;
+
+    ul {
+      display: flex;
+      flex-direction: column;
+
+      font-family: var(--app-font-family);
+      font-size: 1rem;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 1.5rem;
+      gap: 1.5rem;
+
+      li {
+        margin-bottom: var(--space-);
+
+        a {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--app-font-family);
+          font-size: 1rem;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 1.5rem;
+          white-space: nowrap;
+
+          span {
+            margin-left: 0.5rem;
+            color: var(--app-color-footer-arrow);
+          }
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  &--top-bar {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-5);
+    gap: 1rem;
+  }
+
+  &--bottom-bar {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: var(--space-8);
+    border-top: 1px solid #fff;
+    gap: 1rem;
+  }
+}
+
+.c-footer--connected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: map.get(base.$concrete-sizes, 'xl')
+    map.get(base.$concrete-sizes, 'r');
+  border-top-width: 1px;
+  border-top-color: var(--app-border-color-ternary);
+  color: var(--app-color-text);
+  gap: map.get(base.$concrete-sizes, 'r');
+  margin-top: auto;
+
+  @include base.media-breakpoint-up(lg) {
+    align-items: center;
+  }
+
+  .c-footer--connected__nav {
+    flex: 1;
+    margin: 0;
+
+    .c-footer--connected__link-list {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0;
+      column-gap: map.get(base.$concrete-sizes, 'maxplus');
+      row-gap: map.get(base.$concrete-sizes, 'r');
+
+      ul {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+
+        font-family: var(--app-font-family);
+        font-size: base.$lg-unit;
+        font-style: normal;
+        font-weight: 700;
+        line-height: map.get(base.$concrete-sizes, 'm');
+        gap: map.get(base.$concrete-sizes, 'm');
+
+        li {
+          margin: 0;
+
+          .c-custom-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--app-font-family);
+            font-size: base.$lg-unit;
+            font-style: normal;
+            font-weight: 700;
+            line-height: map.get(base.$concrete-sizes, 'm');
+            white-space: nowrap;
+
+            span {
+              max-width: map.get(base.$concrete-sizes, 'r');
+              max-height: map.get(base.$concrete-sizes, 'r');
+              margin-left: 0.5rem;
+              color: var(--app-button-background);
+
+              svg {
+                max-width: map.get(base.$concrete-sizes, 'r');
+                max-height: map.get(base.$concrete-sizes, 'r');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

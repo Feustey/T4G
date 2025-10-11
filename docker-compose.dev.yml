@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  bitcoin:
+    image: lncm/bitcoind:v27.0
+    container_name: t4g-bitcoin
+    command: >
+      bitcoind
+      -regtest
+      -server
+      -rpcuser=bitcoin
+      -rpcpassword=bitcoin123
+      -rpcallowip=0.0.0.0/0
+      -rpcbind=0.0.0.0
+      -zmqpubrawblock=tcp://0.0.0.0:28332
+      -zmqpubrawtx=tcp://0.0.0.0:28333
+      -txindex=1
+      -fallbackfee=0.0001
+    ports:
+      - "18443:18443"
+      - "28332:28332"
+      - "28333:28333"
+    volumes:
+      - bitcoin_data:/root/.bitcoin
+    networks:
+      - t4g-network
+
+  lnd:
+    image: lightninglabs/lnd:v0.17.4-beta
+    container_name: t4g-lnd
+    command: >
+      lnd
+      --bitcoin.active
+      --bitcoin.regtest
+      --bitcoin.node=bitcoind
+      --bitcoind.rpchost=bitcoin:18443
+      --bitcoind.rpcuser=bitcoin
+      --bitcoind.rpcpass=bitcoin123
+      --bitcoind.zmqpubrawblock=tcp://bitcoin:28332
+      --bitcoind.zmqpubrawtx=tcp://bitcoin:28333
+      --rpclisten=0.0.0.0:10009
+      --restlisten=0.0.0.0:8080
+      --listen=0.0.0.0:9735
+      --protocol.wumbo-channels
+      --accept-keysend
+      --debuglevel=debug
+      --noseedbackup
+    ports:
+      - "10009:10009"
+      - "8080:8080"
+      - "9735:9735"
+    volumes:
+      - lnd_data:/root/.lnd
+    depends_on:
+      - bitcoin
+    networks:
+      - t4g-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: t4g-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: token4good
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./token4good-backend/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - t4g-network
+
+  backend:
+    build:
+      context: ./token4good-backend
+      dockerfile: Dockerfile
+    container_name: t4g-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/token4good
+      JWT_SECRET: dev-secret-key-change-in-production
+      RGB_DATA_DIR: /data/rgb
+      LND_HOST: lnd
+      LND_PORT: 10009
+      LND_MACAROON_PATH: /lnd/admin.macaroon
+      LND_TLS_CERT_PATH: /lnd/tls.cert
+      BITCOIN_RPC_URL: http://bitcoin:bitcoin123@bitcoin:18443
+      RUST_LOG: debug
+    ports:
+      - "3000:3000"
+    volumes:
+      - rgb_data:/data/rgb
+      - lnd_data:/lnd:ro
+    depends_on:
+      - postgres
+      - bitcoin
+      - lnd
+    networks:
+      - t4g-network
+
+volumes:
+  bitcoin_data:
+  lnd_data:
+  postgres_data:
+  rgb_data:
+
+networks:
+  t4g-network:
+    driver: bridge

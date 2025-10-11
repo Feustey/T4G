@@ -1,0 +1,12 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.u-contact__layout {
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 0 map.get(base.$concrete-sizes, 'r');
+  @include base.media-breakpoint-up(sm) {
+    padding: 0;
+  }
+}

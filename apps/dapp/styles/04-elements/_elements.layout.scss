@@ -1,0 +1,114 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+html,
+body {
+  background-color: var(--app-color-background-primary);
+  color: var(--app-color-text);
+  min-height: 100vh;
+  height: auto;
+}
+
+.e-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-0) var(--space-5);
+  max-width: 1600px;
+}
+
+.e-container--onboarding {
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-0) var(--space-5);
+  max-width: 1600px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-bottom: 2 * base.$lg-unit;
+
+  @include base.media-breakpoint-down(sm) {
+    margin-bottom: 112px;
+  }
+}
+
+.e-connected-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  @include base.media-breakpoint-up(lg) {
+    display: grid;
+    grid-template-areas:
+      'header header'
+      'sideNav main'
+      'sideNav footer';
+    grid-template-rows: 7rem 1fr 10rem;
+    grid-template-columns: 16.25rem 1fr;
+  }
+
+  .c-header--connected {
+    @include base.media-breakpoint-up(lg) {
+      grid-area: header;
+    }
+  }
+
+  .c-side-nav {
+    @include base.media-breakpoint-up(lg) {
+      grid-area: sideNav;
+    }
+  }
+
+  main.app {
+    padding: 20px map.get(base.$concrete-sizes, 'r');
+    padding-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: map.get(base.$concrete-sizes, 'm');
+
+    @include base.media-breakpoint-up(lg) {
+      min-height: calc(100vh - 7rem - 10rem);
+      padding: map.get(base.$concrete-sizes, 'xl')
+        map.get(base.$concrete-sizes, 'm');
+      grid-area: main;
+      gap: map.get(base.$concrete-sizes, 'xl');
+    }
+  }
+
+  .c-footer--connected {
+    @include base.media-breakpoint-up(lg) {
+      grid-area: footer;
+    }
+  }
+}
+
+@include base.media-breakpoint-up(lg) {
+  .e-container {
+    padding: var(--space-0) var(--space-10);
+  }
+}
+
+@include base.media-breakpoint-up(xxl) {
+  .e-container {
+    padding: var(--space-0) var(--space-14);
+  }
+}
+
+.e-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+
+  @include base.media-breakpoint-up(md) {
+    gap: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  @include base.media-breakpoint-up(lg) {
+    gap: 4rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}

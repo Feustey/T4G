@@ -1,0 +1,125 @@
+@use '../bases.scss' as base;
+@use 'sass:map';
+
+.c-benefit-card {
+  flex: 1;
+  height: fit-content;
+  background-color: transparent;
+  padding: map.get(base.$concrete-sizes, 'm');
+  padding-top: 0;
+  text-align: center;
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  gap: map.get(base.$concrete-sizes, 'm');
+  width: 100%;
+  min-width: fit-content;
+
+  @include base.media-breakpoint-up(lg) {
+    padding: map.get(base.$concrete-sizes, 'm') 48px;
+    padding-top: map.get(base.$concrete-sizes, 'm');
+  }
+
+  &--benefits {
+    @extend .c-benefit-card;
+    --cardColor: var(--app-benefits-color-secondary);
+    --textColor: var(--app-benefits-color-primary);
+  }
+  &--user {
+    @extend .c-benefit-card;
+    --cardColor: var(--app-comunity-color);
+    --textColor: var(--app-comunity-color);
+  }
+
+  .c-avatar__thumbnail-avatar--placeholder,
+  .c-avatar__thumbnail-avatar {
+    cursor: default;
+  }
+
+  .c-benefit-card__pricing {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: base.$md-unit;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .c-benefit-card__avatar-container {
+    position: relative;
+    border-radius: 50%;
+  }
+
+  .c-benefit-card__avatar-container__program {
+    position: absolute;
+    text-transform: capitalize;
+    border-radius: map.get(base.$concrete-sizes, 'xl');
+    padding: base.$sm-unit;
+    background-color: var(--app-color-background-secondary);
+    bottom: 0;
+    left: 50%;
+    transform: translate3d(-50%, 50%, 0);
+    font-weight: 700;
+    width: fit-content;
+    padding: base.$sm-unit base.$lg-unit;
+    min-width: map.get(base.$concrete-sizes, 'xxxl');
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .c-benefit-card__infos {
+    gap: base.$sm-unit;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .c-benefit-card__infos__name {
+    font-family: base.$font-family-primary;
+    font-weight: 400;
+    font-size: 24px;
+    color: var(--textColor);
+  }
+
+  .c-benefit-card__infos__emoji {
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .c-benefit-card__infos__industry {
+    font-weight: 400;
+    font-size: 16px;
+    opacity: 0.7;
+  }
+  .c-benefit-card__infos__job {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .c-benefit-card__infos__place {
+    font-weight: 400;
+    font-size: 16px;
+  }
+
+  .c-benefit-card__infos__summary {
+    margin: auto;
+    word-wrap: break-word;
+  }
+}
+a.c-benefit-card {
+  @extend .c-benefit-card;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  transition: border 0.2s;
+  border: 1px solid transparent;
+  background-color: var(--app-color-background-secondary);
+  width: 100%;
+  padding-top: map.get(base.$concrete-sizes, 'm');
+  height: 100%;
+  &:hover {
+    border: 1px solid var(--cardColor);
+  }
+  .c-avatar__thumbnail-avatar--placeholder,
+  .c-avatar__thumbnail-avatar {
+    cursor: pointer;
+  }
+}

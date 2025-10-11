@@ -1,0 +1,33 @@
+schema_id: token4good-v1
+description: RGB schema for representing Proofs of Impact
+
+global_state:
+  - name: issuer_id
+    type: identity
+    required: true
+
+owned_rights:
+  - name: proof_of_impact
+    assignment_type: declarative
+    seal_type: txout
+    state_type: structured
+    structure:
+      - name: category
+        type: string
+      - name: description
+        type: string
+      - name: timestamp
+        type: u64
+      - name: verifier_id
+        type: identity
+      - name: impact_score
+        type: u8
+      - name: mentor_id
+        type: identity
+      - name: mentee_id
+        type: identity
+
+transitions:
+  - name: transfer
+    inputs: [proof_of_impact]
+    assignments: [proof_of_impact] 

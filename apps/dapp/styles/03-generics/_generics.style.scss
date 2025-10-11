@@ -1,0 +1,46 @@
+@use '../bases.scss' as bases;
+
+*:focus {
+  outline: none !important;
+}
+*:focus-visible {
+  outline: none !important;
+  box-shadow: var(--app-color-background-primary) 0 0 0 2px,
+    var(--app-input-outline-color) 0 0 0 4px !important;
+}
+
+// quick fix
+
+.bg-white {
+  background-color: var(--app-color-modal-primary) !important;
+}
+.text-blue-005 {
+  color: var(--app-color-text) !important;
+}
+.text-blue-007 {
+  color: var(--app-color-text) !important;
+  opacity: 0.7;
+}
+.hover\:text-blue-005:hover {
+  opacity: 1;
+}
+
+.text-blue-008 {
+  color: var(--app-button-background) !important;
+  opacity: 1;
+}
+
+.hover\:text-blue-002:hover {
+  opacity: 1;
+}
+.prose {
+  color: var(--app-color-text) !important;
+}
+
+.BlockchainReceipt__Polygon {
+  background-color: var(--app-color-background-primary);
+}
+
+.prose :where(a):not(:where([class~='not-prose'] *)) {
+  color: var(--app-color-text) !important;
+}

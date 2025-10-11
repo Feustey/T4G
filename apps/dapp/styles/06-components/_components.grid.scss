@@ -1,0 +1,29 @@
+@use '../bases.scss' as base;
+
+.c-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.c-grid-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.c-grid-2,
+.c-grid-3,
+.c-grid--auto {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@include base.media-breakpoint-up(lg) {
+  .c-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .c-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .c-grid--auto {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
