@@ -1,0 +1,160 @@
+---
+globs: token4good-backend/Dockerfile,railway.json,vercel.json,scripts/deploy-*.sh
+description: Standards de déploiement production Token4Good
+---
+
+# Deployment Standards - Production
+
+## Target Date : 28 octobre 2025 🚀
+
+## Architecture Production
+
+```
+Frontend (Vercel)          Backend (Railway)           Blockchain
+─────────────────          ─────────────────           ──────────
+t4g.dazno.de       ←→     api.token4good.com   ←→     RGB + Lightning
+Next.js 13                Rust + Axum                  Bitcoin L2
+Port 443 (HTTPS)          Port 8080                    LND Node
+```
+
+## Backend Deployment (Railway)
+
+### Configuration
+Fichier : [railway.json](mdc:token4good-backend/railway.json)
+
+### Variables d'Environnement
+```bash
+DATABASE_URL=postgresql://...
+JWT_SECRET=***
+LND_REST_URL=https://...
+LND_MACAROON=***
+DAZNO_API_KEY=***
+RUST_LOG=info
+PORT=8080
+```
+
+### Script Déploiement
+```bash
+cd token4good-backend
+railway init
+railway add -d postgres
+./railway-deploy.sh
+```
+
+### Dockerfile
+Fichier : [Dockerfile](mdc:token4good-backend/Dockerfile)
+- Multi-stage build
+- Rust compilation optimisée
+- Image finale : debian:bookworm-slim
+- Taille : ~100MB
+
+## Frontend Deployment (Vercel)
+
+### Configuration
+Fichier : [vercel.json](mdc:vercel.json)
+
+### Variables d'Environnement
+```bash
+NEXT_PUBLIC_API_URL=https://api.token4good.com
+NEXT_PUBLIC_USE_POSTGRES=true
+NEXT_PUBLIC_SUPABASE_URL=***
+NEXT_PUBLIC_SUPABASE_ANON_KEY=***
+```
+
+### Script Déploiement
+```bash
+./deploy-vercel-v2.sh --prod
+```
+
+### DNS Configuration
+- Domain : `t4g.dazno.de`
+- CNAME : Vercel endpoint
+- SSL : Auto (Let's Encrypt)
+
+## Database (Supabase)
+
+### Configuration
+- PostgreSQL 15
+- Connection pooling : 6543
+- Backups automatiques : quotidiens
+- Replication : activée
+
+### Migrations
+Auto-appliquées via SQLx au démarrage du backend
+
+## Monitoring
+
+### Health Checks
+```bash
+# Backend
+curl https://api.token4good.com/health
+
+# Frontend
+curl https://t4g.dazno.de/api/health
+```
+
+### Logs
+```bash
+# Backend
+railway logs --follow
+
+# Frontend
+vercel logs --follow
+```
+
+### Métriques à Surveiller
+- API latency (p50, p95, p99)
+- Error rate par endpoint
+- Database connection pool
+- Lightning payment success rate
+- RGB contract creation rate
+
+## Rollback Procedure
+```bash
+# Backend
+railway rollback
+
+# Frontend
+vercel rollback
+```
+
+## Secrets Rotation
+
+### Schedule
+| Secret | Fréquence | Prochain |
+|--------|-----------|----------|
+| JWT_SECRET | 90 jours | 30 déc 2025 |
+| DATABASE_URL | 90 jours | 30 déc 2025 |
+| LND_MACAROON | 180 jours | 30 mars 2026 |
+| DAZNO_API_KEY | 180 jours | 30 mars 2026 |
+
+### Guide
+Documentation : [SECRETS_ROTATION_GUIDE.md](mdc:SECRETS_ROTATION_GUIDE.md)
+
+## Pre-Deployment Checklist
+
+### Backend
+- [ ] Tests passent à 100%
+- [ ] Build Docker réussit
+- [ ] Variables d'environnement configurées
+- [ ] LND accessible
+- [ ] PostgreSQL migrations OK
+
+### Frontend
+- [ ] Build Next.js réussit
+- [ ] Routes API supprimées
+- [ ] Variables d'environnement configurées
+- [ ] DNS configuré
+- [ ] SSL actif
+
+### Production
+- [ ] Backup database complet
+- [ ] Monitoring actif
+- [ ] Alerting configuré
+- [ ] Rollback plan testé
+- [ ] Support team notifié
+
+## Documentation
+- Guide complet : [DEPLOYMENT_GUIDE.md](mdc:DEPLOYMENT_GUIDE.md)
+- Production : [PRODUCTION_DEPLOYMENT.md](mdc:PRODUCTION_DEPLOYMENT.md)
+- Quick Start : [QUICKSTART.md](mdc:QUICKSTART.md)

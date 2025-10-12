@@ -436,6 +436,7 @@ export interface LoginRequest {
   password?: string;
   provider?: string;
   token?: string;
+  provider_user_data?: any;
 }
 
 export interface LoginResponse {

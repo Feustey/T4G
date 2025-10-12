@@ -1,118 +1,213 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiClient } from '../services/apiClient';
+/**
+ * AuthContext - Remplace NextAuth par le système JWT du backend Rust
+ * Gère l'authentification avec les providers OAuth (t4g, LinkedIn, Dazno)
+ */
 
-interface User {
-  id: string;
-  email: string;
-  firstname: string;
-  lastname: string;
-  role: string;
-  lightning_address: string;
-}
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { apiClient, type User } from '../services/apiClient';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   loading: boolean;
-  login: (email: string, provider: string, providerToken?: string, providerUserData?: any) => Promise<void>;
+  error: string | null;
+  login: (provider: string, credentials?: any) => Promise<void>;
   logout: () => void;
+  refreshSession: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Charger le token au démarrage
+  // Charger l'utilisateur au montage
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      apiClient.setToken(storedToken);
-      // TODO: Valider le token et récupérer l'utilisateur
-      // Pour l'instant, on peut décoder le JWT pour obtenir les infos basiques
-      try {
-        const payload = JSON.parse(atob(storedToken.split('.')[1]));
-        if (payload.exp * 1000 > Date.now()) {
-          // Token valide
-          // TODO: Récupérer les infos complètes de l'utilisateur depuis l'API
-          setUser({
-            id: payload.user_id || '',
-            email: payload.email || '',
-            firstname: '',
-            lastname: '',
-            role: payload.role || '',
-            lightning_address: '',
-          });
-        } else {
-          // Token expiré
-          localStorage.removeItem('token');
-        }
-      } catch (error) {
-        console.error('Erreur lors du décodage du token:', error);
-        localStorage.removeItem('token');
-      }
-    }
-    setLoading(false);
+    loadUser();
   }, []);
 
-  const login = async (
-    email: string,
-    provider: string,
-    providerToken?: string,
-    providerUserData?: any
-  ): Promise<void> => {
+  // Charger l'utilisateur depuis le token stocké
+  const loadUser = async () => {
     try {
-      const response = await apiClient.login({
-        email,
-        provider,
-        token: providerToken,
-      } as any);
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-      setToken(response.token);
-      setUser({
-        id: response.user.id,
-        email: response.user.email,
-        firstname: response.user.first_name,
-        lastname: response.user.last_name,
-        role: response.user.role,
-        lightning_address: '',
-      });
-    } catch (error) {
-      console.error('Erreur de connexion:', error);
-      throw error;
+      apiClient.setToken(token);
+      const currentUser = await apiClient.getCurrentUser();
+      setUser(currentUser);
+      setError(null);
+    } catch (err) {
+      console.error('Erreur lors du chargement de l\'utilisateur:', err);
+      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      // Token invalide ou expiré
+      apiClient.clearToken();
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Connexion avec différents providers
+  const login = async (provider: string, credentials?: any) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let response;
+
+      switch (provider) {
+        case 'dazno':
+        case 'dazeno':
+          if (!credentials?.token) {
+            throw new Error('Token Dazno manquant');
+          }
+          response = await apiClient.login({
+            email: '',
+            provider: 'dazeno',
+            token: credentials.token,
+          });
+          break;
+
+        case 't4g':
+          if (!credentials?.providerUserData) {
+            throw new Error('Données utilisateur t4g manquantes');
+          }
+          response = await apiClient.login({
+            email: credentials.providerUserData.email,
+            provider: 't4g',
+            provider_user_data: credentials.providerUserData,
+          });
+          break;
+
+        case 'linkedin':
+          if (!credentials?.providerUserData) {
+            throw new Error('Données utilisateur LinkedIn manquantes');
+          }
+          response = await apiClient.login({
+            email: credentials.providerUserData.email,
+            provider: 'linkedin',
+            provider_user_data: credentials.providerUserData,
+          });
+          break;
+
+        case 'credentials':
+        case 'custom':
+          // Auth personnalisée pour tests (FAKE_AUTH)
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Email et mot de passe requis');
+          }
+          response = await apiClient.login({
+            email: credentials.email,
+            password: credentials.password,
+          });
+          break;
+
+        default:
+          throw new Error(`Provider non supporté: ${provider}`);
+      }
+
+      setUser(response.user);
+      setError(null);
+    } catch (err) {
+      console.error('Erreur de connexion:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Déconnexion
   const logout = () => {
-    setUser(null);
-    setToken(null);
     apiClient.clearToken();
+    setUser(null);
+    setError(null);
+    // Redirection vers la page de login
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  };
+
+  // Rafraîchir la session
+  const refreshSession = async () => {
+    try {
+      const response = await apiClient.refreshToken();
+      apiClient.setToken(response.token);
+      await loadUser();
+    } catch (err) {
+      console.error('Erreur lors du rafraîchissement du token:', err);
+      logout();
+    }
   };
 
   const value: AuthContextType = {
     user,
-    token,
     loading,
+    error,
     login,
     logout,
-    isAuthenticated: !!user && !!token,
+    refreshSession,
+    isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}
+
+// Hook personnalisé pour utiliser le contexte d'authentification
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth doit être utilisé à l\'intérieur d\'un AuthProvider');
+  }
+  return context;
+}
+
+// Hook pour remplacer next-auth useSession
+export function useSession() {
+  const { user, loading } = useAuth();
+  
+  return {
+    data: user ? { user } : null,
+    status: loading ? 'loading' : user ? 'authenticated' : 'unauthenticated',
+  };
+}
+
+// Fonction pour remplacer next-auth getSession (côté serveur)
+export async function getSession() {
+  try {
+    const user = await apiClient.getCurrentUser();
+    return { user };
+  } catch {
+    return null;
+  }
+}
+
+// Fonction pour remplacer next-auth signIn
+export async function signIn(provider: string, options?: any) {
+  // Cette fonction est utilisée dans les composants
+  // Elle doit être appelée via useAuth().login() à la place
+  console.warn(
+    'signIn() est déprécié. Utilisez useAuth().login() à la place.'
+  );
+  return { ok: false, error: 'Utilisez useAuth().login()' };
+}
+
+// Fonction pour remplacer next-auth signOut
+export async function signOut() {
+  apiClient.clearToken();
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
+  }
+}

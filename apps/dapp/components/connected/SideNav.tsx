@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { UserType } from '@shared/types';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
-import { signOut, useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 // import * as Sentry from '@sentry/nextjs';
 
 export interface ISideNav {
@@ -15,7 +15,7 @@ export interface ISideNav {
 
 export const SideNav: React.FC<ISideNav> = ({ lang, user }) => {
   const router = useRouter();
-  const session = useSession().data as SessionType;
+  const { logout } = useAuth();
 
   const { data: categorieList } = useSwr<Omit<CategoryType, 'index'>[]>(
     '/service-categories/as_consumer',
@@ -55,10 +55,9 @@ export const SideNav: React.FC<ISideNav> = ({ lang, user }) => {
       
       <div
         className={"c-custom-link cursor-pointer"}
-        onClick={async (e)=>{
-          await signOut({
-            callbackUrl: "/",
-          });
+        onClick={(e)=>{
+          e.preventDefault();
+          logout();
         }}
       >
         {' '}

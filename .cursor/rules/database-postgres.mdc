@@ -1,0 +1,86 @@
+---
+globs: token4good-backend/migrations/*.sql,libs/service/data/**/*-pg.ts
+description: Standards base de données PostgreSQL pour Token4Good
+---
+
+# PostgreSQL Database - Standards
+
+## Migration Complète MongoDB → PostgreSQL ✅
+
+## Schéma PostgreSQL
+Localisation : [token4good-backend/migrations/](mdc:token4good-backend/migrations/)
+
+### Tables Principales
+1. **users** - Utilisateurs (étudiants, mentors, admins)
+2. **service_categories** - Catégories de services
+3. **services** - Catalogue de services
+4. **blockchain_transactions** - Transactions Bitcoin/Lightning
+5. **experiences** - Expériences utilisateur
+6. **notifications** - Notifications système
+
+## Backend (Rust + SQLx)
+
+### Opérations Database
+Fichier : [database_services.rs](mdc:token4good-backend/src/services/database_services.rs)
+
+### Conventions
+```rust
+// Query avec SQLx
+let result = sqlx::query_as::<_, ModelType>(
+    "SELECT * FROM table WHERE condition = $1"
+)
+.bind(param)
+.fetch_one(&pool)
+.await?;
+
+// Transactions
+let mut tx = pool.begin().await?;
+// operations...
+tx.commit().await?;
+```
+
+## Frontend (TypeScript)
+
+### DAOs PostgreSQL
+Localisation : [libs/service/data/src/lib/dao/](mdc:libs/service/data/src/lib/dao/)
+
+### Fichiers
+- `categoriesDAO-pg.ts` - Catégories via API REST
+- `servicesDAO-pg.ts` - Services via API REST
+- `transactionsDAO-pg.ts` - Transactions via API REST
+
+### Switch MongoDB/PostgreSQL
+```typescript
+// libs/service/data/src/lib/dao/index.ts
+const USE_POSTGRES = process.env.NEXT_PUBLIC_USE_POSTGRES === 'true';
+
+export const categoriesDAO = USE_POSTGRES 
+  ? categoriesDAOPg 
+  : categoriesDAOMongo;
+```
+
+## Configuration
+
+### Backend (.env)
+```bash
+DATABASE_URL=postgresql://user:pass@host:5432/dbname
+```
+
+### Frontend (.env.local)
+```bash
+NEXT_PUBLIC_USE_POSTGRES=true
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
+## Migrations
+- Auto-appliquées au démarrage du backend
+- Versionning SQLx : `sqlx migrate add nom_migration`
+
+## Performance
+- Indexation sur : `user_id`, `service_id`, `category_id`, `hash`
+- Connection pooling automatique (SQLx)
+- Query optimization pour listes paginées
+
+## Documentation
+- Guide complet : [POSTGRES_MIGRATION_GUIDE.md](mdc:POSTGRES_MIGRATION_GUIDE.md)
+- Migration complète : [MIGRATION_COMPLETE.md](mdc:MIGRATION_COMPLETE.md)

@@ -1,0 +1,71 @@
+---
+globs: token4good-backend/**/*.rs
+description: Standards de développement backend Rust pour Token4Good
+---
+
+# Backend Rust - Standards et Conventions
+
+## Architecture Backend
+- Framework : **Axum** (async web framework)
+- Database : **SQLx** avec PostgreSQL
+- Auth : **JWT** tokens avec validation middleware
+- Tests : **tokio::test** pour async
+
+## Structure des Fichiers
+```
+token4good-backend/src/
+├── main.rs              # Entry point, router setup
+├── routes/              # API endpoints (auth, users, proofs, lightning, etc.)
+├── services/            # Business logic
+│   ├── rgb_native.rs    # RGB Protocol operations
+│   ├── lightning.rs     # Lightning Network REST API
+│   └── database_*.rs    # Database operations
+├── models/              # Data structures (User, Service, Proof, etc.)
+└── middleware/          # JWT validation, CORS, rate limiting
+```
+
+## Conventions de Code
+
+### Endpoints API
+- Utiliser les macros Axum : `#[get("/path")]`, `#[post("/path")]`
+- Retourner `Result<Json<T>, AppError>`
+- Extraire user authentifié : `user: AuthUser`
+- Valider les données entrantes avec garde de type
+
+### Services
+- Toutes les opérations async avec `tokio`
+- Utiliser `Arc<RwLock<T>>` pour état partagé
+- Logger avec `tracing::info!`, `tracing::error!`
+- Retourner `Result<T, ServiceError>`
+
+### Tests
+```rust
+#[tokio::test]
+async fn test_nom_descriptif() {
+    // Arrange
+    // Act
+    // Assert
+}
+```
+
+## Performance
+- Réponse API cible : <10ms (p50), <50ms (p95)
+- Utiliser connection pooling PostgreSQL
+- RGB operations : <5ms
+- Lightning calls : ~120ms (dépendance externe)
+
+## Sécurité
+- JWT tokens : expiration 24h
+- Secrets via variables d'environnement
+- Rate limiting sur tous les endpoints publics
+- Validation stricte des entrées
+
+## Tests Requis
+- Coverage minimum : 85% pour services critiques
+- Tests unitaires pour chaque service
+- Tests d'intégration pour flux complets
+- Commande : `cargo test --lib && cargo test --test integration_tests`
+
+## Documentation
+- Commenter les fonctions publiques avec `///`
+- README dans [token4good-backend/README.md](mdc:token4good-backend/README.md)

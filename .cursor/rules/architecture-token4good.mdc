@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+description: Architecture et contexte global de Token4Good v2
+---
+
+# Token4Good v2 - Architecture Globale
+
+## État du Projet : 85% Complété
+**Production Target:** 28 octobre 2025
+
+## Architecture Technique
+
+### Backend (Rust + Axum) - 100% ✅
+- Localisation : [token4good-backend/](mdc:token4good-backend/)
+- Entry point : [token4good-backend/src/main.rs](mdc:token4good-backend/src/main.rs)
+- Services principaux :
+  - [rgb_native.rs](mdc:token4good-backend/src/services/rgb_native.rs) - RGB Protocol
+  - [lightning.rs](mdc:token4good-backend/src/services/lightning.rs) - Lightning Network REST API
+  - [database_services.rs](mdc:token4good-backend/src/services/database_services.rs) - PostgreSQL operations
+- Routes API : [token4good-backend/src/routes/](mdc:token4good-backend/src/routes/)
+
+### Frontend (Next.js 13) - 30% Migré ⚠️
+- Localisation : [apps/dapp/](mdc:apps/dapp/)
+- API Client : [apps/dapp/services/apiClient.ts](mdc:apps/dapp/services/apiClient.ts)
+- PostgreSQL DAOs : [libs/service/data/src/lib/dao/](mdc:libs/service/data/src/lib/dao/)
+
+### Base de Données
+- PostgreSQL (Supabase) - Migration complète depuis MongoDB
+- Schéma : [token4good-backend/migrations/](mdc:token4good-backend/migrations/)
+
+## Stack Technique
+- Backend : Rust + Axum + SQLx + PostgreSQL
+- Frontend : Next.js 13 + React 18 + TypeScript
+- Blockchain : RGB Protocol + Lightning Network (LND)
+- Auth : JWT + OAuth (t4g, LinkedIn, Dazno)
+
+## Priorités Actuelles
+1. **Migration Frontend** : Remplacer 52 routes API Next.js par appels backend Rust
+2. **Tests E2E** : Valider tous les flux critiques
+3. **Déploiement** : Railway (backend) + Vercel (frontend)
+
+## Documentation Clé
+- Plan général : [FINAL_SUMMARY.md](mdc:FINAL_SUMMARY.md)
+- Migration frontend : [FRONTEND_MIGRATION_PLAN.md](mdc:FRONTEND_MIGRATION_PLAN.md)
+- Déploiement : [PRODUCTION_DEPLOYMENT.md](mdc:PRODUCTION_DEPLOYMENT.md)
+- Quick Start : [QUICKSTART.md](mdc:QUICKSTART.md)

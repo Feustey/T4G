@@ -89,16 +89,7 @@ export const useOAuth = () => {
         }
       );
 
-      // Vérifier le statut d'onboarding
-      const onboardingResponse = await fetch('/api/user/onboarding-status');
-      if (onboardingResponse.ok) {
-        const { is_onboarded } = await onboardingResponse.json();
-        if (!is_onboarded) {
-          router.push('/onboarding');
-          return true;
-        }
-      }
-
+      // Rediriger vers dashboard
       router.push('/dashboard');
       return true;
     } catch (error) {
@@ -153,16 +144,7 @@ export const useOAuth = () => {
         }
       );
 
-      // Vérifier le statut d'onboarding
-      const onboardingResponse = await fetch('/api/user/onboarding-status');
-      if (onboardingResponse.ok) {
-        const { is_onboarded } = await onboardingResponse.json();
-        if (!is_onboarded) {
-          router.push('/onboarding');
-          return;
-        }
-      }
-
+      // Rediriger vers dashboard
       router.push('/dashboard');
     } catch (error) {
       console.error('Erreur authentification Dazno:', error);

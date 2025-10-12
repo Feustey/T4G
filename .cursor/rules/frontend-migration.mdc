@@ -1,0 +1,101 @@
+---
+globs: apps/dapp/**/*.tsx,apps/dapp/**/*.ts,libs/service/**/*.ts
+description: Guide de migration frontend Next.js API vers backend Rust
+---
+
+# Migration Frontend - Next.js API → Backend Rust
+
+## ⚠️ PRIORITÉ CRITIQUE - 15% Restant
+
+## Objectif
+Remplacer **52 routes API Next.js** par appels au backend Rust via [apiClient.ts](mdc:apps/dapp/services/apiClient.ts)
+
+## Pattern de Migration
+
+### ❌ AVANT (Next.js API Route)
+```typescript
+// apps/dapp/pages/api/users/me/wallet.ts
+export default async function handler(req, res) {
+  const session = await getSession({ req });
+  const wallet = await db.getWallet(session.user.id);
+  res.json(wallet);
+}
+
+// Component
+const response = await fetch('/api/users/me/wallet');
+const wallet = await response.json();
+```
+
+### ✅ APRÈS (Backend Rust)
+```typescript
+// Supprimer apps/dapp/pages/api/users/me/wallet.ts
+
+// Component
+import { apiClient } from '@/services/apiClient';
+const user = await apiClient.getCurrentUser();
+const wallet = user.lightning_balance;
+```
+
+## Checklist par Fichier
+
+### Étapes de Migration
+1. **Trouver l'équivalent backend** : Vérifier [token4good-backend/src/routes/](mdc:token4good-backend/src/routes/)
+2. **Remplacer fetch()** : Utiliser `apiClient.*()` au lieu de `fetch('/api/...')`
+3. **Tester localement** : Backend sur :8080, Frontend sur :3000
+4. **Supprimer la route** : `git rm apps/dapp/pages/api/...`
+
+### Routes à Migrer (15 restantes)
+- [ ] `/api/auth/[...nextauth].ts` → JWT Backend
+- [ ] `/api/admin/wallets` → `/api/admin/users?include=wallet`
+- [ ] `/api/metrics` → `/api/metrics`
+- [ ] `/api/transactions/[id]/status` → `/api/lightning/payment/[hash]/status`
+- [ ] OAuth callbacks (t4g, LinkedIn)
+
+## API Client Usage
+
+### Importation
+```typescript
+import { apiClient } from '@/services/apiClient';
+```
+
+### Méthodes Disponibles
+```typescript
+// Auth
+await apiClient.login({ email, password })
+await apiClient.refreshToken()
+await apiClient.logout()
+await apiClient.getCurrentUser()
+
+// Mentoring
+await apiClient.getMentoringRequests()
+await apiClient.createMentoringRequest(data)
+await apiClient.assignMentor(requestId, mentorId)
+
+// RGB Proofs
+await apiClient.createProof(data)
+await apiClient.verifyProof(proofId)
+await apiClient.transferProof(proofId, recipientId)
+await apiClient.getProofHistory(proofId)
+
+// Lightning
+await apiClient.createLightningInvoice(data)
+await apiClient.payLightningInvoice(paymentRequest)
+await apiClient.getPaymentStatus(hash)
+await apiClient.getLightningNodeInfo()
+```
+
+## Tests Requis
+```typescript
+// Avant de supprimer une route API :
+// 1. Tester le flux complet en local
+// 2. Vérifier que le backend répond correctement
+// 3. Valider l'authentification JWT
+// 4. Tester les cas d'erreur
+```
+
+## Documentation
+- Plan complet : [FRONTEND_MIGRATION_PLAN.md](mdc:FRONTEND_MIGRATION_PLAN.md)
+- API Client : [apps/dapp/services/apiClient.ts](mdc:apps/dapp/services/apiClient.ts)
+
+## Deadline
+**21 octobre 2025** - Migration complète frontend

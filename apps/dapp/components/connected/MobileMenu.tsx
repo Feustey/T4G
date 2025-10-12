@@ -1,12 +1,12 @@
 import { CategoryType, LangType } from '../../types';
 import { ButtonIcon, CustomLink, Icons, MenuItem } from '../';
-import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { UserType } from '@shared/types';
 import { useRef, useState, useEffect } from 'react';
 import { trapFocus } from 'apps/dapp/services';
 import { apiFetcher } from 'apps/dapp/services/config';
 import useSwr from 'swr';
+import { useAuth } from '../../contexts/AuthContext';
 
 export interface IMobileMenu {
   lang: LangType;
@@ -19,6 +19,7 @@ export const MobileMenu: React.FC<IMobileMenu> = ({ lang, user }) => {
     apiFetcher
   ); //TODO error
   const router = useRouter();
+  const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -53,12 +54,9 @@ export const MobileMenu: React.FC<IMobileMenu> = ({ lang, user }) => {
     setIsOpen(false);
   };
 
-  const handleSignOut = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleSignOut = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    await signOut({
-      callbackUrl: 'https://login.t4g.com/logout',
-    });
-    router.push('/');
+    logout();
   };
 
   return (

@@ -1,4 +1,3 @@
-import { getProviders, signIn } from 'next-auth/react';
 import React, { useEffect, useState } from 'react';
 import * as process from 'process';
 import { useRouter } from 'next/router';
@@ -10,6 +9,7 @@ import { GetServerSideProps } from 'next';
 import OnboardingLayout from '../layouts/OnboardingLayout';
 import { Button } from '../components';
 import { checkDaznoSession } from '../utils/dazeno-auth';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface IPage {
   lang: LangType;
@@ -18,11 +18,13 @@ export interface IPage {
 export function Page({ lang }: IPage) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
+  const { login, isAuthenticated } = useAuth();
 
   const [debugButtonsVisible, setDebugButtonsVisible] =
     useState<boolean>(false);
   const [isDazenoUser, setIsDazenoUser] = useState<boolean>(false);
   const [isCheckingDazeno, setIsCheckingDazeno] = useState<boolean>(false);
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
   useEffect(() => {
     if (process.env.NEXTAUTH_URL !== 'token-for-good.com') {
@@ -41,11 +43,9 @@ export function Page({ lang }: IPage) {
         const daznoSession = await checkDaznoSession();
         
         if (daznoSession.authenticated && daznoSession.token) {
-          // Auto-login avec le token Dazno
-          await signIn('dazeno', { 
-            token: daznoSession.token,
-            callbackUrl: `/${locale}/onboarding` 
-          });
+          // Auto-login avec le token Dazno via le nouveau système JWT
+          await login('dazno', { token: daznoSession.token });
+          router.push(`/${locale}/onboarding`);
         } else if (daznoSession.authenticated) {
           setIsDazenoUser(true);
         }
@@ -57,7 +57,14 @@ export function Page({ lang }: IPage) {
     };
 
     checkDazno();
-  }, [router.query.debug, locale]);
+  }, [router.query.debug, locale, login]);
+
+  // Rediriger si déjà authentifié
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(`/${locale}/onboarding`);
+    }
+  }, [isAuthenticated, locale, router]);
 
   // const debugButtonsVisible = (router.query.debug != undefined) || (process.env.NODE_ENV === "development");
   if (typeof window !== 'undefined') {
@@ -90,17 +97,33 @@ export function Page({ lang }: IPage) {
                 <Button
                   label={'Login with Daznode'}
                   variant="primary"
-                  onClick={(e) => {
+                  disabled={isLoggingIn}
+                  onClick={async (e) => {
                     e.preventDefault();
-                    signIn('daznode', { callbackUrl: `/${locale}/onboarding` });
+                    setIsLoggingIn(true);
+                    try {
+                      // Rediriger vers OAuth Dazno (à implémenter côté backend)
+                      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/dazno/authorize?redirect=${encodeURIComponent(window.location.origin + `/${locale}/onboarding`)}`;
+                    } catch (error) {
+                      console.error('Erreur login Dazno:', error);
+                      setIsLoggingIn(false);
+                    }
                   }}
                 />
                 <Button
                   label={'Login with LinkedIn'}
                   variant="primary"
-                  onClick={(e) => {
+                  disabled={isLoggingIn}
+                  onClick={async (e) => {
                     e.preventDefault();
-                    signIn('linkedin', { callbackUrl: `/onboarding` });
+                    setIsLoggingIn(true);
+                    try {
+                      // Rediriger vers OAuth LinkedIn (à implémenter côté backend)
+                      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/linkedin/authorize?redirect=${encodeURIComponent(window.location.origin + `/onboarding`)}`;
+                    } catch (error) {
+                      console.error('Erreur login LinkedIn:', error);
+                      setIsLoggingIn(false);
+                    }
                   }}
                 />
               </>
@@ -119,34 +142,58 @@ export function Page({ lang }: IPage) {
               <Button
                 label={'Login as admin'}
                 variant="secondary"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
-                  signIn('custom', {
-                    username: 'admin',
-                    callbackUrl: `/${locale}/onboarding`,
-                  });
+                  setIsLoggingIn(true);
+                  try {
+                    await login('custom', {
+                      email: 'admin@token-for-good.com',
+                      password: 'admin',
+                    });
+                    router.push(`/${locale}/onboarding`);
+                  } catch (error) {
+                    console.error('Erreur login admin:', error);
+                    alert('Erreur de connexion');
+                    setIsLoggingIn(false);
+                  }
                 }}
               />
               <Button
                 label={'Login as alumni'}
                 variant="secondary"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
-                  signIn('custom', {
-                    username: 'alumni',
-                    callbackUrl: `/${locale}/onboarding`,
-                  });
+                  setIsLoggingIn(true);
+                  try {
+                    await login('custom', {
+                      email: 'alumni@token-for-good.com',
+                      password: 'alumni',
+                    });
+                    router.push(`/${locale}/onboarding`);
+                  } catch (error) {
+                    console.error('Erreur login alumni:', error);
+                    alert('Erreur de connexion');
+                    setIsLoggingIn(false);
+                  }
                 }}
               />
               <Button
                 label={'Login as student'}
                 variant="secondary"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
-                  signIn('custom', {
-                    username: 'student',
-                    callbackUrl: `/${locale}/onboarding`,
-                  });
+                  setIsLoggingIn(true);
+                  try {
+                    await login('custom', {
+                      email: 'student@token-for-good.com',
+                      password: 'student',
+                    });
+                    router.push(`/${locale}/onboarding`);
+                  } catch (error) {
+                    console.error('Erreur login student:', error);
+                    alert('Erreur de connexion');
+                    setIsLoggingIn(false);
+                  }
                 }}
               />
             </div>
