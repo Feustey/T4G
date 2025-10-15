@@ -7,7 +7,7 @@ import useSwr from 'swr';
 import { useAppSelector, useIndexing } from '../../hooks';
 import AdminLayout from '../../layouts/AdminLayout';
 import { AuthPageType, SessionType } from 'apps/dapp/types';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import { TableSkeleton } from 'apps/dapp/components';
 import { HiddenIconElement } from '@t4g/ui/icons';
 import { ButtonElement } from '@t4g/ui/elements';
@@ -18,8 +18,7 @@ import { apiFetcher } from 'apps/dapp/services/config';
 
 const Page: React.FC<Components.Admin.ServiceDeliveryPage.Props> &
   AuthPageType = ({ lang }: Components.Admin.ServiceDeliveryPage.Props) => {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   const { setRightPanel, updateDisabled, setUpdateDisabled } = useAppContext();
 
   const {

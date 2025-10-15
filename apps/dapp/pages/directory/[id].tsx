@@ -15,7 +15,7 @@ import {
   UserExperienceType,
 } from 'apps/dapp/types';
 import { capitalise } from 'apps/dapp/services';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
 import useSwr from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
@@ -33,8 +33,7 @@ export function ProfilePage({
   categoryName,
   userId,
 }: IProfilePage & AuthPageType) {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   const { data: profile } = useSwr<User>(`/users/${userId}`, apiFetcher);
   const { data: cv } = useSwr<UserCVType>(
     `/users/${userId}/cv`,

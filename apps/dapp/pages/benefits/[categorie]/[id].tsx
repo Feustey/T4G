@@ -15,7 +15,7 @@ import {
 } from 'apps/dapp/types';
 import { useIndexing } from 'apps/dapp/hooks';
 import { capitalise, getServiceByIdServerSide } from 'apps/dapp/services';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../../contexts/AuthContext';
 import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
 
 interface IBenefitPage {
@@ -31,8 +31,7 @@ export function BenefitPage({
   categoryName,
   benefit,
 }: IBenefitPage & AuthPageType) {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   return (
     <>
       <Head>

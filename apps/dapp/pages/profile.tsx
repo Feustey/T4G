@@ -5,7 +5,7 @@ import Head from 'next/head';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import { useIndexing } from '../hooks';
 import { AuthPageType, SessionType } from '../types';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components';
 import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
 import { RightPanel } from 'libs/ui/layouts/src/lib/AppLayout/RightPanel';
@@ -15,8 +15,7 @@ import { DeleteUser } from 'libs/ui/components/src/lib/ProfileInfo/DeleteUser';
 const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
   lang,
 }: Components.Profile.Page.Props) => {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   const { setModal } = useAppContext();
   return (
     <>

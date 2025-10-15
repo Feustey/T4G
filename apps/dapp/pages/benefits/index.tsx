@@ -10,7 +10,7 @@ import {
 } from 'apps/dapp/types';
 import { useIndexing } from 'apps/dapp/hooks';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 
@@ -21,8 +21,7 @@ interface IBenefitPage {
 export function BenefitPage({
   lang,
 }: IBenefitPage & AuthPageType) {
-  const session = useSession().data as SessionType | null;
-  const user = session?.user ?? null;
+  const { user } = useAuth();
   
   const { data: categorieList } = useSwr<CategoryType[]>(
     '/service-categories/as_consumer',

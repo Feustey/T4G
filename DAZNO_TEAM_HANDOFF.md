@@ -33,6 +33,16 @@ T4G_WEBHOOK_SECRET=<sera_fourni_séparément>
 
 ## 📍 2. URL du Webhook
 
+### Token4Good → Dazno
+
+```
+URL : https://dazno.de/api/webhooks/t4g
+Méthode : POST
+Content-Type : application/json
+```
+
+### Dazno → Token4Good
+
 ```
 URL : https://t4g.dazno.de/api/webhooks/dazno
 Méthode : POST

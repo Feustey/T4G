@@ -17,16 +17,9 @@ const nextConfig = {
       '@t4g/service/data': require('path').resolve(__dirname, '../../libs/service/data/src'),
     };
 
-    // Ignore optional MongoDB dependencies
+    // Configuration webpack pour le backend Rust
     if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push({
-        'mongodb-client-encryption': 'commonjs mongodb-client-encryption',
-        'snappy': 'commonjs snappy',
-        'aws4': 'commonjs aws4',
-        'kerberos': 'commonjs kerberos',
-        '@mongodb-js/zstd': 'commonjs @mongodb-js/zstd',
-      });
+      // Plus de dépendances MongoDB à ignorer
     }
 
     return config;
@@ -47,7 +40,6 @@ const nextConfig = {
   },
   // Variables d'environnement
   env: {
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '/api',
     NEXT_PUBLIC_DAZNO_API_URL: process.env.NEXT_PUBLIC_DAZNO_API_URL || 'https://www.dazno.de/api',
     NEXT_PUBLIC_DAZNO_USERS_API_URL: process.env.NEXT_PUBLIC_DAZNO_USERS_API_URL || 'https://www.dazno.de/api',

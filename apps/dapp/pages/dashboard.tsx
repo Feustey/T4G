@@ -30,7 +30,7 @@ import {
   setPendingTransactionsState,
 } from '../store/slices';
 import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../contexts/AuthContext';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 
@@ -52,8 +52,7 @@ export interface IDashboard {
 
 const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
   const pendingTransactions = useAppSelector(selectPendingTransactions);
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   const [transactionToUpdate, setTransactionToUpdate] =
     useState<PendingTransactionType | null>(null);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);

@@ -1,6 +1,6 @@
 import { AppProps } from 'next/app';
 import localFont from '@next/font/local';
-import { getProviders, SessionProvider, useSession } from 'next-auth/react';
+// NextAuth supprimé - utilisation d'AuthContext JWT
 // import './styles.css'; // Temporarily commented due to build error
 import '../styles/styles.scss';
 import '../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
@@ -38,8 +38,7 @@ function CustomApp({
           --font-family-primary: ${squadaOne.style.fontFamily};
         }
       `}</style>
-      <SessionProvider session={session}>
-        <AuthProvider>
+      <AuthProvider>
           <Script
             strategy="afterInteractive"
             id="tag-manager"
@@ -61,7 +60,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </Provider>
           </AppContextProvider>
         </AuthProvider>
-      </SessionProvider>
     </>
   );
 }
@@ -73,18 +71,10 @@ function Auth({ children, lang, role }) {
   // Nouveau système d'authentification JWT
   const { user, loading: authLoading, isAuthenticated } = useAuth();
 
-  // Ancien système NextAuth (pour compatibilité pendant la migration)
-  const {
-    status,
-    data: session,
-  }: { status: 'loading' | 'authenticated' | 'unauthenticated'; data: SessionType | null } = useSession({
-    required: false,
-  });
-
-  // Utiliser le nouveau système JWT si disponible, sinon NextAuth
-  const isLoading = authLoading || status === 'loading';
-  const isUserAuthenticated = isAuthenticated || status === 'authenticated';
-  const currentUser = user || session?.user;
+  // Utiliser uniquement le nouveau système JWT
+  const isLoading = authLoading;
+  const isUserAuthenticated = isAuthenticated;
+  const currentUser = user;
 
   if (isLoading) {
     return <Spinner lang={lang} />;

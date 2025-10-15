@@ -3,7 +3,7 @@ import { TransactionList } from '@t4g/ui/components';
 import { Components } from '@t4g/types';
 import useSwr from 'swr';
 import Head from 'next/head';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../contexts/AuthContext';
 import { useIndexing } from '../hooks';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import { AuthPageType, SessionType, UserMetricsType, LangType, NotificationType } from '../types';
@@ -22,8 +22,7 @@ export interface Iwallet {
 const Page: React.FC<Iwallet> & AuthPageType = ({
   lang,
 }: Iwallet) => {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
 
   const {
     data: transactions,

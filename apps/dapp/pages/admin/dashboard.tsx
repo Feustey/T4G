@@ -11,14 +11,13 @@ import Head from 'next/head';
 import { useAppDispatch, useIndexing } from '../../hooks';
 import AdminLayout from '../../layouts/AdminLayout';
 import { AuthPageType, SessionType } from 'apps/dapp/types';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import { apiClient, AdminWalletInfo } from '../../services/apiClient';
 
 const Page: React.FC<Components.Wallet.Page.Props> & AuthPageType = ({
   lang,
 }: Components.Wallet.Page.Props) => {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   
   // Utiliser apiClient via SWR pour auto-refresh
   const {

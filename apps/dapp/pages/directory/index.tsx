@@ -10,7 +10,7 @@ import {
   UserExperienceType,
 } from 'apps/dapp/types';
 import { useIndexing, useMediaQuery } from 'apps/dapp/hooks';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import Image from 'next/image';
 import useSwr, { SWRResponse } from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
@@ -25,8 +25,7 @@ interface IDirectoryPage {
 export function DirectoryPage({
   lang,
 }: IDirectoryPage & AuthPageType) {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
   const categoryName="Directory"
 
   const { data: users } = useSwr<User[]>('/users', apiFetcher); //TODO error

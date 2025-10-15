@@ -9,7 +9,7 @@ import { ButtonElement } from '@t4g/ui/elements';
 import { useAppContext } from '@t4g/ui/providers';
 import useSwr from 'swr';
 import Head from 'next/head';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useIndexing } from '../../hooks';
 import AdminLayout from '../../layouts/AdminLayout';
 import { AuthPageType, SessionType } from '../../types';
@@ -20,8 +20,7 @@ const Page: React.FC<Components.Admin.ServiceCataloguePage.Props> &
   provider,
   lang,
 }: Components.Admin.ServiceCataloguePage.Props) => {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
 
   const { setRightPanel } = useAppContext();
   const {

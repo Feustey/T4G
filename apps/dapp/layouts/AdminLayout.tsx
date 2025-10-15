@@ -3,7 +3,7 @@ import GlobalLayout from './GlobalLayout';
 import getConfig from "next/config";
 import useWebSocket from "react-use-websocket";
 import {fetchNotificationsState, fetchPendingTransactionsState, setUserBalanceState} from "apps/dapp/store/slices";
-import {useSession} from "next-auth/react";
+import { useAuth } from '../contexts/AuthContext';
 import {useAppDispatch} from "apps/dapp/hooks";
 
 export interface IAdminLayout {

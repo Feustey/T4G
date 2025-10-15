@@ -1,12 +1,55 @@
 # Token4Good v2 - Production Deployment Guide
 
-**Date:** 2025-09-30
+**Date:** 2025-10-12
 **Target Date:** 2025-10-28
-**Environments:** Railway (Backend) + Vercel (Frontend)
+**Environments:** Hostinger VPS (Backend + Frontend) | Alternative: Railway + Vercel
 
 ---
 
-## 🎯 Deployment Architecture
+## 🎯 Architecture Actuelle - Hostinger VPS
+
+> ⚠️ **Infrastructure Recommandée**: Nous utilisons actuellement un VPS Hostinger pour héberger l'ensemble de la stack.
+> Pour le déploiement sur Hostinger, consultez: **[HOSTINGER_DEPLOYMENT.md](./HOSTINGER_DEPLOYMENT.md)**
+
+```
+┌──────────────────────────────────────────────┐
+│  Serveur Hostinger VPS (147.79.101.32)       │
+│  Domaine: t4g.dazno.de                       │
+├──────────────────────────────────────────────┤
+│                                              │
+│  Nginx (80/443) → Backend Rust (3001)       │
+│                   ↓                          │
+│                   PostgreSQL (5432)          │
+│                   ↓                          │
+│                   LND + Bitcoin Core         │
+│  Frontend (Static Next.js)                  │
+│                                              │
+└──────────────────────────────────────────────┘
+```
+
+### 🚀 Déploiement Rapide (Hostinger)
+
+```bash
+# Installation automatique complète
+./scripts/deploy-hostinger.sh full
+
+# Voir le guide rapide
+cat QUICKSTART_HOSTINGER.md
+```
+
+---
+
+## 📖 Autres Options de Déploiement
+
+Ce document couvre également les déploiements alternatifs:
+- **Railway** (Backend managé)
+- **Vercel** (Frontend avec Edge Functions)
+
+Pour la production Token4Good, **utilisez Hostinger** (ci-dessus).
+
+---
+
+## 🎯 Architecture Alternative - Railway + Vercel
 
 ```
 ┌─────────────────┐
@@ -172,7 +215,7 @@ curl -X POST https://token4good-backend-production.up.railway.app/api/auth/login
 ### 2.1 Connecter le Repository GitHub
 
 1. Aller sur https://vercel.com/new
-2. Importer le repository: `github.com/your-org/RGB`
+2. Importer le repository: `github.com/your-org/T4G`
 3. Sélectionner le framework: **Next.js**
 4. Root Directory: `apps/dapp`
 5. Build Command: `npm run build`

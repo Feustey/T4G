@@ -13,7 +13,7 @@ import {
   UserExperienceType,
 } from 'apps/dapp/types';
 import { useIndexing, useMediaQuery } from 'apps/dapp/hooks';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../../contexts/AuthContext';
 import Image from 'next/image';
 import useSwr from 'swr';
 import { apiFetcher, apiUrl } from 'apps/dapp/services/config';
@@ -31,8 +31,7 @@ export function BenefitPage({
   categoryIcon,
   categoryDescription,
 }: IBenefitPage & AuthPageType) {
-  const session = useSession().data as SessionType | null;
-  const user = session?.user ?? null;
+  const { user } = useAuth();
 
 
   const { data: service } = useSwr<ReceiveServiceType[]>(

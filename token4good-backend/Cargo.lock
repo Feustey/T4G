@@ -3337,6 +3337,7 @@ dependencies = [
  "dotenv",
  "futures",
  "hex",
+ "hmac",
  "jsonwebtoken",
  "prost",
  "regex",

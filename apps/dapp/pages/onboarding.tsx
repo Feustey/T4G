@@ -1,8 +1,7 @@
 import React, { useReducer, useMemo, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from 'apps/dapp/pages/api/auth/[...nextauth]';
+// NextAuth supprimé - utilisation d'AuthContext JWT
 // import { identitiesDAO, dbConnect } from '@t4g/service/data';
 import { identitiesDAO, dbConnect } from '../lib/stubs/data-stubs';
 import { useAppDispatch, useIndexing } from '../hooks';
@@ -331,44 +330,43 @@ Onboarding.auth = true;
 Onboarding.role = ['ALUMNI', 'STUDENT'];
 
 export const getServerSideProps: GetServerSideProps = async function (context) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const session = await getServerSession(context.req, context.res, authOptions);
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-  await dbConnect();
-  const user = await identitiesDAO.getById(session.user.id.toString());
-
-  if (user.isOnboarded || user.role === 'SERVICE_PROVIDER') {
-    const { locale } = context;
-    const language = locale === 'fr' ? '' : '/en';
-    let dest: string;
-    user.role === 'SERVICE_PROVIDER' ? (dest = 'admin') : (dest = 'dashboard');
-    return {
-      redirect: {
-        permanent: false,
-        destination: `${language}/${dest}/`,
-      },
-    };
-  }
-  const baseAvatar = await getUserAvatarServerSide(session.user.id);
-  const baseCV = await getCVServerSide(session.user.id);
-  const baseExperiences: UserExperienceType[] = baseCV.experiences;
-
-  console.log("cv", baseCV)
-
+  // Authentification gérée côté client avec AuthContext JWT
+  // Redirection vers login si pas authentifié
   return {
-    props: {
-      user: session.user,
-      baseAvatar,
-      baseCV,
-      baseExperiences,
+    redirect: {
+      destination: '/login',
+      permanent: false,
     },
   };
+  
+  // Code commenté - authentification maintenant côté client
+  // await dbConnect();
+  // const user = await identitiesDAO.getById(session.user.id.toString());
+
+  // if (user.isOnboarded || user.role === 'SERVICE_PROVIDER') {
+  //   const { locale } = context;
+  //   const language = locale === 'fr' ? '' : '/en';
+  //   let dest: string;
+  //   user.role === 'SERVICE_PROVIDER' ? (dest = 'admin') : (dest = 'dashboard');
+  //   return {
+  //     redirect: {
+  //       permanent: false,
+  //       destination: `${language}/${dest}/`,
+  //     },
+  //   };
+  // }
+  // const baseAvatar = await getUserAvatarServerSide(session.user.id);
+  // const baseCV = await getCVServerSide(session.user.id);
+  // const baseExperiences: UserExperienceType[] = baseCV.experiences;
+
+  // console.log("cv", baseCV)
+
+  // return {
+  //   props: {
+  //     user: session.user,
+  //     baseAvatar,
+  //     baseCV,
+  //     baseExperiences,
+  //   },
+  // };
 };

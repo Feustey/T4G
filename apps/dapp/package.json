@@ -19,12 +19,10 @@
     "@vercel/analytics": "^0.1.8",
     "axios": "^1.7.4",
     "core-js": "3.21.1",
-    "mongodb": "^4.17.0",
     "next": "^14.2.15",
-    "next-auth": "^4.24.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "7.27.1",
+    "react-hook-form": "^7.48.2",
     "react-redux": "^8.0.5",
     "swr": "^2.1.2",
     "tslib": "^2.3.0"

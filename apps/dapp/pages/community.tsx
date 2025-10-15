@@ -6,7 +6,7 @@ import useSwr from 'swr';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import { useIndexing } from '../hooks';
 import { AuthPageType, LangType, SessionType } from '../types';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb, CustomLink, Icons, Spinner } from '../components';
 import { apiFetcher } from 'apps/dapp/services/config';
 
@@ -36,8 +36,7 @@ const Page: React.FC<PageProps> & AuthPageType = ({
 // smartContractAddress,
 PageProps) => {
   const POLYGONSCAN_BASEURL = getConfig().publicRuntimeConfig.polygonScanUrl;
-  const session = useSession().data as SessionType | null;
-  const user = session?.user ?? null;
+  const { user } = useAuth();
   const { data: metrics } = useSwr<CommunityMetrics>(`/metrics`, apiFetcher);
   const {
     data: wallet,

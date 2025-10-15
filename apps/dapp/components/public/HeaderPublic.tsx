@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Button, ButtonIcon } from '..';
 import { useMediaQuery } from '../../hooks';
-import { signIn } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import Link from 'next/link';
 import { LangType, LocaleType } from '../../types';
 import { useRouter } from 'next/router';

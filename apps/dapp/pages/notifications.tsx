@@ -6,7 +6,7 @@ import ConnectedLayout from '../layouts/ConnectedLayout';
 import { AuthPageType, LangType, NotificationType, SessionType } from '../types';
 import { selectNotifications } from '../store/slices/notificationsSlices';
 import { Icons } from '../components';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface IDashboard {
   lang: LangType;
@@ -16,8 +16,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({
   lang,
 }: IDashboard) => {
   const notifications = useAppSelector(selectNotifications);
-  const session = useSession().data as SessionType | null;
-  const user = session?.user ?? null;
+  const { user } = useAuth();
 
   return (
     <>

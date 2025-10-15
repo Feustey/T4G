@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppLayout } from '@t4g/ui/layouts';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import Head from 'next/head';
 import ConnectedLayout from '../../layouts/ConnectedLayout';
 import { useIndexing } from '../../hooks';
@@ -22,8 +22,7 @@ export interface IPage {
 }
 
 const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
-  const session = useSession().data as SessionType;
-  const user = session.user;
+  const { user } = useAuth();
 
   const alumniStudentMentorServices: string[] =
     alumniServices.studentMentor.map((service) => service.name);
