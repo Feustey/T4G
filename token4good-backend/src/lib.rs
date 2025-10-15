@@ -78,6 +78,13 @@ pub async fn build_state() -> Result<AppState, Box<dyn Error>> {
 pub fn build_router(state: AppState) -> Router {
     Router::new()
         .nest("/health", routes::health::health_routes())
+        // Webhooks - Authentification par API Key + signature HMAC (pas de JWT)
+        .nest(
+            "/api/webhooks",
+            routes::webhooks::webhook_routes().layer(axum::middleware::from_fn(
+                crate::middleware::webhook_auth::webhook_api_key_middleware,
+            )),
+        )
         .nest("/api/auth", routes::auth::auth_routes())
         .nest(
             "/api/mentoring",

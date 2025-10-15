@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod authorization;
 pub mod validation;
+pub mod webhook_auth;
 
 pub use auth::{admin_only_middleware, auth_middleware, AuthUser, JWTService};
 pub use authorization::{
@@ -11,3 +12,4 @@ pub use validation::{
     request_size_limit_middleware, security_headers_middleware, validate_email,
     validate_lightning_address, validate_rating, validate_username, Validate, ValidationError,
 };
+pub use webhook_auth::webhook_api_key_middleware;

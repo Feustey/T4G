@@ -33,6 +33,7 @@ jsonwebtoken = "8.3"  # Pour l'authentification JWT
 bitcoin = "0.30"  # Bitcoin utilities
 hex = "0.4"
 sha2 = "0.10"
+hmac = "0.12"  # Pour la signature des webhooks
 regex = "1.10"  # Pour la validation des inputs
 
 # Database support - PostgreSQL (Supabase) et SQLite (tests)
