@@ -78,3 +78,12 @@ token4good-backend-src*.tar.gz
 .github/instructions/nx.instructions.md
 RAILWAY_WEBHOOK_SETUP.md
 .env.webhook
+
+# CI/CD SSH Keys (NEVER commit these!)
+ci-deploy-key
+ci-deploy-key.pub
+ci-ssh-setup-instructions.txt
+**/ci-deploy-key*
+.ssh/
+*.pem
+*.key
