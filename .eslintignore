@@ -1,0 +1,36 @@
+# Build artifacts
+apps/dapp/.next/
+apps/dapp/out/
+**/out/
+**/.next/
+dist/
+build/
+.next/
+out/
+
+# Dependencies
+**/node_modules/
+node_modules/
+
+# Minified files
+**/*.min.js
+**/landing/js/jquery*.js
+**/landing/js/webflow*.js
+**/landing/js/webfont.js
+
+# Generated files
+**/_next/
+_next/
+
+# Backend Rust
+token4good-backend/target/
+**/target/
+
+# Cache
+.cache/
+**/.cache/
+
+# Test coverage
+coverage/
+**/coverage/
+
