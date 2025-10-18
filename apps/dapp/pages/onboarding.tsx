@@ -40,6 +40,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/router';
 import { alumniServices } from '../data';
 import { getCVServerSide } from '../services/user';
+import { apiClient } from '../services/apiClient';
 
 export interface IOnboarding {
   lang: LangType;
@@ -142,6 +143,8 @@ export function Onboarding({
           school: state.school,
         }),
         setUserAvatar(state.avatar, user.id),
+        // Marquer l'utilisateur comme onboardé
+        apiClient.updateUser(user.id, { is_onboarded: true }),
         ...(user.role === 'ALUMNI'
           ? [
               setUserExperience({

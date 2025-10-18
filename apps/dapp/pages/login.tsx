@@ -18,7 +18,7 @@ export interface IPage {
 export function Page({ lang }: IPage) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
 
   const [debugButtonsVisible, setDebugButtonsVisible] =
     useState<boolean>(false);
@@ -45,7 +45,7 @@ export function Page({ lang }: IPage) {
         if (daznoSession.authenticated && daznoSession.token) {
           // Auto-login avec le token Dazno via le nouveau système JWT
           await login('dazno', { token: daznoSession.token });
-          router.push(`/${locale}/onboarding`);
+          // La redirection sera gérée par le useEffect ci-dessous
         } else if (daznoSession.authenticated) {
           setIsDazenoUser(true);
         }
@@ -61,10 +61,15 @@ export function Page({ lang }: IPage) {
 
   // Rediriger si déjà authentifié
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push(`/${locale}/onboarding`);
+    if (isAuthenticated && user) {
+      // Rediriger selon le statut d'onboarding
+      if (user.is_onboarded) {
+        router.push(`/${locale}/`); // Dashboard
+      } else {
+        router.push(`/${locale}/onboarding`);
+      }
     }
-  }, [isAuthenticated, locale, router]);
+  }, [isAuthenticated, user, locale, router]);
 
   // const debugButtonsVisible = (router.query.debug != undefined) || (process.env.NODE_ENV === "development");
   if (typeof window !== 'undefined') {
@@ -103,7 +108,7 @@ export function Page({ lang }: IPage) {
                     setIsLoggingIn(true);
                     try {
                       // Rediriger vers OAuth Dazno (à implémenter côté backend)
-                      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/dazno/authorize?redirect=${encodeURIComponent(window.location.origin + `/${locale}/onboarding`)}`;
+                      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/dazno/authorize?redirect=${encodeURIComponent(window.location.origin + `/${locale}/login`)}`;
                     } catch (error) {
                       console.error('Erreur login Dazno:', error);
                       setIsLoggingIn(false);
@@ -188,7 +193,7 @@ export function Page({ lang }: IPage) {
                       email: 'student@token-for-good.com',
                       password: 'student',
                     });
-                    router.push(`/${locale}/onboarding`);
+                    // La redirection sera gérée par le useEffect
                   } catch (error) {
                     console.error('Erreur login student:', error);
                     alert('Erreur de connexion');

@@ -315,6 +315,7 @@ export interface User {
   bio?: string;
   created_at: string;
   updated_at: string;
+  is_onboarded: boolean;
 }
 
 export interface CreateUserRequest {

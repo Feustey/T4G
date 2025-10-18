@@ -31,7 +31,7 @@ const nextConfig = {
   },
   trailingSlash: true,
 
-  // Configuration pour Vercel
+  // Configuration pour déploiement standalone
   output: 'standalone',
   reactStrictMode: true,
   swcMinify: true,

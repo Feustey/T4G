@@ -56,8 +56,8 @@ impl DatabaseService {
     pub async fn create_user(&self, user: &User) -> Result<(), Box<dyn Error>> {
         sqlx::query(
             r#"
-            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, is_onboarded)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             "#
         )
         .bind(&user.id)
@@ -75,6 +75,7 @@ impl DatabaseService {
         .bind(user.is_active)
         .bind(&user.wallet_address)
         .bind(&user.preferences)
+        .bind(user.is_onboarded)
         .execute(&self.pool)
         .await?;
 
@@ -83,7 +84,7 @@ impl DatabaseService {
 
     pub async fn find_user_by_id(&self, id: &str) -> Result<Option<User>, Box<dyn Error>> {
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login FROM users WHERE id = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE id = $1"
         )
         .bind(id)
         .fetch_optional(&self.pool)
@@ -108,6 +109,7 @@ impl DatabaseService {
                 preferences: row.try_get("preferences")?,
                 email_verified: row.try_get("email_verified").unwrap_or(false),
                 last_login: row.try_get("last_login").ok(),
+                is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
             };
             Ok(Some(user))
         } else {
@@ -142,6 +144,7 @@ impl DatabaseService {
                 preferences: row.preferences,
                 email_verified: row.email_verified.unwrap_or(false),
                 last_login: row.last_login,
+                is_onboarded: row.is_onboarded.unwrap_or(false),
             };
             Ok(Some(user))
         } else {
@@ -592,9 +595,80 @@ impl DatabaseService {
         self.find_user_by_id(user_id).await
     }
 
-    pub async fn update_user(&self, id: &str, _payload: crate::models::user::UpdateUserRequest) -> Result<Option<User>, Box<dyn Error>> {
-        // TODO: Implement user update logic
-        Err("Not implemented".into())
+    pub async fn update_user(&self, id: &str, payload: crate::models::user::UpdateUserRequest) -> Result<Option<User>, Box<dyn Error>> {
+        // Build dynamic UPDATE query based on provided fields
+        let mut updates = Vec::new();
+        let mut values: Vec<String> = Vec::new();
+        let mut param_count = 1;
+
+        if let Some(username) = &payload.username {
+            updates.push(format!("username = ${}", param_count));
+            values.push(username.clone());
+            param_count += 1;
+        }
+        if let Some(bio) = &payload.bio {
+            updates.push(format!("bio = ${}", param_count));
+            values.push(bio.clone());
+            param_count += 1;
+        }
+        if let Some(avatar) = &payload.avatar {
+            updates.push(format!("avatar = ${}", param_count));
+            values.push(avatar.clone());
+            param_count += 1;
+        }
+        if let Some(is_onboarded) = payload.is_onboarded {
+            updates.push(format!("is_onboarded = ${}", param_count));
+            values.push(is_onboarded.to_string());
+            param_count += 1;
+        }
+        
+        // Always update updated_at
+        updates.push(format!("updated_at = NOW()"));
+
+        if updates.is_empty() {
+            return self.find_user_by_id(id).await;
+        }
+
+        let query = format!(
+            "UPDATE users SET {} WHERE id = ${} RETURNING *",
+            updates.join(", "),
+            param_count
+        );
+
+        // For simplicity, we'll use a simpler approach with sqlx::query
+        if let Some(is_onboarded) = payload.is_onboarded {
+            sqlx::query(&format!("UPDATE users SET is_onboarded = $1, updated_at = NOW() WHERE id = $2"))
+                .bind(is_onboarded)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(username) = &payload.username {
+            sqlx::query(&format!("UPDATE users SET username = $1, updated_at = NOW() WHERE id = $2"))
+                .bind(username)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(bio) = &payload.bio {
+            sqlx::query(&format!("UPDATE users SET bio = $1, updated_at = NOW() WHERE id = $2"))
+                .bind(bio)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(avatar) = &payload.avatar {
+            sqlx::query(&format!("UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2"))
+                .bind(avatar)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        self.find_user_by_id(id).await
     }
 
     pub async fn delete_user(&self, _id: &str) -> Result<bool, Box<dyn Error>> {

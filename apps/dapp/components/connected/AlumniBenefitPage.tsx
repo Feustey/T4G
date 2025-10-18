@@ -12,7 +12,7 @@ export interface IAlumniBenefitPage {
 }
 
 // Simplification de l'import dynamique
-// @ts-ignore - Problème de typage avec Next.js dynamic et react-draft-wysiwyg
+// @ts-expect-error - Problème de typage avec Next.js dynamic et react-draft-wysiwyg
 const DraftEditor: any = dynamic(() => import('react-draft-wysiwyg'), {
   ssr: false,
 });

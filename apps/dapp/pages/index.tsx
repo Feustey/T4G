@@ -3,23 +3,36 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { LangType, LocaleType } from '../types';
 import { Spinner } from '../components'; // Optionnel: pour un meilleur retour visuel
+import { useAuth } from '../contexts/AuthContext';
 
 export interface IPage {
   lang: LangType;
 }
 
 /**
- * Page d'accueil qui redirige immédiatement les utilisateurs vers le parcours d'onboarding.
+ * Page d'accueil qui redirige les utilisateurs selon leur statut d'authentification et d'onboarding.
  * Affiche un spinner pendant la redirection.
  */
 export function Page({ lang }: IPage) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Redirige vers la page d'onboarding en conservant la locale actuelle.
-    router.push('/onboarding', '/onboarding', { locale });
-  }, [router, locale]);
+    if (isAuthenticated && user) {
+      // Utilisateur authentifié
+      if (!user.is_onboarded) {
+        // Première connexion → onboarding
+        router.push('/onboarding', '/onboarding', { locale });
+      } else {
+        // Utilisateur déjà onboardé → dashboard
+        router.push('/dashboard', '/dashboard', { locale });
+      }
+    } else {
+      // Non authentifié → login
+      router.push('/login', '/login', { locale });
+    }
+  }, [router, locale, isAuthenticated, user]);
 
   return (
     <>

@@ -64,6 +64,7 @@ pub struct User {
     pub preferences: serde_json::Value,
     pub email_verified: bool,
     pub last_login: Option<chrono::DateTime<chrono::Utc>>,
+    pub is_onboarded: bool,
 }
 
 impl User {
@@ -94,6 +95,7 @@ impl User {
             preferences: serde_json::Value::Object(serde_json::Map::new()),
             email_verified: false,
             last_login: None,
+            is_onboarded: false,
         }
     }
 }
@@ -116,4 +118,5 @@ pub struct UpdateUserRequest {
     pub bio: Option<String>,
     pub avatar: Option<String>,
     pub preferences: Option<serde_json::Value>,
+    pub is_onboarded: Option<bool>,
 }
