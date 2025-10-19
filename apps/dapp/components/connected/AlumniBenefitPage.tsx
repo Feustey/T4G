@@ -11,9 +11,9 @@ export interface IAlumniBenefitPage {
   lang: LangType;
 }
 
-// Simplification de l'import dynamique
-// @ts-expect-error - Problème de typage avec Next.js dynamic et react-draft-wysiwyg
-const DraftEditor: any = dynamic(() => import('react-draft-wysiwyg'), {
+// Simplification de l'import dynamique avec contournement des problèmes de typage
+// @ts-expect-error - react-draft-wysiwyg a des problèmes de compatibilité de typage avec Next.js dynamic
+const DraftEditor = dynamic(() => import('react-draft-wysiwyg'), {
   ssr: false,
 });
 
@@ -90,6 +90,7 @@ export const AlumniBenefitPage: React.FC<IAlumniBenefitPage> = ({
           <h2 className="subtitle heading-4 u-d--flex u-align-items-center u-gap--s u-margin-b--m">
             {Icons.chat} {lang.components.alumniBenefitPage.about} {/* i18n */}
           </h2>
+          {/* @ts-expect-error - Accès à Editor depuis le module react-draft-wysiwyg */}
           <DraftEditor.Editor
             editorClassName="editorClassName prose w-full self-stretch m-auto"
             readOnly
