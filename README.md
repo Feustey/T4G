@@ -6,7 +6,7 @@
 [![Version](https://img.shields.io/badge/version-2.0.0-blue)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 
-t4g University wanted to build a platform which will enable to track and trace in a transparent and irrefutable way interactions between school's stakeholders, by creating a community of trust, supported by a network, issuing service counterpart by tokens (Token for Good).
+t4g wanted to build a platform which will enable to track and trace in a transparent and irrefutable way interactions between people, by creating a community of trust, supported by a network, issuing service counterpart by tokens (Token for Good).
 An identified interaction is "rewarded" by a defined amount of token; the beneficiary then accesses a catalog of services (training, Knowledge Hub, mentoring, conferences, etc).
 
 🔗 **Production:** https://t4g.dazno.de
@@ -113,7 +113,7 @@ To run main app (front+api):
 
 T4G use Hardhat to deploy smart contract in [`/contracts`](./contracts/)
 
-To deploy contracts (default to Mumbai Polygon testnet): `npx hardhat run contracts/scripts/deploy.ts`
+To deploy contracts (default to Bitcoin testnet): `npx hardhat run contracts/scripts/deploy.ts`
 _(smart contracts address are automatically added to `.env`)_
 
 #### DB
