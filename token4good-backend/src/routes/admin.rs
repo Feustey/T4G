@@ -1,4 +1,10 @@
-use axum::{extract::{Query, State}, http::StatusCode, response::Json, routing::get, Router};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    response::Json,
+    routing::get,
+    Router,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::AppState;

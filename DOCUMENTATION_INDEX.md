@@ -107,6 +107,24 @@
 
 ---
 
+## 🛠️ Maintenance & Operations
+
+### Gestion de l'Espace Disque
+| Document | Description | Usage |
+|----------|-------------|-------|
+| [DISK_CLEANUP_GUIDE.md](DISK_CLEANUP_GUIDE.md) | Guide complet nettoyage disque | 📖 Guide |
+| [scripts/cleanup-disk.sh](scripts/cleanup-disk.sh) | Script nettoyage automatique | 🔧 Script |
+| [scripts/check-disk-space.sh](scripts/check-disk-space.sh) | Monitoring + alertes | 📊 Monitoring |
+
+### Déploiement Cloud
+| Document | Description |
+|----------|-------------|
+| [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) | Architecture Railway + Vercel |
+| [RAILWAY_WEBHOOK_SETUP.md](RAILWAY_WEBHOOK_SETUP.md) | Intégration CI/CD Railway |
+| [deploy-vercel-v2.sh](deploy-vercel-v2.sh) | Déploiement frontend Vercel |
+
+---
+
 ## 📊 État du Projet
 
 ### Métriques
@@ -182,15 +200,17 @@ vercel --prod
 
 | Date | Document | Changement |
 |------|----------|------------|
+| 2025-10-21 | DISK_CLEANUP_GUIDE.md | Guide nettoyage espace disque |
+| 2025-10-21 | scripts/cleanup-disk.sh | Script de nettoyage automatique |
+| 2025-10-21 | scripts/check-disk-space.sh | Script de monitoring disque |
 | 2025-10-01 | Tous | Création initiale v2.0.0 |
 | 2025-10-01 | FINAL_DELIVERY.md | Livraison complète |
 | 2025-10-01 | QUICKSTART.md | Guide rapide |
-| 2025-10-01 | Ce fichier | Index créé |
 
 ---
 
-**Version:** 2.0.0
-**Dernière MAJ:** 2025-10-01
+**Version:** 2.0.1
+**Dernière MAJ:** 2025-10-21
 **Maintenu par:** Token4Good Team
 
 🎯 **Navigation facilitée - Trouvez rapidement ce dont vous avez besoin!** 🎯

@@ -1,6 +1,6 @@
-use std::net::SocketAddr;
-use axum::{Router, routing::get, Json};
+use axum::{routing::get, Json, Router};
 use serde_json::json;
+use std::net::SocketAddr;
 
 use token4good_backend::{build_router, build_state};
 
@@ -17,7 +17,10 @@ async fn main() {
     let state = match build_state().await {
         Ok(s) => s,
         Err(e) => {
-            tracing::warn!("⚠️ Failed to initialize full state: {}. Starting in minimal mode", e);
+            tracing::warn!(
+                "⚠️ Failed to initialize full state: {}. Starting in minimal mode",
+                e
+            );
             // Continue without full state - create minimal routes
             return start_minimal_server(port).await;
         }
@@ -42,20 +45,26 @@ async fn start_minimal_server(port: u16) {
     tracing::info!("🔧 Starting minimal server on port {}", port);
 
     let app = Router::new()
-        .route("/health", get(|| async {
-            Json(json!({
-                "status": "ok",
-                "mode": "minimal",
-                "message": "Backend running in minimal mode without database"
-            }))
-        }))
-        .route("/", get(|| async {
-            Json(json!({
-                "name": "Token4Good Backend",
-                "version": "0.1.0",
-                "mode": "minimal"
-            }))
-        }));
+        .route(
+            "/health",
+            get(|| async {
+                Json(json!({
+                    "status": "ok",
+                    "mode": "minimal",
+                    "message": "Backend running in minimal mode without database"
+                }))
+            }),
+        )
+        .route(
+            "/",
+            get(|| async {
+                Json(json!({
+                    "name": "Token4Good Backend",
+                    "version": "0.1.0",
+                    "mode": "minimal"
+                }))
+            }),
+        );
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!("minimal server binding to {}", addr);

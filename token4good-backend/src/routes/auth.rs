@@ -129,7 +129,8 @@ async fn handle_t4g_login(
         name,
         UserRole::Mentee, // t4g = étudiants/mentees
         format!("t4g_{}", t4g_id),
-    ).await?;
+    )
+    .await?;
 
     // Générer JWT
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -192,7 +193,8 @@ async fn handle_linkedin_login(
         name,
         UserRole::Alumni, // LinkedIn = alumni/professionnels
         format!("linkedin_{}", linkedin_id),
-    ).await?;
+    )
+    .await?;
 
     // Générer JWT
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -262,6 +264,7 @@ async fn get_or_create_user_from_dazno(
         preferences: serde_json::Value::Object(serde_json::Map::new()),
         email_verified: true, // Utilisateurs Dazno sont pré-vérifiés
         last_login: Some(chrono::Utc::now()),
+        is_onboarded: false,
     };
 
     state
@@ -288,7 +291,10 @@ async fn get_or_create_user_from_oauth(
     // Extraire prénom et nom du nom complet
     let name_parts: Vec<&str> = full_name.split_whitespace().collect();
     let firstname = name_parts.first().unwrap_or(&"").to_string();
-    let lastname = name_parts.get(1..).map(|parts| parts.join(" ")).unwrap_or_default();
+    let lastname = name_parts
+        .get(1..)
+        .map(|parts| parts.join(" "))
+        .unwrap_or_default();
 
     // Créer un nouvel utilisateur
     let user_id = uuid::Uuid::new_v4();
@@ -310,6 +316,7 @@ async fn get_or_create_user_from_oauth(
         preferences: serde_json::Value::Object(serde_json::Map::new()),
         email_verified: true, // Les utilisateurs OAuth sont pré-vérifiés
         last_login: Some(chrono::Utc::now()),
+        is_onboarded: false,
     };
 
     state

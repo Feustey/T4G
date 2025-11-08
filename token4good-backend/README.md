@@ -188,6 +188,8 @@ Response: {
 }
 
 ## 2. Lightning Network (api.dazno.de)
+
+### Endpoints Legacy
 POST https://api.dazno.de/lightning/invoice
 Authorization: Bearer JWT_TOKEN
 Body: {
@@ -202,7 +204,29 @@ Body: {
   "payment_request": "lnbc...",
   "user_id": "user123"
 }
+
+### MCP API v1 (nouveaux endpoints)
 ```
+## Wallet Operations
+GET  /api/dazno/v1/wallet/balance/:user_id
+GET  /api/dazno/v1/wallet/payments/:user_id
+
+## Channel Management
+GET  /api/dazno/v1/channels/:user_id
+GET  /api/dazno/v1/channels/detail/:channel_id
+POST /api/dazno/v1/channels/open
+POST /api/dazno/v1/channels/:channel_id/close
+
+## Node Information
+GET  /api/dazno/v1/nodes
+GET  /api/dazno/v1/nodes/:pubkey
+
+## Lightning Network Analysis
+GET  /api/dazno/v1/lightning/stats
+POST /api/dazno/v1/lightning/routing
+```
+
+📚 **Documentation complète**: [MCP_API_ENDPOINTS.md](./MCP_API_ENDPOINTS.md)
 
 ## Déploiement
 

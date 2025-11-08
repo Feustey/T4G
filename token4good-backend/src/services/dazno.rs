@@ -305,6 +305,292 @@ impl DaznoService {
             .await
             .map_err(|e| DaznoError::LightningApiError(e.to_string()))
     }
+
+    // ============= MCP API v1 ENDPOINTS (api.dazno.de/api/v1) =============
+
+    // Wallet Operations (/api/v1/wallet)
+    pub async fn get_wallet_balance(
+        &self,
+        token: &str,
+        user_id: &str,
+    ) -> Result<LightningBalance, DaznoError> {
+        let url = format!("{}/api/v1/wallet/balance/{}", self.lightning_api_base, user_id);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get wallet balance".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn get_wallet_payments(
+        &self,
+        token: &str,
+        user_id: &str,
+        limit: Option<u32>,
+    ) -> Result<Vec<LightningTransaction>, DaznoError> {
+        let mut url = format!("{}/api/v1/wallet/payments/{}", self.lightning_api_base, user_id);
+        if let Some(limit) = limit {
+            url.push_str(&format!("?limit={}", limit));
+        }
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get wallet payments".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    // Channel Management (/api/v1/channels)
+    pub async fn list_channels(
+        &self,
+        token: &str,
+        user_id: &str,
+    ) -> Result<Vec<ChannelInfo>, DaznoError> {
+        let url = format!("{}/api/v1/channels/{}", self.lightning_api_base, user_id);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to list channels".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn get_channel(
+        &self,
+        token: &str,
+        channel_id: &str,
+    ) -> Result<ChannelInfo, DaznoError> {
+        let url = format!("{}/api/v1/channels/{}/detail", self.lightning_api_base, channel_id);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get channel".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn open_channel(
+        &self,
+        token: &str,
+        user_id: &str,
+        node_pubkey: &str,
+        amount_msat: u64,
+    ) -> Result<ChannelInfo, DaznoError> {
+        let url = format!("{}/api/v1/channels/open", self.lightning_api_base);
+
+        let payload = OpenChannelRequest {
+            user_id: user_id.to_string(),
+            node_pubkey: node_pubkey.to_string(),
+            amount_msat,
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to open channel".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn close_channel(
+        &self,
+        token: &str,
+        channel_id: &str,
+        force: Option<bool>,
+    ) -> Result<ChannelCloseInfo, DaznoError> {
+        let mut url = format!("{}/api/v1/channels/{}/close", self.lightning_api_base, channel_id);
+        if let Some(force) = force {
+            url.push_str(&format!("?force={}", force));
+        }
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to close channel".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    // Node Information (/api/v1/nodes)
+    pub async fn get_node_info(
+        &self,
+        token: &str,
+        node_pubkey: &str,
+    ) -> Result<NodeInfo, DaznoError> {
+        let url = format!("{}/api/v1/nodes/{}", self.lightning_api_base, node_pubkey);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get node info".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn list_nodes(
+        &self,
+        token: &str,
+        query: Option<&str>,
+    ) -> Result<Vec<NodeInfo>, DaznoError> {
+        let mut url = format!("{}/api/v1/nodes", self.lightning_api_base);
+        if let Some(query) = query {
+            url.push_str(&format!("?q={}", query));
+        }
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to list nodes".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    // Lightning Network Analysis (/api/v1/lightning)
+    pub async fn get_lightning_stats(
+        &self,
+        token: &str,
+    ) -> Result<LightningNetworkStats, DaznoError> {
+        let url = format!("{}/api/v1/lightning/stats", self.lightning_api_base);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get lightning stats".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn analyze_lightning_routing(
+        &self,
+        token: &str,
+        from_node: &str,
+        to_node: &str,
+        amount_msat: u64,
+    ) -> Result<RoutingAnalysis, DaznoError> {
+        let url = format!("{}/api/v1/lightning/routing", self.lightning_api_base);
+
+        let payload = RoutingAnalysisRequest {
+            from_node: from_node.to_string(),
+            to_node: to_node.to_string(),
+            amount_msat,
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to analyze routing".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
 }
 
 // ============= TYPES =============
@@ -404,4 +690,85 @@ pub struct LightningTransaction {
     pub description: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+// ============= MCP API v1 TYPES =============
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ChannelInfo {
+    pub channel_id: String,
+    pub channel_point: String,
+    pub capacity_msat: u64,
+    pub local_balance_msat: u64,
+    pub remote_balance_msat: u64,
+    pub state: String, // "OPENING", "OPEN", "CLOSING", "CLOSED"
+    pub node_pubkey: String,
+    pub node_alias: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OpenChannelRequest {
+    pub user_id: String,
+    pub node_pubkey: String,
+    pub amount_msat: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChannelCloseInfo {
+    pub channel_id: String,
+    pub closing_txid: Option<String>,
+    pub status: String,
+    pub closed_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct NodeInfo {
+    pub pubkey: String,
+    pub alias: Option<String>,
+    pub color: Option<String>,
+    pub num_channels: u32,
+    pub total_capacity_msat: u64,
+    pub addresses: Vec<NodeAddress>,
+    pub last_update: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct NodeAddress {
+    pub network: String, // "tcp", "ipv4", "ipv6"
+    pub addr: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LightningNetworkStats {
+    pub total_nodes: u64,
+    pub total_channels: u64,
+    pub total_capacity_msat: u64,
+    pub avg_channel_capacity_msat: u64,
+    pub network_growth_24h: Option<f64>,
+    pub timestamp: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RoutingAnalysisRequest {
+    pub from_node: String,
+    pub to_node: String,
+    pub amount_msat: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RoutingAnalysis {
+    pub route_found: bool,
+    pub hops: Vec<RouteHop>,
+    pub total_fee_msat: u64,
+    pub estimated_time_seconds: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RouteHop {
+    pub node_pubkey: String,
+    pub node_alias: Option<String>,
+    pub channel_id: String,
+    pub fee_msat: u64,
 }

@@ -78,6 +78,7 @@ pub async fn create_user(
         preferences: serde_json::Value::Object(serde_json::Map::new()),
         email_verified: false,
         last_login: None,
+        is_onboarded: false,
     };
 
     state
@@ -174,14 +175,11 @@ pub async fn get_user_wallet(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    // Essayer de récupérer les infos du node Lightning (peut échouer)
-    let lightning_info = state.lightning.get_node_info().await.ok();
-
     let wallet_info = WalletInfo {
         balance_msat: 0, // TODO: implémenter le calcul du solde réel
         pending_balance_msat: 0,
         lightning_address: user.lightning_address,
-        num_channels: lightning_info.as_ref().map(|info| info.num_channels).unwrap_or(0) as u32,
+        num_channels: 0,
         num_pending_channels: 0, // TODO: ajouter ce champ à NodeInfo si disponible via LND API
     };
 
@@ -303,9 +301,9 @@ pub async fn get_user_cv(
         bio: user.bio.clone().unwrap_or_default(),
         avatar: user.avatar.clone(),
         role: format!("{:?}", user.role),
-        experiences: vec![],  // TODO: fetch from experiences table
-        education: vec![],    // TODO: fetch from education table
-        skills: vec![],       // TODO: fetch from skills table
+        experiences: vec![], // TODO: fetch from experiences table
+        education: vec![],   // TODO: fetch from education table
+        skills: vec![],      // TODO: fetch from skills table
     };
 
     Ok(Json(cv))

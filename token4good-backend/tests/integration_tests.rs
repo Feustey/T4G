@@ -1,8 +1,8 @@
 use reqwest;
 use serde_json::json;
 use std::time::Duration;
+use token4good_backend::services::rgb_native::RGBNativeService;
 use tokio::time::sleep;
-use token4good_backend::services::{rgb_native::RGBNativeService, lightning::LightningService};
 
 const BASE_URL: &str = "http://localhost:3000";
 
@@ -253,7 +253,10 @@ async fn test_rgb_native_verify_proof() {
         .await
         .unwrap();
 
-    let verified = service.verify_proof(&contract_id, &signature).await.unwrap();
+    let verified = service
+        .verify_proof(&contract_id, &signature)
+        .await
+        .unwrap();
     assert!(verified);
 }
 
@@ -261,8 +264,12 @@ async fn test_rgb_native_verify_proof() {
 async fn test_rgb_native_list_proofs() {
     let service = RGBNativeService::new().unwrap();
 
-    let _ = service.create_proof_contract("m1", "me1", "r1", 5, None).await;
-    let _ = service.create_proof_contract("m2", "me2", "r2", 4, None).await;
+    let _ = service
+        .create_proof_contract("m1", "me1", "r1", 5, None)
+        .await;
+    let _ = service
+        .create_proof_contract("m2", "me2", "r2", 4, None)
+        .await;
 
     let proofs = service.list_proofs().await.unwrap();
     assert!(proofs.len() >= 2);
@@ -272,7 +279,9 @@ async fn test_rgb_native_list_proofs() {
 async fn test_rgb_native_invalid_rating() {
     let service = RGBNativeService::new().unwrap();
 
-    let result = service.create_proof_contract("m1", "m2", "r1", 10, None).await;
+    let result = service
+        .create_proof_contract("m1", "m2", "r1", 10, None)
+        .await;
     assert!(result.is_err());
 }
 
@@ -290,22 +299,6 @@ async fn test_rgb_native_transfer_proof() {
 
     let result = service.transfer_proof(&contract_id, from, to, 1000).await;
     assert!(result.is_ok());
-}
-
-// ========== Lightning Service Tests ==========
-
-#[tokio::test]
-async fn test_lightning_service_creation() {
-    let result = LightningService::new();
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_lightning_health_check_without_lnd() {
-    let service = LightningService::new().unwrap();
-    let result = service.health_check().await;
-    // Will fail without LND, but shouldn't panic
-    assert!(result.is_ok() || result.is_err());
 }
 
 // ========== Integration Workflow Tests ==========

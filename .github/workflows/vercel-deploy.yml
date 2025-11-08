@@ -20,15 +20,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
+          cache: 'npm'
+          cache-dependency-path: 'apps/dapp/package-lock.json'
           
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        working-directory: ./apps/dapp
+        run: npm ci
         
       - name: Build project
-        run: |
-          cd apps/dapp
-          yarn build
+        working-directory: ./apps/dapp
+        run: npm run build
         env:
           NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}

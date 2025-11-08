@@ -7,15 +7,12 @@ use axum::Router;
 use std::{env, error::Error};
 use tower_http::cors::{Any, CorsLayer};
 
-use services::{
-    database::DatabaseService, dazno::DaznoService, lightning::LightningService, rgb::RGBService,
-};
+use services::{database::DatabaseService, dazno::DaznoService, rgb::RGBService};
 
 #[derive(Clone)]
 pub struct AppState {
     pub db: DatabaseService,
     pub rgb: RGBService,
-    pub lightning: LightningService,
     pub dazno: DaznoService,
 }
 
@@ -26,13 +23,6 @@ impl AppState {
 
     pub async fn rgb_health(&self) -> Result<(), String> {
         self.rgb.health_check().await.map_err(|e| e.to_string())
-    }
-
-    pub async fn lightning_health(&self) -> Result<(), String> {
-        self.lightning
-            .health_check()
-            .await
-            .map_err(|e| e.to_string())
     }
 
     pub async fn dazno_health(&self) -> Result<(), String> {
@@ -58,21 +48,16 @@ pub async fn build_state() -> Result<AppState, Box<dyn Error>> {
             Err(e) => {
                 tracing::error!("❌ Database connection failed: {}. Using fallback", e);
                 // Use a fallback that won't crash
-                DatabaseService::new("postgresql://postgres:password@localhost:5432/fallback").await?
+                DatabaseService::new("postgresql://postgres:password@localhost:5432/fallback")
+                    .await?
             }
         }
     };
 
     let rgb = RGBService::new()?;
-    let lightning = LightningService::new()?;
     let dazno = DaznoService::new()?;
 
-    Ok(AppState {
-        db,
-        rgb,
-        lightning,
-        dazno,
-    })
+    Ok(AppState { db, rgb, dazno })
 }
 
 pub fn build_router(state: AppState) -> Router {
@@ -126,19 +111,15 @@ pub fn build_router(state: AppState) -> Router {
             )),
         )
         .nest(
-            "/api/lightning",
-            routes::lightning::lightning_routes()
-                .layer(axum::middleware::from_fn(
-                    crate::middleware::authorization::financial_authorization,
-                ))
-                .layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    crate::middleware::auth::auth_middleware,
-                )),
-        )
-        .nest(
             "/api/dazno",
             routes::dazno::dazno_routes().layer(axum::middleware::from_fn_with_state(
+                state.clone(),
+                crate::middleware::auth::auth_middleware,
+            )),
+        )
+        .nest(
+            "/api/v1/token4good",
+            routes::token4good::token4good_routes().layer(axum::middleware::from_fn_with_state(
                 state.clone(),
                 crate::middleware::auth::auth_middleware,
             )),

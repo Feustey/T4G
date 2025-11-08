@@ -1,5 +1,5 @@
-use rgbstd::{ContractId, WitnessStatus};
 use bpcore::Txid;
+use rgbstd::{ContractId, WitnessStatus};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error, path::PathBuf, str::FromStr, sync::Arc};
 use thiserror::Error;
@@ -56,8 +56,8 @@ pub struct RGBNativeService {
 
 impl RGBNativeService {
     pub fn new() -> Result<Self, Box<dyn Error>> {
-        let rgb_data_dir = std::env::var("RGB_DATA_DIR")
-            .unwrap_or_else(|_| "/tmp/rgb_data".to_string());
+        let rgb_data_dir =
+            std::env::var("RGB_DATA_DIR").unwrap_or_else(|_| "/tmp/rgb_data".to_string());
 
         let data_dir = PathBuf::from(&rgb_data_dir);
         std::fs::create_dir_all(&data_dir)?;
@@ -65,7 +65,10 @@ impl RGBNativeService {
         let contracts = Arc::new(tokio::sync::RwLock::new(HashMap::new()));
         let network = std::env::var("BITCOIN_NETWORK").unwrap_or_else(|_| "regtest".to_string());
 
-        tracing::info!("Initialized RGB native service with data directory: {}", data_dir.display());
+        tracing::info!(
+            "Initialized RGB native service with data directory: {}",
+            data_dir.display()
+        );
 
         Ok(Self {
             data_dir,
@@ -140,7 +143,11 @@ impl RGBNativeService {
     }
 
     /// Verify proof contract exists and is valid
-    pub async fn verify_proof(&self, contract_id: &str, _signature: &str) -> Result<bool, RGBError> {
+    pub async fn verify_proof(
+        &self,
+        contract_id: &str,
+        _signature: &str,
+    ) -> Result<bool, RGBError> {
         let contracts = self.contracts.read().await;
         Ok(contracts.contains_key(contract_id))
     }
@@ -188,7 +195,11 @@ impl RGBNativeService {
 
         // In production: Create RGB state transition
         // For now: Generate transfer ID
-        let transfer_id = format!("transfer_{}_{}", contract_id, chrono::Utc::now().timestamp());
+        let transfer_id = format!(
+            "transfer_{}_{}",
+            contract_id,
+            chrono::Utc::now().timestamp()
+        );
 
         tracing::info!(
             "Transferred proof {} from {} to {}",
@@ -224,8 +235,8 @@ impl RGBNativeService {
     // Private helper methods
 
     fn generate_contract_id(&self, metadata: &ProofMetadata) -> Result<ContractId, RGBError> {
-        use sha2::Digest;
         use amplify::ByteArray;
+        use sha2::Digest;
 
         let contract_data = format!(
             "{}:{}:{}:{}:{}",
@@ -275,12 +286,11 @@ impl RGBNativeService {
 
         if parts.len() != 2 {
             return Err(RGBError::Transfer(
-                "Invalid outpoint format. Expected: txid:vout".to_string()
+                "Invalid outpoint format. Expected: txid:vout".to_string(),
             ));
         }
 
-        Txid::from_str(parts[0])
-            .map_err(|e| RGBError::Transfer(format!("Invalid txid: {}", e)))?;
+        Txid::from_str(parts[0]).map_err(|e| RGBError::Transfer(format!("Invalid txid: {}", e)))?;
 
         parts[1]
             .parse::<u32>()
@@ -323,7 +333,10 @@ mod tests {
             .await
             .unwrap();
 
-        let verified = service.verify_proof(&contract_id, &signature).await.unwrap();
+        let verified = service
+            .verify_proof(&contract_id, &signature)
+            .await
+            .unwrap();
         assert!(verified);
     }
 

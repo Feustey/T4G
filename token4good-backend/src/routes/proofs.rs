@@ -181,39 +181,8 @@ pub async fn transfer_proof(
     State(state): State<AppState>,
     Json(payload): Json<TransferProofRequest>,
 ) -> Result<Json<TransferResponse>, StatusCode> {
-    // 1. Récupérer la preuve
-    let proof = state
-        .db
-        .get_proof_by_id(&payload.proof_id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    // 2. Créer une invoice Lightning
-    let invoice = state
-        .lightning
-        .create_proof_payment(&proof.id, payload.amount_msat)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-    // 3. Pour l'instant, simuler le transfert RGB (en attente du paiement)
-    let transfer_id = Uuid::new_v4().to_string();
-
-    // TODO: Implémenter la logique complète de transfert
-    // 4. Après confirmation du paiement, effectuer le transfert RGB
-    // 5. Mettre à jour l'historique de transfert
-
-    let response = TransferResponse {
-        transfer_id,
-        proof_id: proof.id,
-        payment_invoice: invoice.payment_request,
-        amount_msat: payload.amount_msat,
-        to_address: payload.to_lightning_address,
-        status: "pending_payment".to_string(),
-        created_at: chrono::Utc::now(),
-    };
-
-    Ok(Json(response))
+    let _ = (state, payload);
+    Err(StatusCode::NOT_IMPLEMENTED)
 }
 
 pub async fn get_proof_history(

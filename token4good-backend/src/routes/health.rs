@@ -14,7 +14,6 @@ pub struct HealthResponse {
 pub struct ServiceStatus {
     pub database: ComponentStatus,
     pub rgb: ComponentStatus,
-    pub lightning: ComponentStatus,
     pub dazno: ComponentStatus,
 }
 
@@ -40,22 +39,17 @@ pub async fn detailed_health(State(state): State<AppState>) -> Json<HealthRespon
 }
 
 async fn build_health_response(state: AppState) -> HealthResponse {
-    let (db_status, rgb_status, lightning_status, dazno_status) = tokio::join!(
+    let (db_status, rgb_status, dazno_status) = tokio::join!(
         state.database_health(),
         state.rgb_health(),
-        state.lightning_health(),
         state.dazno_health(),
     );
 
     let database = to_component_status(db_status);
     let rgb = to_component_status(rgb_status);
-    let lightning = to_component_status(lightning_status);
     let dazno = to_component_status(dazno_status);
 
-    let degraded = database.status != "ok"
-        || rgb.status != "ok"
-        || lightning.status != "ok"
-        || dazno.status != "ok";
+    let degraded = database.status != "ok" || rgb.status != "ok" || dazno.status != "ok";
 
     HealthResponse {
         status: if degraded {
@@ -68,7 +62,6 @@ async fn build_health_response(state: AppState) -> HealthResponse {
         services: ServiceStatus {
             database,
             rgb,
-            lightning,
             dazno,
         },
     }

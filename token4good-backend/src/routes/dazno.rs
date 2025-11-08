@@ -10,8 +10,9 @@ use serde::Deserialize;
 use crate::{
     middleware::auth::AuthUser,
     services::dazno::{
-        DaznoError, DaznoLightningInvoice, DaznoLightningPayment, DaznoUserProfile,
-        LightningBalance, LightningTransaction, TokenBalance,
+        ChannelCloseInfo, ChannelInfo, DaznoError, DaznoLightningInvoice,
+        DaznoLightningPayment, DaznoUserProfile, LightningBalance, LightningNetworkStats,
+        LightningTransaction, NodeInfo, RoutingAnalysis, TokenBalance,
     },
     AppState,
 };
@@ -39,7 +40,7 @@ pub fn dazno_routes() -> Router<AppState> {
         .route("/users/:id/profile", get(get_dazno_user_profile))
         .route("/users/:id/tokens/t4g", get(get_user_t4g_balance))
         .route("/users/:id/gamification", post(update_user_gamification))
-        // Lightning Network (api.dazno.de)
+        // Lightning Network (api.dazno.de) - Legacy endpoints
         .route("/lightning/invoice", post(create_dazno_lightning_invoice))
         .route("/lightning/pay", post(pay_dazno_lightning_invoice))
         .route(
@@ -50,6 +51,20 @@ pub fn dazno_routes() -> Router<AppState> {
             "/lightning/transactions/:user_id",
             get(get_dazno_lightning_transactions),
         )
+        // MCP API v1 - Wallet Operations
+        .route("/v1/wallet/balance/:user_id", get(get_wallet_balance))
+        .route("/v1/wallet/payments/:user_id", get(get_wallet_payments))
+        // MCP API v1 - Channel Management
+        .route("/v1/channels/:user_id", get(list_user_channels))
+        .route("/v1/channels/detail/:channel_id", get(get_channel_detail))
+        .route("/v1/channels/open", post(open_channel))
+        .route("/v1/channels/:channel_id/close", post(close_channel))
+        // MCP API v1 - Node Information
+        .route("/v1/nodes", get(list_nodes))
+        .route("/v1/nodes/:pubkey", get(get_node_info))
+        // MCP API v1 - Lightning Network Analysis
+        .route("/v1/lightning/stats", get(get_lightning_stats))
+        .route("/v1/lightning/routing", post(analyze_routing))
 }
 
 // ============= USER MANAGEMENT (dazno.de/api) =============
@@ -221,6 +236,210 @@ fn ensure_user_access(auth_user: &AuthUser, resource_owner: &str) -> Result<(), 
     } else {
         Err(StatusCode::FORBIDDEN)
     }
+}
+
+// ============= MCP API v1 HANDLERS =============
+
+#[derive(Debug, Deserialize)]
+pub struct WalletPaymentsQuery {
+    pub limit: Option<u32>,
+}
+
+pub async fn get_wallet_balance(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(user_id): Path<String>,
+) -> Result<Json<LightningBalance>, StatusCode> {
+    ensure_user_access(&auth_user, &user_id)?;
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let balance = state
+        .dazno
+        .get_wallet_balance(&dazno_token, &user_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(balance))
+}
+
+pub async fn get_wallet_payments(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(user_id): Path<String>,
+    Query(params): Query<WalletPaymentsQuery>,
+) -> Result<Json<Vec<LightningTransaction>>, StatusCode> {
+    ensure_user_access(&auth_user, &user_id)?;
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let payments = state
+        .dazno
+        .get_wallet_payments(&dazno_token, &user_id, params.limit)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(payments))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenChannelPayload {
+    pub node_pubkey: String,
+    pub amount_msat: u64,
+}
+
+pub async fn list_user_channels(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(user_id): Path<String>,
+) -> Result<Json<Vec<ChannelInfo>>, StatusCode> {
+    ensure_user_access(&auth_user, &user_id)?;
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let channels = state
+        .dazno
+        .list_channels(&dazno_token, &user_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(channels))
+}
+
+pub async fn get_channel_detail(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(channel_id): Path<String>,
+) -> Result<Json<ChannelInfo>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let channel = state
+        .dazno
+        .get_channel(&dazno_token, &channel_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(channel))
+}
+
+pub async fn open_channel(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<OpenChannelPayload>,
+) -> Result<Json<ChannelInfo>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let channel = state
+        .dazno
+        .open_channel(&dazno_token, &auth_user.id, &payload.node_pubkey, payload.amount_msat)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(channel))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CloseChannelQuery {
+    pub force: Option<bool>,
+}
+
+pub async fn close_channel(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(channel_id): Path<String>,
+    Query(params): Query<CloseChannelQuery>,
+) -> Result<Json<ChannelCloseInfo>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let close_info = state
+        .dazno
+        .close_channel(&dazno_token, &channel_id, params.force)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(close_info))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct NodesQuery {
+    pub q: Option<String>,
+}
+
+pub async fn list_nodes(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Query(params): Query<NodesQuery>,
+) -> Result<Json<Vec<NodeInfo>>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let nodes = state
+        .dazno
+        .list_nodes(&dazno_token, params.q.as_deref())
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(nodes))
+}
+
+pub async fn get_node_info(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(pubkey): Path<String>,
+) -> Result<Json<NodeInfo>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let node = state
+        .dazno
+        .get_node_info(&dazno_token, &pubkey)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(node))
+}
+
+pub async fn get_lightning_stats(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+) -> Result<Json<LightningNetworkStats>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let stats = state
+        .dazno
+        .get_lightning_stats(&dazno_token)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(stats))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AnalyzeRoutingPayload {
+    pub from_node: String,
+    pub to_node: String,
+    pub amount_msat: u64,
+}
+
+pub async fn analyze_routing(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<AnalyzeRoutingPayload>,
+) -> Result<Json<RoutingAnalysis>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let analysis = state
+        .dazno
+        .analyze_lightning_routing(&dazno_token, &payload.from_node, &payload.to_node, payload.amount_msat)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(analysis))
 }
 
 fn map_dazno_error(err: DaznoError) -> StatusCode {

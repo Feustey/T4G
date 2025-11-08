@@ -19,29 +19,33 @@ impl ServiceDatabaseOps {
     // ========== SERVICE CATEGORIES ==========
 
     pub async fn get_all_categories(&self) -> Result<Vec<ServiceCategory>, Box<dyn Error>> {
-        let categories = sqlx::query_as::<_, ServiceCategory>(
-            "SELECT * FROM service_categories ORDER BY name"
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let categories =
+            sqlx::query_as::<_, ServiceCategory>("SELECT * FROM service_categories ORDER BY name")
+                .fetch_all(&self.pool)
+                .await?;
 
         Ok(categories)
     }
 
-    pub async fn get_category_by_id(&self, id: &str) -> Result<Option<ServiceCategory>, Box<dyn Error>> {
-        let category = sqlx::query_as::<_, ServiceCategory>(
-            "SELECT * FROM service_categories WHERE id = $1"
-        )
-        .bind(id)
-        .fetch_optional(&self.pool)
-        .await?;
+    pub async fn get_category_by_id(
+        &self,
+        id: &str,
+    ) -> Result<Option<ServiceCategory>, Box<dyn Error>> {
+        let category =
+            sqlx::query_as::<_, ServiceCategory>("SELECT * FROM service_categories WHERE id = $1")
+                .bind(id)
+                .fetch_optional(&self.pool)
+                .await?;
 
         Ok(category)
     }
 
-    pub async fn get_category_by_name(&self, name: &str) -> Result<Option<ServiceCategory>, Box<dyn Error>> {
+    pub async fn get_category_by_name(
+        &self,
+        name: &str,
+    ) -> Result<Option<ServiceCategory>, Box<dyn Error>> {
         let category = sqlx::query_as::<_, ServiceCategory>(
-            "SELECT * FROM service_categories WHERE name = $1"
+            "SELECT * FROM service_categories WHERE name = $1",
         )
         .bind(name)
         .fetch_optional(&self.pool)
@@ -50,9 +54,12 @@ impl ServiceDatabaseOps {
         Ok(category)
     }
 
-    pub async fn get_categories_by_audience(&self, audience: &str) -> Result<Vec<ServiceCategory>, Box<dyn Error>> {
+    pub async fn get_categories_by_audience(
+        &self,
+        audience: &str,
+    ) -> Result<Vec<ServiceCategory>, Box<dyn Error>> {
         let categories = sqlx::query_as::<_, ServiceCategory>(
-            "SELECT * FROM service_categories WHERE audience = $1 ORDER BY name"
+            "SELECT * FROM service_categories WHERE audience = $1 ORDER BY name",
         )
         .bind(audience)
         .fetch_all(&self.pool)
@@ -61,7 +68,10 @@ impl ServiceDatabaseOps {
         Ok(categories)
     }
 
-    pub async fn create_category(&self, req: CreateCategoryRequest) -> Result<ServiceCategory, Box<dyn Error>> {
+    pub async fn create_category(
+        &self,
+        req: CreateCategoryRequest,
+    ) -> Result<ServiceCategory, Box<dyn Error>> {
         let category = sqlx::query_as::<_, ServiceCategory>(
             r#"
             INSERT INTO service_categories (
@@ -70,7 +80,7 @@ impl ServiceDatabaseOps {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
-            "#
+            "#,
         )
         .bind(&req.name)
         .bind(&req.kind)
@@ -80,7 +90,10 @@ impl ServiceDatabaseOps {
         .bind(req.default_unit.unwrap_or_else(|| "hour".to_string()))
         .bind(&req.icon)
         .bind(req.disabled.unwrap_or(false))
-        .bind(req.service_provider_type.unwrap_or_else(|| "SERVICE_PROVIDER".to_string()))
+        .bind(
+            req.service_provider_type
+                .unwrap_or_else(|| "SERVICE_PROVIDER".to_string()),
+        )
         .bind(req.audience.unwrap_or_else(|| "ALUMNI".to_string()))
         .fetch_one(&self.pool)
         .await?;
@@ -88,7 +101,11 @@ impl ServiceDatabaseOps {
         Ok(category)
     }
 
-    pub async fn update_category(&self, id: &str, req: UpdateCategoryRequest) -> Result<Option<ServiceCategory>, Box<dyn Error>> {
+    pub async fn update_category(
+        &self,
+        id: &str,
+        req: UpdateCategoryRequest,
+    ) -> Result<Option<ServiceCategory>, Box<dyn Error>> {
         let mut query_parts = Vec::new();
         let mut param_count = 1;
 
@@ -151,29 +168,29 @@ impl ServiceDatabaseOps {
     // ========== SERVICES ==========
 
     pub async fn get_all_services(&self) -> Result<Vec<Service>, Box<dyn Error>> {
-        let services = sqlx::query_as::<_, Service>(
-            "SELECT * FROM services ORDER BY created_at DESC"
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let services =
+            sqlx::query_as::<_, Service>("SELECT * FROM services ORDER BY created_at DESC")
+                .fetch_all(&self.pool)
+                .await?;
 
         Ok(services)
     }
 
     pub async fn get_service_by_id(&self, id: &str) -> Result<Option<Service>, Box<dyn Error>> {
-        let service = sqlx::query_as::<_, Service>(
-            "SELECT * FROM services WHERE id = $1"
-        )
-        .bind(id)
-        .fetch_optional(&self.pool)
-        .await?;
+        let service = sqlx::query_as::<_, Service>("SELECT * FROM services WHERE id = $1")
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(service)
     }
 
-    pub async fn get_services_by_category(&self, category_id: &str) -> Result<Vec<Service>, Box<dyn Error>> {
+    pub async fn get_services_by_category(
+        &self,
+        category_id: &str,
+    ) -> Result<Vec<Service>, Box<dyn Error>> {
         let services = sqlx::query_as::<_, Service>(
-            "SELECT * FROM services WHERE category_id = $1 ORDER BY created_at DESC"
+            "SELECT * FROM services WHERE category_id = $1 ORDER BY created_at DESC",
         )
         .bind(category_id)
         .fetch_all(&self.pool)
@@ -182,9 +199,12 @@ impl ServiceDatabaseOps {
         Ok(services)
     }
 
-    pub async fn get_services_by_provider(&self, provider_id: &str) -> Result<Vec<Service>, Box<dyn Error>> {
+    pub async fn get_services_by_provider(
+        &self,
+        provider_id: &str,
+    ) -> Result<Vec<Service>, Box<dyn Error>> {
         let services = sqlx::query_as::<_, Service>(
-            "SELECT * FROM services WHERE service_provider_id = $1 ORDER BY created_at DESC"
+            "SELECT * FROM services WHERE service_provider_id = $1 ORDER BY created_at DESC",
         )
         .bind(provider_id)
         .fetch_all(&self.pool)
@@ -193,7 +213,10 @@ impl ServiceDatabaseOps {
         Ok(services)
     }
 
-    pub async fn get_services_by_audience(&self, audience: &str) -> Result<Vec<Service>, Box<dyn Error>> {
+    pub async fn get_services_by_audience(
+        &self,
+        audience: &str,
+    ) -> Result<Vec<Service>, Box<dyn Error>> {
         let services = sqlx::query_as::<_, Service>(
             "SELECT * FROM services WHERE audience = $1 AND blockchain_id IS NOT NULL ORDER BY created_at DESC"
         )
@@ -204,18 +227,23 @@ impl ServiceDatabaseOps {
         Ok(services)
     }
 
-    pub async fn get_service_by_blockchain_id(&self, blockchain_id: i32) -> Result<Option<Service>, Box<dyn Error>> {
-        let service = sqlx::query_as::<_, Service>(
-            "SELECT * FROM services WHERE blockchain_id = $1"
-        )
-        .bind(blockchain_id)
-        .fetch_optional(&self.pool)
-        .await?;
+    pub async fn get_service_by_blockchain_id(
+        &self,
+        blockchain_id: i32,
+    ) -> Result<Option<Service>, Box<dyn Error>> {
+        let service =
+            sqlx::query_as::<_, Service>("SELECT * FROM services WHERE blockchain_id = $1")
+                .bind(blockchain_id)
+                .fetch_optional(&self.pool)
+                .await?;
 
         Ok(service)
     }
 
-    pub async fn create_service(&self, req: CreateServiceRequest) -> Result<Service, Box<dyn Error>> {
+    pub async fn create_service(
+        &self,
+        req: CreateServiceRequest,
+    ) -> Result<Service, Box<dyn Error>> {
         let service = sqlx::query_as::<_, Service>(
             r#"
             INSERT INTO services (
@@ -224,7 +252,7 @@ impl ServiceDatabaseOps {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
-            "#
+            "#,
         )
         .bind(&req.name)
         .bind(req.unit.unwrap_or_else(|| "hour".to_string()))
@@ -242,7 +270,11 @@ impl ServiceDatabaseOps {
         Ok(service)
     }
 
-    pub async fn update_service(&self, id: &str, req: UpdateServiceRequest) -> Result<Option<Service>, Box<dyn Error>> {
+    pub async fn update_service(
+        &self,
+        id: &str,
+        req: UpdateServiceRequest,
+    ) -> Result<Option<Service>, Box<dyn Error>> {
         let mut updates = Vec::new();
         let mut param_idx = 1;
 
@@ -318,7 +350,10 @@ impl ServiceDatabaseOps {
 
     // ========== BLOCKCHAIN TRANSACTIONS ==========
 
-    pub async fn get_transactions_by_address(&self, address: &str) -> Result<Vec<BlockchainTransaction>, Box<dyn Error>> {
+    pub async fn get_transactions_by_address(
+        &self,
+        address: &str,
+    ) -> Result<Vec<BlockchainTransaction>, Box<dyn Error>> {
         let transactions = sqlx::query_as::<_, BlockchainTransaction>(
             r#"
             SELECT * FROM blockchain_transactions
@@ -326,7 +361,7 @@ impl ServiceDatabaseOps {
                OR transfer_from = $1 OR transfer_to = $1
                OR service_buyer = $1 OR service_provider = $1
             ORDER BY ts DESC
-            "#
+            "#,
         )
         .bind(address)
         .fetch_all(&self.pool)
@@ -335,9 +370,12 @@ impl ServiceDatabaseOps {
         Ok(transactions)
     }
 
-    pub async fn get_transaction_by_hash(&self, hash: &str) -> Result<Option<BlockchainTransaction>, Box<dyn Error>> {
+    pub async fn get_transaction_by_hash(
+        &self,
+        hash: &str,
+    ) -> Result<Option<BlockchainTransaction>, Box<dyn Error>> {
         let transaction = sqlx::query_as::<_, BlockchainTransaction>(
-            "SELECT * FROM blockchain_transactions WHERE hash = $1"
+            "SELECT * FROM blockchain_transactions WHERE hash = $1",
         )
         .bind(hash)
         .fetch_optional(&self.pool)
@@ -346,7 +384,10 @@ impl ServiceDatabaseOps {
         Ok(transaction)
     }
 
-    pub async fn create_or_update_transaction(&self, req: CreateTransactionRequest) -> Result<BlockchainTransaction, Box<dyn Error>> {
+    pub async fn create_or_update_transaction(
+        &self,
+        req: CreateTransactionRequest,
+    ) -> Result<BlockchainTransaction, Box<dyn Error>> {
         let transaction = sqlx::query_as::<_, BlockchainTransaction>(
             r#"
             INSERT INTO blockchain_transactions (
@@ -371,7 +412,7 @@ impl ServiceDatabaseOps {
                 service_buyer = EXCLUDED.service_buyer,
                 service_provider = EXCLUDED.service_provider
             RETURNING *
-            "#
+            "#,
         )
         .bind(&req.hash)
         .bind(&req.block)
@@ -396,7 +437,7 @@ impl ServiceDatabaseOps {
 
     pub async fn get_last_block(&self) -> Result<Option<i32>, Box<dyn Error>> {
         let result = sqlx::query_scalar::<_, Option<i32>>(
-            "SELECT MAX(block) FROM blockchain_transactions WHERE block IS NOT NULL"
+            "SELECT MAX(block) FROM blockchain_transactions WHERE block IS NOT NULL",
         )
         .fetch_one(&self.pool)
         .await?;
@@ -410,7 +451,7 @@ impl ServiceDatabaseOps {
             SELECT COALESCE(SUM(transfer_amount), 0)
             FROM blockchain_transactions
             WHERE transfer_from = '0x0000000000000000000000000000000000000000'
-            "#
+            "#,
         )
         .fetch_one(&self.pool)
         .await?;

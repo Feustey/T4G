@@ -1,41 +1,20 @@
 {
   "version": 2,
-  "name": "token4good",
-  "builds": [
-    {
-      "src": "apps/dapp/package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "name": "token4good-dapp",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install --legacy-peer-deps",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://token4good-backend-production.up.railway.app/api/$1"
+      "source": "/api/backend/:path*",
+      "destination": "https://apirust-production.up.railway.app/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://token4good-backend-production.up.railway.app/health"
+      "destination": "https://apirust-production.up.railway.app/health"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "apps/dapp/$1"
-    }
-  ],
-  "env": {
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXT_PUBLIC_API_URL": "@next_public_api_url",
-    "NEXT_PUBLIC_DAZNO_API_URL": "@next_public_dazno_api_url",
-    "NEXT_PUBLIC_DAZNO_USERS_API_URL": "@next_public_dazno_users_api_url",
-    "DATABASE_URL": "@database_url"
-  },
-  "functions": {
-    "apps/dapp/pages/api/**/*.js": {
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
@@ -57,6 +36,30 @@
           "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
         }
       ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/fr",
+      "permanent": false
     }
   ]
 }

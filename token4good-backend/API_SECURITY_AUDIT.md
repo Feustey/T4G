@@ -32,11 +32,6 @@ let app = Router::new()
         routes::proofs::proof_routes()
             .layer(axum::middleware::from_fn_with_state(state.clone(), crate::middleware::auth::auth_middleware))
     )
-    .nest("/api/lightning", 
-        routes::lightning::lightning_routes()
-            .layer(axum::middleware::from_fn(crate::middleware::authorization::financial_authorization))
-            .layer(axum::middleware::from_fn_with_state(state.clone(), crate::middleware::auth::auth_middleware))
-    )
     .nest("/api/dazno", 
         routes::dazno::dazno_routes()
             .layer(axum::middleware::from_fn_with_state(state.clone(), crate::middleware::auth::auth_middleware))
@@ -63,7 +58,6 @@ let app = Router::new()
 ✅ /api/mentoring/*     - Now requires authentication
 ✅ /api/users/*         - Now requires authentication + authorization
 ✅ /api/proofs/*        - Now requires authentication  
-✅ /api/lightning/*     - Now requires authentication + financial authorization
 ✅ /api/dazno/*         - Now requires authentication
 🔓 /api/auth/*          - Public (login endpoints)
 🔓 /health/*            - Public (health checks)
@@ -86,10 +80,10 @@ let app = Router::new()
 
 **Details**:
 ```rust
-// Lightning Network routes - NOW PROTECTED
-POST /api/lightning/invoice    - ✅ Requires authentication + financial authorization
-POST /api/lightning/payment    - ✅ Requires authentication + financial authorization 
-GET /api/lightning/balance/:id - ✅ Requires authentication + financial authorization
+// Lightning operations proxied via Dazno API - NOW PROTECTED
+POST /api/dazno/lightning/invoice    - ✅ Requires authentication + financial authorization
+POST /api/dazno/lightning/pay        - ✅ Requires authentication + financial authorization
+GET  /api/dazno/lightning/balance/:id - ✅ Requires authentication + financial authorization
 ```
 
 **Security Features Added**:
@@ -141,14 +135,6 @@ GET  /api/proofs/:id/verify    ❌ No auth - verify proofs
 POST /api/proofs/:id/transfer  ❌ No auth - transfer proofs
 ```
 
-### Lightning Routes (`/api/lightning/`) - 🔴 FINANCIAL DISASTER
-```
-GET  /api/lightning/node/info           ❌ No auth - node information
-POST /api/lightning/invoice             ❌ No auth - create invoices
-POST /api/lightning/payment             ❌ No auth - send payments
-GET  /api/lightning/payment/:hash/status ❌ No auth - payment status
-```
-
 ### Mentoring Routes (`/api/mentoring/`) - 🔴 COMPLETELY INSECURE
 ```
 GET  /api/mentoring/requests       ❌ No auth - view all requests
@@ -181,7 +167,6 @@ let app = Router::new()
     .nest("/api/auth", routes::auth::auth_routes())      // ❌ No auth middleware
     .nest("/api/users", routes::users::user_routes())    // ❌ No auth middleware  
     .nest("/api/proofs", routes::proofs::proof_routes()) // ❌ No auth middleware
-    .nest("/api/lightning", routes::lightning::lightning_routes()) // ❌ CRITICAL
     .nest("/api/mentoring", routes::mentoring::mentoring_routes()) // ❌ No auth middleware
     .nest("/api/dazno", routes::dazno::dazno_routes())   // ❌ No auth middleware
 ```

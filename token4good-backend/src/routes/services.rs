@@ -19,11 +19,22 @@ pub fn service_routes() -> Router<AppState> {
     Router::new()
         // Categories
         .route("/categories", get(get_categories).post(create_category))
-        .route("/categories/:id", get(get_category).put(update_category).delete(delete_category))
-        .route("/categories/audience/:audience", get(get_categories_by_audience))
+        .route(
+            "/categories/:id",
+            get(get_category)
+                .put(update_category)
+                .delete(delete_category),
+        )
+        .route(
+            "/categories/audience/:audience",
+            get(get_categories_by_audience),
+        )
         // Services
         .route("/", get(get_services).post(create_service))
-        .route("/:id", get(get_service).put(update_service).delete(delete_service))
+        .route(
+            "/:id",
+            get(get_service).put(update_service).delete(delete_service),
+        )
         .route("/category/:category_id", get(get_services_by_category))
         .route("/provider/:provider_id", get(get_services_by_provider))
         .route("/audience/:audience", get(get_services_by_audience))
@@ -38,7 +49,9 @@ struct ServiceQuery {
 
 // ========== CATEGORIES ==========
 
-async fn get_categories(State(state): State<AppState>) -> Result<Json<Vec<crate::models::service::ServiceCategory>>, StatusCode> {
+async fn get_categories(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<crate::models::service::ServiceCategory>>, StatusCode> {
     let ops = state.db.service_ops();
     ops.get_all_categories()
         .await
@@ -141,7 +154,11 @@ async fn get_service(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let enriched = enrich_services(&state, vec![service]).await?;
-    enriched.into_iter().next().map(Json).ok_or(StatusCode::NOT_FOUND)
+    enriched
+        .into_iter()
+        .next()
+        .map(Json)
+        .ok_or(StatusCode::NOT_FOUND)
 }
 
 async fn get_services_by_category(
@@ -197,7 +214,11 @@ async fn create_service(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let enriched = enrich_services(&state, vec![service]).await?;
-    enriched.into_iter().next().map(Json).ok_or(StatusCode::INTERNAL_SERVER_ERROR)
+    enriched
+        .into_iter()
+        .next()
+        .map(Json)
+        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 async fn update_service(
@@ -213,7 +234,11 @@ async fn update_service(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let enriched = enrich_services(&state, vec![service]).await?;
-    enriched.into_iter().next().map(Json).ok_or(StatusCode::INTERNAL_SERVER_ERROR)
+    enriched
+        .into_iter()
+        .next()
+        .map(Json)
+        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 async fn delete_service(
