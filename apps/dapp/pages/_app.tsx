@@ -99,12 +99,3 @@ function Auth({ children, lang, role }) {
 }
 
 export default CustomApp;
-
-export async function getServerSideProps() {
-  const providers = await getProviders();
-  return {
-    props: {
-      providers,
-    },
-  };
-}

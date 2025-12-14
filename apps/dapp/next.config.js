@@ -6,7 +6,7 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Fix pour les modules Node.js
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -15,6 +15,27 @@ const nextConfig = {
       tls: false,
       crypto: false,
     };
+    
+    // Aliases pour le monorepo
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@shared/types': require('path').resolve(__dirname, '../../shared/types/src/index.ts'),
+      '@t4g/types': require('path').resolve(__dirname, '../../libs/types/src/index.ts'),
+      '@t4g/service/blockchain': require('path').resolve(__dirname, '../../libs/service/blockchain/src/index.ts'),
+      '@t4g/service/data': require('path').resolve(__dirname, '../../libs/service/data/src/index.ts'),
+      '@t4g/service/middleware': require('path').resolve(__dirname, '../../libs/service/middleware/src/index.ts'),
+      '@t4g/service/services': require('path').resolve(__dirname, '../../libs/service/services/src/index.ts'),
+      '@t4g/service/smartcontracts': require('path').resolve(__dirname, '../../libs/service/smartcontracts/src/index.ts'),
+      '@t4g/service/users': require('path').resolve(__dirname, '../../libs/service/users/src/index.ts'),
+      '@t4g/ui/components': require('path').resolve(__dirname, '../../libs/ui/components/src/index.ts'),
+      '@t4g/ui/elements': require('path').resolve(__dirname, '../../libs/ui/elements/src/index.ts'),
+      '@t4g/ui/hooks': require('path').resolve(__dirname, '../../libs/ui/hooks/src/index.ts'),
+      '@t4g/ui/icons': require('path').resolve(__dirname, '../../libs/ui/icons/src/index.ts'),
+      '@t4g/ui/layouts': require('path').resolve(__dirname, '../../libs/ui/layouts/src/index.ts'),
+      '@t4g/ui/pages': require('path').resolve(__dirname, '../../libs/ui/pages/src/index.ts'),
+      '@t4g/ui/providers': require('path').resolve(__dirname, '../../libs/ui/providers/src/index.ts'),
+    };
+    
     return config;
   },
   
