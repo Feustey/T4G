@@ -1,4 +1,4 @@
-import {LangType, SessionType} from '../types';
+import {LangType} from '../types';
 import GlobalLayout from './GlobalLayout';
 import getConfig from "next/config";
 import useWebSocket from "react-use-websocket";
@@ -13,9 +13,7 @@ export interface IAdminLayout {
 
 export default function AdminLayout({ children }: IAdminLayout) {
   const dispatch = useAppDispatch();
-
-  const { data: session } = useSession();
-  const user = (session as SessionType)?.user;
+  const { user } = useAuth();
 
   const WS_URL = getConfig().publicRuntimeConfig.updatesUrl;
   useWebSocket(user?.id ? `${WS_URL}/wallet/${user.id}` : null, {
