@@ -4,13 +4,15 @@ export async function checkDaznoSession(): Promise<{
   token?: string;
 }> {
   try {
+    const verifyUrl = process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://dazno.de/api/auth/verify-session';
+    
     // Vérifier d'abord s'il y a un token dans l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
     if (token) {
       // Vérifier le token via l'API Dazno
-      const response = await fetch('https://dazno.de/api/auth/verify-session', {
+      const response = await fetch(verifyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,7 +32,7 @@ export async function checkDaznoSession(): Promise<{
     }
 
     // Sinon, vérifier via les cookies cross-domain
-    const response = await fetch('https://dazno.de/api/auth/verify-session', {
+    const response = await fetch(verifyUrl, {
       method: 'GET',
       credentials: 'include',
     });
