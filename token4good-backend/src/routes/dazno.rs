@@ -65,6 +65,21 @@ pub fn dazno_routes() -> Router<AppState> {
         // MCP API v1 - Lightning Network Analysis
         .route("/v1/lightning/stats", get(get_lightning_stats))
         .route("/v1/lightning/routing", post(analyze_routing))
+        // Webhooks
+        .route("/v1/webhook", post(configure_webhook))
+        .route("/v1/webhook/user/:user_id", get(get_user_webhooks))
+        .route("/v1/webhook/id/:webhook_id", axum::routing::delete(delete_webhook))
+        // LNURL
+        .route("/v1/lnurl/pay", post(create_lnurl_pay))
+        .route("/v1/lnurl/withdraw", post(create_lnurl_withdraw))
+        .route("/v1/lnurl/auth", post(lnurl_auth))
+        // Multi-Wallets
+        .route("/v1/wallet", post(create_new_wallet))
+        .route("/v1/wallet/list/:user_id", get(list_user_wallets))
+        .route("/v1/wallet/:wallet_id", get(get_wallet_info))
+        .route("/v1/wallet/:wallet_id", axum::routing::delete(delete_user_wallet))
+        .route("/v1/wallet/:wallet_id/invoices", get(get_wallet_invoices_list))
+        .route("/v1/wallet/:wallet_id/payments", get(get_wallet_payments_list))
 }
 
 // ============= USER MANAGEMENT (dazno.de/api) =============
@@ -440,6 +455,274 @@ pub async fn analyze_routing(
         .map_err(map_dazno_error)?;
 
     Ok(Json(analysis))
+}
+
+// ============= WEBHOOKS HANDLERS =============
+
+use crate::services::dazno::{WebhookConfig, LnurlPayResponse, LnurlWithdrawResponse, 
+    LnurlAuthResponse, WalletInfo, WalletDetails};
+
+#[derive(Debug, Deserialize)]
+pub struct ConfigureWebhookPayload {
+    pub webhook_url: String,
+    pub events: Vec<String>,
+}
+
+pub async fn configure_webhook(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<ConfigureWebhookPayload>,
+) -> Result<Json<WebhookConfig>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let webhook = state
+        .dazno
+        .configure_webhook(&dazno_token, &auth_user.id, &payload.webhook_url, payload.events)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(webhook))
+}
+
+pub async fn get_user_webhooks(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(user_id): Path<String>,
+) -> Result<Json<Vec<WebhookConfig>>, StatusCode> {
+    ensure_user_access(&auth_user, &user_id)?;
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let webhooks = state
+        .dazno
+        .get_webhooks(&dazno_token, &user_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(webhooks))
+}
+
+pub async fn delete_webhook(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(webhook_id): Path<String>,
+) -> Result<StatusCode, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    state
+        .dazno
+        .delete_webhook(&dazno_token, &webhook_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(StatusCode::OK)
+}
+
+// ============= LNURL HANDLERS =============
+
+#[derive(Debug, Deserialize)]
+pub struct CreateLnurlPayPayload {
+    pub min_sendable: u64,
+    pub max_sendable: u64,
+    pub metadata: String,
+    pub comment_allowed: Option<u32>,
+}
+
+pub async fn create_lnurl_pay(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<CreateLnurlPayPayload>,
+) -> Result<Json<LnurlPayResponse>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let lnurl = state
+        .dazno
+        .create_lnurl_pay(
+            &dazno_token,
+            &auth_user.id,
+            payload.min_sendable,
+            payload.max_sendable,
+            &payload.metadata,
+            payload.comment_allowed,
+        )
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(lnurl))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateLnurlWithdrawPayload {
+    pub min_withdrawable: u64,
+    pub max_withdrawable: u64,
+    pub default_description: String,
+}
+
+pub async fn create_lnurl_withdraw(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<CreateLnurlWithdrawPayload>,
+) -> Result<Json<LnurlWithdrawResponse>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let lnurl = state
+        .dazno
+        .create_lnurl_withdraw(
+            &dazno_token,
+            &auth_user.id,
+            payload.min_withdrawable,
+            payload.max_withdrawable,
+            &payload.default_description,
+        )
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(lnurl))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LnurlAuthPayload {
+    pub k1: String,
+    pub sig: String,
+    pub key: String,
+}
+
+pub async fn lnurl_auth(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<LnurlAuthPayload>,
+) -> Result<Json<LnurlAuthResponse>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let auth_response = state
+        .dazno
+        .lnurl_auth_verify(&dazno_token, &payload.k1, &payload.sig, &payload.key)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(auth_response))
+}
+
+// ============= MULTI-WALLETS HANDLERS =============
+
+#[derive(Debug, Deserialize)]
+pub struct CreateWalletPayload {
+    pub name: String,
+}
+
+pub async fn create_new_wallet(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Json(payload): Json<CreateWalletPayload>,
+) -> Result<Json<WalletInfo>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let wallet = state
+        .dazno
+        .create_wallet(&dazno_token, &auth_user.id, &payload.name)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(wallet))
+}
+
+pub async fn list_user_wallets(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(user_id): Path<String>,
+) -> Result<Json<Vec<WalletInfo>>, StatusCode> {
+    ensure_user_access(&auth_user, &user_id)?;
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let wallets = state
+        .dazno
+        .list_wallets(&dazno_token, &user_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(wallets))
+}
+
+pub async fn get_wallet_info(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(wallet_id): Path<String>,
+) -> Result<Json<WalletDetails>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let wallet = state
+        .dazno
+        .get_wallet_details(&dazno_token, &wallet_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(wallet))
+}
+
+pub async fn delete_user_wallet(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(wallet_id): Path<String>,
+) -> Result<StatusCode, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    state
+        .dazno
+        .delete_wallet(&dazno_token, &wallet_id)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(StatusCode::OK)
+}
+
+#[derive(Debug, Deserialize)]
+pub struct WalletHistoryQuery {
+    pub limit: Option<u32>,
+}
+
+pub async fn get_wallet_invoices_list(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(wallet_id): Path<String>,
+    Query(params): Query<WalletHistoryQuery>,
+) -> Result<Json<Vec<crate::services::dazno::DaznoLightningInvoice>>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let invoices = state
+        .dazno
+        .get_wallet_invoices(&dazno_token, &wallet_id, params.limit)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(invoices))
+}
+
+pub async fn get_wallet_payments_list(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+    headers: HeaderMap,
+    Path(wallet_id): Path<String>,
+    Query(params): Query<WalletHistoryQuery>,
+) -> Result<Json<Vec<crate::services::dazno::DaznoLightningPayment>>, StatusCode> {
+    let dazno_token = extract_dazno_token(&headers)?;
+
+    let payments = state
+        .dazno
+        .get_wallet_payments_history(&dazno_token, &wallet_id, params.limit)
+        .await
+        .map_err(map_dazno_error)?;
+
+    Ok(Json(payments))
 }
 
 fn map_dazno_error(err: DaznoError) -> StatusCode {

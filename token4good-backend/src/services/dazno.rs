@@ -591,6 +591,368 @@ impl DaznoService {
             .await
             .map_err(|e| DaznoError::LightningApiError(e.to_string()))
     }
+
+    // ============= WEBHOOKS (/api/v1/webhook) =============
+
+    pub async fn configure_webhook(
+        &self,
+        token: &str,
+        user_id: &str,
+        webhook_url: &str,
+        events: Vec<String>,
+    ) -> Result<WebhookConfig, DaznoError> {
+        let url = format!("{}/api/v1/webhook", self.lightning_api_base);
+
+        let payload = WebhookRequest {
+            user_id: user_id.to_string(),
+            url: webhook_url.to_string(),
+            events,
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to configure webhook".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn get_webhooks(
+        &self,
+        token: &str,
+        user_id: &str,
+    ) -> Result<Vec<WebhookConfig>, DaznoError> {
+        let url = format!("{}/api/v1/webhook/{}", self.lightning_api_base, user_id);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get webhooks".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn delete_webhook(
+        &self,
+        token: &str,
+        webhook_id: &str,
+    ) -> Result<(), DaznoError> {
+        let url = format!("{}/api/v1/webhook/{}", self.lightning_api_base, webhook_id);
+
+        let response = self
+            .authorized(self.client.delete(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to delete webhook".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    // ============= LNURL (/api/v1/lnurl) =============
+
+    pub async fn create_lnurl_pay(
+        &self,
+        token: &str,
+        user_id: &str,
+        min_sendable: u64,
+        max_sendable: u64,
+        metadata: &str,
+        comment_allowed: Option<u32>,
+    ) -> Result<LnurlPayResponse, DaznoError> {
+        let url = format!("{}/api/v1/lnurl/pay", self.lightning_api_base);
+
+        let payload = LnurlPayRequest {
+            user_id: user_id.to_string(),
+            min_sendable,
+            max_sendable,
+            metadata: metadata.to_string(),
+            comment_allowed,
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to create LNURL-pay".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn create_lnurl_withdraw(
+        &self,
+        token: &str,
+        user_id: &str,
+        min_withdrawable: u64,
+        max_withdrawable: u64,
+        default_description: &str,
+    ) -> Result<LnurlWithdrawResponse, DaznoError> {
+        let url = format!("{}/api/v1/lnurl/withdraw", self.lightning_api_base);
+
+        let payload = LnurlWithdrawRequest {
+            user_id: user_id.to_string(),
+            min_withdrawable,
+            max_withdrawable,
+            default_description: default_description.to_string(),
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to create LNURL-withdraw".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn lnurl_auth_verify(
+        &self,
+        token: &str,
+        k1: &str,
+        sig: &str,
+        key: &str,
+    ) -> Result<LnurlAuthResponse, DaznoError> {
+        let url = format!("{}/api/v1/lnurl/auth", self.lightning_api_base);
+
+        let payload = LnurlAuthRequest {
+            k1: k1.to_string(),
+            sig: sig.to_string(),
+            key: key.to_string(),
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to verify LNURL-auth".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    // ============= MULTI-WALLETS (/api/v1/wallet) =============
+
+    pub async fn create_wallet(
+        &self,
+        token: &str,
+        user_id: &str,
+        wallet_name: &str,
+    ) -> Result<WalletInfo, DaznoError> {
+        let url = format!("{}/api/v1/wallet", self.lightning_api_base);
+
+        let payload = CreateWalletRequest {
+            user_id: user_id.to_string(),
+            name: wallet_name.to_string(),
+        };
+
+        let response = self
+            .authorized(self.client.post(&url), Some(token))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to create wallet".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn list_wallets(
+        &self,
+        token: &str,
+        user_id: &str,
+    ) -> Result<Vec<WalletInfo>, DaznoError> {
+        let url = format!("{}/api/v1/wallet/list/{}", self.lightning_api_base, user_id);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to list wallets".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn get_wallet_details(
+        &self,
+        token: &str,
+        wallet_id: &str,
+    ) -> Result<WalletDetails, DaznoError> {
+        let url = format!("{}/api/v1/wallet/{}", self.lightning_api_base, wallet_id);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get wallet details".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn delete_wallet(
+        &self,
+        token: &str,
+        wallet_id: &str,
+    ) -> Result<(), DaznoError> {
+        let url = format!("{}/api/v1/wallet/{}", self.lightning_api_base, wallet_id);
+
+        let response = self
+            .authorized(self.client.delete(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to delete wallet".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    pub async fn get_wallet_invoices(
+        &self,
+        token: &str,
+        wallet_id: &str,
+        limit: Option<u32>,
+    ) -> Result<Vec<DaznoLightningInvoice>, DaznoError> {
+        let mut url = format!("{}/api/v1/wallet/{}/invoices", self.lightning_api_base, wallet_id);
+        if let Some(limit) = limit {
+            url.push_str(&format!("?limit={}", limit));
+        }
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get wallet invoices".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
+    pub async fn get_wallet_payments_history(
+        &self,
+        token: &str,
+        wallet_id: &str,
+        limit: Option<u32>,
+    ) -> Result<Vec<DaznoLightningPayment>, DaznoError> {
+        let mut url = format!("{}/api/v1/wallet/{}/payments", self.lightning_api_base, wallet_id);
+        if let Some(limit) = limit {
+            url.push_str(&format!("?limit={}", limit));
+        }
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to get wallet payments".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
 }
 
 // ============= TYPES =============
@@ -771,4 +1133,121 @@ pub struct RouteHop {
     pub node_alias: Option<String>,
     pub channel_id: String,
     pub fee_msat: u64,
+}
+
+// ============= WEBHOOK TYPES =============
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WebhookRequest {
+    pub user_id: String,
+    pub url: String,
+    pub events: Vec<String>, // ["payment.received", "payment.sent", "invoice.created", etc.]
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct WebhookConfig {
+    pub id: String,
+    pub user_id: String,
+    pub url: String,
+    pub events: Vec<String>,
+    pub active: bool,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub last_triggered: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WebhookEvent {
+    pub event_type: String,
+    pub timestamp: chrono::DateTime<chrono::Utc>,
+    pub data: serde_json::Value,
+}
+
+// ============= LNURL TYPES =============
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LnurlPayRequest {
+    pub user_id: String,
+    pub min_sendable: u64,
+    pub max_sendable: u64,
+    pub metadata: String,
+    pub comment_allowed: Option<u32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LnurlPayResponse {
+    pub lnurl: String,
+    pub callback: String,
+    pub min_sendable: u64,
+    pub max_sendable: u64,
+    pub metadata: String,
+    pub comment_allowed: Option<u32>,
+    pub tag: String, // "payRequest"
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LnurlWithdrawRequest {
+    pub user_id: String,
+    pub min_withdrawable: u64,
+    pub max_withdrawable: u64,
+    pub default_description: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LnurlWithdrawResponse {
+    pub lnurl: String,
+    pub callback: String,
+    pub k1: String,
+    pub min_withdrawable: u64,
+    pub max_withdrawable: u64,
+    pub default_description: String,
+    pub tag: String, // "withdrawRequest"
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LnurlAuthRequest {
+    pub k1: String,
+    pub sig: String,
+    pub key: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LnurlAuthResponse {
+    pub status: String, // "OK" | "ERROR"
+    pub reason: Option<String>,
+    pub event: Option<String>,
+}
+
+// ============= MULTI-WALLET TYPES =============
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateWalletRequest {
+    pub user_id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct WalletInfo {
+    pub id: String,
+    pub user_id: String,
+    pub name: String,
+    pub balance_msat: u64,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub is_default: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WalletDetails {
+    pub id: String,
+    pub user_id: String,
+    pub name: String,
+    pub balance_msat: u64,
+    pub pending_msat: u64,
+    pub reserved_msat: u64,
+    pub total_received_msat: u64,
+    pub total_sent_msat: u64,
+    pub total_invoices: u64,
+    pub total_payments: u64,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub is_default: bool,
 }

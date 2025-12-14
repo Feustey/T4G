@@ -192,6 +192,193 @@ export class DaznoAPIService {
     return data;
   }
 
+  // ============= WEBHOOKS =============
+
+  async configureWebhook(webhookUrl: string, events: string[]) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/webhook`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        webhook_url: webhookUrl,
+        events
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur configuration webhook: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async getUserWebhooks(userId: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/webhook/${userId}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur récupération webhooks: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async deleteWebhook(webhookId: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/webhook/${webhookId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur suppression webhook: ${response.status}`);
+    }
+    
+    return response.ok;
+  }
+
+  // ============= LNURL =============
+
+  async createLnurlPay(minSendable: number, maxSendable: number, metadata: string, commentAllowed?: number) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/lnurl/pay`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        min_sendable: minSendable,
+        max_sendable: maxSendable,
+        metadata,
+        comment_allowed: commentAllowed
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur création LNURL-pay: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async createLnurlWithdraw(minWithdrawable: number, maxWithdrawable: number, defaultDescription: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/lnurl/withdraw`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        min_withdrawable: minWithdrawable,
+        max_withdrawable: maxWithdrawable,
+        default_description: defaultDescription
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur création LNURL-withdraw: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async lnurlAuthVerify(k1: string, sig: string, key: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/lnurl/auth`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ k1, sig, key }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur vérification LNURL-auth: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  // ============= MULTI-WALLETS =============
+
+  async createWallet(name: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/wallet`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ name }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur création wallet: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async listWallets(userId: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/wallet/list/${userId}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur liste wallets: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async getWalletDetails(walletId: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/wallet/${walletId}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur détails wallet: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async deleteWallet(walletId: string) {
+    const response = await fetch(`${this.baseURL}/api/dazno/v1/wallet/${walletId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur suppression wallet: ${response.status}`);
+    }
+    
+    return response.ok;
+  }
+
+  async getWalletInvoices(walletId: string, limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    const response = await fetch(
+      `${this.baseURL}/api/dazno/v1/wallet/${walletId}/invoices${params}`,
+      {
+        method: 'GET',
+        headers: this.getHeaders(),
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Erreur invoices wallet: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
+  async getWalletPayments(walletId: string, limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    const response = await fetch(
+      `${this.baseURL}/api/dazno/v1/wallet/${walletId}/payments${params}`,
+      {
+        method: 'GET',
+        headers: this.getHeaders(),
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Erreur paiements wallet: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+
   // ============= HELPERS =============
 
   clearTokens() {
@@ -263,4 +450,77 @@ export interface LightningTransaction {
   description: string;
   created_at: string;
   settled_at?: string;
+}
+
+// ============= WEBHOOK TYPES =============
+
+export interface WebhookConfig {
+  id: string;
+  user_id: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  created_at: string;
+  last_triggered?: string;
+}
+
+export interface WebhookEvent {
+  event_type: string;
+  timestamp: string;
+  data: any;
+}
+
+// ============= LNURL TYPES =============
+
+export interface LnurlPayResponse {
+  lnurl: string;
+  callback: string;
+  min_sendable: number;
+  max_sendable: number;
+  metadata: string;
+  comment_allowed?: number;
+  tag: string; // "payRequest"
+}
+
+export interface LnurlWithdrawResponse {
+  lnurl: string;
+  callback: string;
+  k1: string;
+  min_withdrawable: number;
+  max_withdrawable: number;
+  default_description: string;
+  tag: string; // "withdrawRequest"
+}
+
+export interface LnurlAuthResponse {
+  status: string; // "OK" | "ERROR"
+  reason?: string;
+  event?: string;
+}
+
+// ============= WALLET TYPES =============
+
+export interface WalletInfo {
+  id: string;
+  user_id: string;
+  name: string;
+  balance_msat: number;
+  created_at: string;
+  is_default: boolean;
+}
+
+export interface WalletDetails {
+  id: string;
+  user_id: string;
+  name: string;
+  balance_msat: number;
+  pending_msat: number;
+  reserved_msat: number;
+  total_received_msat: number;
+  total_sent_msat: number;
+  total_invoices: number;
+  total_payments: number;
+  created_at: string;
+  updated_at?: string;
+  is_default: boolean;
 }

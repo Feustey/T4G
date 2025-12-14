@@ -129,3 +129,4 @@ echo "- Ouvrir l'interface du routeur: open http://$network_base.1"
 echo "- Vérifier les logs d'Umbrel (si accessible via SSH)"
 echo "- Redémarrer Umbrel: sudo reboot (sur le nœud)"
 
+

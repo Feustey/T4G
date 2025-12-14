@@ -23,12 +23,29 @@ pub async fn get_metrics(
         .map(|proofs| proofs.len() as u64)
         .unwrap_or(0);
 
+    // T4G statistics
+    let active_mentoring_requests = sqlx::query_scalar::<_, Option<i64>>(
+        "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE status IN ('scheduled', 'in_progress')"
+    )
+    .fetch_one(state.db.pool())
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+    .unwrap_or(0) as u64;
+
+    let completed_mentoring_requests = sqlx::query_scalar::<_, Option<i64>>(
+        "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE status = 'completed'"
+    )
+    .fetch_one(state.db.pool())
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+    .unwrap_or(0) as u64;
+
     let metrics = MetricsResponse {
         total_users,
         total_mentoring_requests,
         total_rgb_proofs,
-        active_mentoring_requests: 0,    // TODO: count active requests
-        completed_mentoring_requests: 0, // TODO: count completed requests
+        active_mentoring_requests,
+        completed_mentoring_requests,
         lightning: None,
         timestamp: chrono::Utc::now(),
     };

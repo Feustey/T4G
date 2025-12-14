@@ -230,9 +230,53 @@ pub async fn verify_dazeno_session(
     Ok(Json(dazno_user))
 }
 
-pub async fn refresh_token(// TODO: Implémenter le refresh de token
+#[derive(Debug, Deserialize)]
+pub struct RefreshTokenRequest {
+    pub token: String,
+}
+
+pub async fn refresh_token(
+    State(state): State<AppState>,
+    Json(payload): Json<RefreshTokenRequest>,
 ) -> Result<Json<AuthResponse>, StatusCode> {
-    Err(StatusCode::NOT_IMPLEMENTED)
+    // Vérifier le token actuel
+    let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    let claims = jwt_service
+        .verify_token(&payload.token)
+        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+
+    // Vérifier que le token n'est pas trop vieux (max 7 jours pour refresh)
+    let now = chrono::Utc::now().timestamp() as usize;
+    if now.saturating_sub(claims.iat) > 7 * 24 * 60 * 60 {
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
+    // Récupérer l'utilisateur depuis la DB
+    let user = state.db.find_user_by_id(&claims.sub)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    // Créer un nouveau token
+    let new_token = jwt_service
+        .create_token(&user.id.to_string(), &user.email, &user.role.to_string())
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let response = AuthResponse {
+        token: new_token,
+        user: UserSummary {
+            id: user.id.to_string(),
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            role: user.role,
+            lightning_address: user.lightning_address,
+        },
+        expires_at: chrono::Utc::now() + chrono::Duration::hours(24),
+    };
+
+    Ok(Json(response))
 }
 
 async fn get_or_create_user_from_dazno(
@@ -318,6 +362,14 @@ async fn get_or_create_user_from_oauth(
         last_login: Some(chrono::Utc::now()),
         is_onboarded: false,
     };
+    
+    // Créer l'utilisateur dans la base de données
+    state.db.create_user(&new_user)
+        .await
+        .map_err(|e| {
+            tracing::error!("Error creating user from OAuth: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
     state
         .db

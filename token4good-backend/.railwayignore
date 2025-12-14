@@ -1,0 +1,35 @@
+# Railway ignore file - Exclure les fichiers de build locaux
+
+# Rust build artifacts
+target/
+**/*.rs.bk
+**/*.pdb
+
+# Debug symbols
+*.dSYM/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test artifacts
+*.profraw
+*.profdata
+
+# Documentation build
+target/doc/
+
+# Backup files
+*.bak
+*.orig
+

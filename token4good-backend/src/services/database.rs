@@ -680,4 +680,423 @@ impl DatabaseService {
         // TODO: Implement user services retrieval
         Ok(vec![])
     }
+
+    /// Accéder au pool pour requêtes SQL directes (usage interne)
+    pub fn pool(&self) -> &PgPool {
+        &self.pool
+    }
+
+    // ============= T4G TOKEN OPERATIONS =============
+
+    /// Créer une transaction de tokens
+    pub async fn create_token_transaction(
+        &self,
+        user_id: &str,
+        action_type: &str,
+        tokens: i64,
+        description: &str,
+        metadata: Option<serde_json::Value>,
+        impact_score: Option<f64>,
+    ) -> Result<String, Box<dyn Error>> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let metadata_json = metadata.unwrap_or_else(|| serde_json::json!({}));
+        let impact = impact_score.unwrap_or(1.0);
+
+        sqlx::query!(
+            r#"
+            INSERT INTO t4g_token_transactions (id, user_id, action_type, tokens, description, metadata, impact_score)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING id
+            "#,
+            id,
+            user_id,
+            action_type,
+            tokens,
+            description,
+            metadata_json,
+            impact
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(id)
+    }
+
+    /// Obtenir le solde d'un utilisateur (total gagné - total dépensé)
+    pub async fn get_user_token_balance(&self, user_id: &str) -> Result<(i64, i64, i64), Box<dyn Error>> {
+        let earned = sqlx::query_scalar::<_, Option<i64>>(
+            r#"
+            SELECT COALESCE(SUM(tokens), 0)
+            FROM t4g_token_transactions
+            WHERE user_id = $1 AND tokens > 0
+            "#,
+        )
+        .bind(user_id)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        let spent = sqlx::query_scalar::<_, Option<i64>>(
+            r#"
+            SELECT COALESCE(ABS(SUM(tokens)), 0)
+            FROM t4g_token_transactions
+            WHERE user_id = $1 AND tokens < 0
+            "#,
+        )
+        .bind(user_id)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        let balance = earned - spent;
+        Ok((earned, spent, balance))
+    }
+
+    /// Obtenir les transactions d'un utilisateur
+    pub async fn get_user_token_transactions(
+        &self,
+        user_id: &str,
+        limit: Option<i64>,
+    ) -> Result<Vec<crate::routes::token4good::Transaction>, Box<dyn Error>> {
+        let limit_value = limit.unwrap_or(50).min(100) as i64;
+
+        let rows = sqlx::query!(
+            r#"
+            SELECT id, user_id, action_type, tokens, description, created_at
+            FROM t4g_token_transactions
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+            LIMIT $2
+            "#,
+            user_id,
+            limit_value
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows.into_iter().map(|row| crate::routes::token4good::Transaction {
+            id: row.id,
+            user_id: row.user_id,
+            action_type: row.action_type,
+            tokens: row.tokens,
+            description: row.description,
+            timestamp: row.created_at,
+        }).collect())
+    }
+
+    // ============= T4G MENTORING SESSIONS =============
+
+    /// Créer une session de mentoring
+    pub async fn create_t4g_session(
+        &self,
+        mentor_id: &str,
+        mentee_id: &str,
+        topic: &str,
+        category: &str,
+        duration_minutes: i32,
+    ) -> Result<String, Box<dyn Error>> {
+        let id = uuid::Uuid::new_v4().to_string();
+
+        sqlx::query!(
+            r#"
+            INSERT INTO t4g_mentoring_sessions (id, mentor_id, mentee_id, topic, category, duration_minutes)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+            "#,
+            id,
+            mentor_id,
+            mentee_id,
+            topic,
+            category,
+            duration_minutes
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(id)
+    }
+
+    /// Compléter une session de mentoring et attribuer des tokens
+    pub async fn complete_t4g_session(
+        &self,
+        session_id: &str,
+        rating: i32,
+        feedback_comments: &str,
+        learned_skills: Vec<String>,
+    ) -> Result<(), Box<dyn Error>> {
+        // Calculer les tokens basés sur la durée et la note
+        let session = sqlx::query!(
+            r#"
+            SELECT mentor_id, mentee_id, duration_minutes, category
+            FROM t4g_mentoring_sessions
+            WHERE id = $1 AND status = 'scheduled'
+            "#,
+            session_id
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        let session = session.ok_or("Session not found or already completed")?;
+
+        // Base: 50 tokens par heure, bonus pour bonne note
+        let base_tokens = (session.duration_minutes as f64 / 60.0 * 50.0) as i64;
+        let rating_bonus = match rating {
+            5 => 20,
+            4 => 10,
+            _ => 0,
+        };
+        let tokens_awarded = base_tokens + rating_bonus;
+
+        // Mettre à jour la session
+        sqlx::query!(
+            r#"
+            UPDATE t4g_mentoring_sessions
+            SET status = 'completed',
+                rating = $2,
+                feedback_comments = $3,
+                learned_skills = $4,
+                tokens_awarded = $5,
+                completed_at = NOW(),
+                updated_at = NOW()
+            WHERE id = $1
+            "#,
+            session_id,
+            rating,
+            feedback_comments,
+            &learned_skills,
+            tokens_awarded
+        )
+        .execute(&self.pool)
+        .await?;
+
+        // Créer transaction de tokens pour le mentor
+        self.create_token_transaction(
+            &session.mentor_id,
+            "mentoring",
+            tokens_awarded,
+            &format!("Session de mentoring: {}", session.category),
+            Some(serde_json::json!({
+                "session_id": session_id,
+                "rating": rating,
+                "duration_minutes": session.duration_minutes
+            })),
+            Some(1.0 + (rating as f64 / 10.0)),
+        ).await?;
+
+        Ok(())
+    }
+
+    /// Obtenir les sessions d'un utilisateur
+    pub async fn get_user_t4g_sessions(
+        &self,
+        user_id: &str,
+        as_mentor: Option<bool>,
+    ) -> Result<Vec<crate::routes::token4good::MentoringSession>, Box<dyn Error>> {
+        let query = if as_mentor.unwrap_or(false) {
+            "SELECT id, mentor_id, mentee_id, topic, category, duration_minutes, status, created_at
+             FROM t4g_mentoring_sessions
+             WHERE mentor_id = $1
+             ORDER BY created_at DESC"
+        } else {
+            "SELECT id, mentor_id, mentee_id, topic, category, duration_minutes, status, created_at
+             FROM t4g_mentoring_sessions
+             WHERE mentee_id = $1
+             ORDER BY created_at DESC"
+        };
+
+        let rows = sqlx::query(query)
+            .bind(user_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(rows.into_iter().map(|row| crate::routes::token4good::MentoringSession {
+            id: row.try_get("id").unwrap_or_default(),
+            mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+            mentee_id: row.try_get("mentee_id").unwrap_or_default(),
+            topic: row.try_get("topic").unwrap_or_default(),
+            category: row.try_get("category").unwrap_or_default(),
+            duration_minutes: row.try_get("duration_minutes").unwrap_or(0),
+            status: row.try_get("status").unwrap_or_else(|_| "unknown".to_string()),
+            created_at: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
+        }).collect())
+    }
+
+    // ============= T4G STATISTICS =============
+
+    /// Obtenir les statistiques d'un utilisateur
+    pub async fn get_user_statistics(&self, user_id: &str) -> Result<crate::routes::token4good::UserStatistics, Box<dyn Error>> {
+        // Total transactions
+        let total_transactions = sqlx::query_scalar::<_, Option<i64>>(
+            "SELECT COUNT(*) FROM t4g_token_transactions WHERE user_id = $1"
+        )
+        .bind(user_id)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        // Sessions données (comme mentor)
+        let sessions_given = sqlx::query_scalar::<_, Option<i64>>(
+            "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE mentor_id = $1 AND status = 'completed'"
+        )
+        .bind(user_id)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        // Sessions reçues (comme mentee)
+        let sessions_received = sqlx::query_scalar::<_, Option<i64>>(
+            "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE mentee_id = $1 AND status = 'completed'"
+        )
+        .bind(user_id)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        // Note moyenne
+        let avg_rating = sqlx::query_scalar::<_, Option<f64>>(
+            r#"
+            SELECT AVG(rating)::FLOAT
+            FROM t4g_mentoring_sessions
+            WHERE mentor_id = $1 AND rating IS NOT NULL
+            "#
+        )
+        .bind(user_id)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0.0);
+
+        // Rang communautaire (basé sur total tokens)
+        let (total_earned, _, _) = self.get_user_token_balance(user_id).await?;
+        let rank = sqlx::query_scalar::<_, Option<i64>>(
+            r#"
+            SELECT COUNT(*) + 1
+            FROM (
+                SELECT user_id, COALESCE(SUM(CASE WHEN tokens > 0 THEN tokens ELSE 0 END), 0) as total
+                FROM t4g_token_transactions
+                GROUP BY user_id
+                HAVING COALESCE(SUM(CASE WHEN tokens > 0 THEN tokens ELSE 0 END), 0) > $1
+            ) ranked
+            "#
+        )
+        .bind(total_earned)
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(1);
+
+        // Progression vers le niveau suivant
+        let user_level = if total_earned < 500 {
+            "contributeur"
+        } else if total_earned < 1500 {
+            "mentor"
+        } else {
+            "expert"
+        };
+
+        let level_progress = match user_level {
+            "contributeur" => (total_earned as f64 / 500.0 * 100.0).min(100.0),
+            "mentor" => ((total_earned - 500) as f64 / 1000.0 * 100.0).min(100.0),
+            _ => 100.0,
+        };
+
+        Ok(crate::routes::token4good::UserStatistics {
+            user_id: user_id.to_string(),
+            total_transactions,
+            sessions_given,
+            sessions_received,
+            avg_rating,
+            community_rank: rank,
+            level_progress,
+        })
+    }
+
+    /// Obtenir le leaderboard
+    pub async fn get_leaderboard(&self, limit: i64) -> Result<Vec<crate::routes::token4good::LeaderboardEntry>, Box<dyn Error>> {
+        let limit_value = limit.min(100) as i64;
+
+        let rows = sqlx::query!(
+            r#"
+            SELECT 
+                u.id::text as user_id,
+                u.username,
+                COALESCE(SUM(CASE WHEN t.tokens > 0 THEN t.tokens ELSE 0 END), 0) as total_tokens,
+                ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN t.tokens > 0 THEN t.tokens ELSE 0 END), 0) DESC) as rank
+            FROM users u
+            LEFT JOIN t4g_token_transactions t ON u.id::text = t.user_id
+            GROUP BY u.id, u.username
+            ORDER BY total_tokens DESC
+            LIMIT $1
+            "#,
+            limit_value
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows.into_iter().map(|row| crate::routes::token4good::LeaderboardEntry {
+            user_id: row.user_id,
+            username: row.username,
+            total_tokens: row.total_tokens.unwrap_or(0),
+            rank: row.rank.unwrap_or(0) as i64,
+        }).collect())
+    }
+
+    /// Compter le nombre total d'utilisateurs T4G
+    pub async fn count_t4g_users(&self) -> Result<i64, Box<dyn Error>> {
+        let count = sqlx::query_scalar::<_, Option<i64>>(
+            r#"
+            SELECT COUNT(DISTINCT user_id)
+            FROM t4g_token_transactions
+            "#
+        )
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        Ok(count)
+    }
+
+    /// Obtenir les statistiques système
+    pub async fn get_system_statistics(&self) -> Result<(i64, i64, i64, std::collections::HashMap<String, i64>), Box<dyn Error>> {
+        let total_users = self.count_t4g_users().await?;
+
+        let total_transactions = sqlx::query_scalar::<_, Option<i64>>(
+            "SELECT COUNT(*) FROM t4g_token_transactions"
+        )
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        let active_services = sqlx::query_scalar::<_, Option<i64>>(
+            "SELECT COUNT(*) FROM t4g_services WHERE status = 'active'"
+        )
+        .fetch_one(&self.pool)
+        .await?
+        .unwrap_or(0);
+
+        // Distribution des niveaux
+        let level_rows = sqlx::query!(
+            r#"
+            SELECT 
+                CASE 
+                    WHEN COALESCE(SUM(CASE WHEN tokens > 0 THEN tokens ELSE 0 END), 0) < 500 THEN 'contributeur'
+                    WHEN COALESCE(SUM(CASE WHEN tokens > 0 THEN tokens ELSE 0 END), 0) < 1500 THEN 'mentor'
+                    ELSE 'expert'
+                END as level,
+                COUNT(DISTINCT user_id) as count
+            FROM t4g_token_transactions
+            GROUP BY level
+            "#
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        let mut level_distribution = std::collections::HashMap::new();
+        for row in level_rows {
+            level_distribution.insert(
+                row.level.unwrap_or_else(|| "contributeur".to_string()),
+                row.count.unwrap_or(0) as i64
+            );
+        }
+
+        Ok((total_users, total_transactions, active_services, level_distribution))
+    }
 }

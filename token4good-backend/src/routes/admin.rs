@@ -37,19 +37,44 @@ pub async fn get_all_wallets(
     let mut wallets = Vec::new();
 
     for user in users {
-        // For now, return mock wallet data
-        // TODO: Integrate with Lightning service to get real balances
+        // Obtenir le solde T4G
+        let (total_earned, total_spent, available_balance) = state
+            .db
+            .get_user_token_balance(&user.id.to_string())
+            .await
+            .unwrap_or((0, 0, 0));
+
+        // Obtenir le nombre de transactions T4G
+        let num_t4g_transactions = sqlx::query_scalar::<_, Option<i64>>(
+            "SELECT COUNT(*) FROM t4g_token_transactions WHERE user_id = $1"
+        )
+        .bind(user.id.to_string())
+        .fetch_one(state.db.pool())
+        .await
+        .unwrap_or(Some(0))
+        .unwrap_or(0);
+
+        // Obtenir la dernière transaction T4G
+        let last_t4g_transaction = sqlx::query_scalar::<_, Option<chrono::DateTime<chrono::Utc>>>(
+            "SELECT MAX(created_at) FROM t4g_token_transactions WHERE user_id = $1"
+        )
+        .bind(user.id.to_string())
+        .fetch_one(state.db.pool())
+        .await
+        .ok()
+        .flatten();
+
         let wallet = AdminWalletInfo {
             user_id: user.id.to_string(),
             username: user.username.clone(),
             email: user.email.clone(),
             lightning_address: user.lightning_address.clone(),
-            balance_msat: 0,
+            balance_msat: (available_balance * 1000) as u64, // Convertir tokens T4G en msat (1 token = 1000 msat)
             pending_balance_msat: 0,
-            total_received_msat: 0,
-            total_sent_msat: 0,
-            num_transactions: 0,
-            last_transaction_at: None,
+            total_received_msat: (total_earned * 1000) as u64,
+            total_sent_msat: (total_spent * 1000) as u64,
+            num_transactions: num_t4g_transactions as u32,
+            last_transaction_at: last_t4g_transaction,
             created_at: user.created_at,
         };
 

@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod auth_extractor;
 pub mod authorization;
 pub mod validation;
 pub mod webhook_auth;

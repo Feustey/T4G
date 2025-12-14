@@ -63,3 +63,4 @@ echo "Ou si vous voulez forcer la réparation des kernels:"
 echo "  apt autoremove --purge -y"
 echo "  apt install -f"
 
+

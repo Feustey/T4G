@@ -122,6 +122,7 @@
 | [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) | Architecture Railway + Vercel |
 | [RAILWAY_WEBHOOK_SETUP.md](RAILWAY_WEBHOOK_SETUP.md) | Intégration CI/CD Railway |
 | [deploy-vercel-v2.sh](deploy-vercel-v2.sh) | Déploiement frontend Vercel |
+| [RAILWAY_SETUP.md](RAILWAY_SETUP.md) | Procédure pas-à-pas Railway |
 
 ---
 

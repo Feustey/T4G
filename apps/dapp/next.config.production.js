@@ -77,15 +77,65 @@ const nextConfig = {
     ]
   },
 
-  // Configuration Webpack pour éviter les erreurs de compilation
+  // Configuration expérimentale pour les répertoires externes
+  experimental: {
+    externalDir: true, // Permettre les imports depuis l'extérieur de l'app
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+
+  // Configuration Webpack pour traiter les libs locales
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Ignorer les modules problématiques en production
-    if (!dev) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        // Éviter les imports MongoDB/DAO en frontend
-        '@t4g/service/data': false,
-      };
+    const path = require('path');
+    const libsPath = path.resolve(__dirname, '../../libs');
+    
+    // Résolution des alias pour les librairies locales
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@t4g/service/data': path.resolve(__dirname, '../../libs/service/data/src'),
+      '@t4g/ui/components': path.resolve(__dirname, '../../libs/ui/components/src'),
+      '@t4g/ui/elements': path.resolve(__dirname, '../../libs/ui/elements/src'),
+      '@t4g/ui/hooks': path.resolve(__dirname, '../../libs/ui/hooks/src'),
+      '@t4g/ui/icons': path.resolve(__dirname, '../../libs/ui/icons/src'),
+      '@t4g/ui/layouts': path.resolve(__dirname, '../../libs/ui/layouts/src'),
+      '@t4g/ui/pages': path.resolve(__dirname, '../../libs/ui/pages/src'),
+      '@t4g/ui/providers': path.resolve(__dirname, '../../libs/ui/providers/src'),
+      '@t4g/service/blockchain': path.resolve(__dirname, '../../libs/service/blockchain/src'),
+      '@t4g/service/middleware': path.resolve(__dirname, '../../libs/service/middleware/src'),
+      '@t4g/service/services': path.resolve(__dirname, '../../libs/service/services/src'),
+      '@t4g/service/smartcontracts': path.resolve(__dirname, '../../libs/service/smartcontracts/src'),
+      '@t4g/service/users': path.resolve(__dirname, '../../libs/service/users/src'),
+      '@t4g/types': path.resolve(__dirname, '../../libs/types/src'),
+    };
+
+    // Ajouter une règle pour traiter les fichiers TypeScript des libs
+    const oneOfRule = config.module.rules.find((rule) => rule.oneOf);
+    if (oneOfRule) {
+      // Ajouter une règle spécifique pour les libs AVANT les autres règles
+      oneOfRule.oneOf.unshift({
+        test: /\.(ts|tsx|js|jsx)$/,
+        include: [libsPath],
+        use: defaultLoaders.babel || defaultLoaders.swcLoader || {
+          loader: 'next-swc-loader',
+          options: {},
+        },
+      });
+      
+      // Modifier les règles existantes pour ne pas exclure les libs
+      oneOfRule.oneOf.forEach((rule) => {
+        if (rule.exclude) {
+          if (typeof rule.exclude === 'function') {
+            const originalExclude = rule.exclude;
+            rule.exclude = (modulePath) => {
+              // Ne pas exclure les libs
+              if (modulePath && modulePath.includes(libsPath)) {
+                return false;
+              }
+              return originalExclude ? originalExclude(modulePath) : false;
+            };
+          }
+        }
+      });
     }
 
     // Optimisations pour la production
@@ -110,12 +160,6 @@ const nextConfig = {
     widenClientFileUpload: true,
   },
 
-  // Configuration expérimentale
-  experimental: {
-    // Optimisations modernes
-    optimizeCss: true,
-    scrollRestoration: true,
-  },
 
   // Configuration du compilateur
   compiler: {

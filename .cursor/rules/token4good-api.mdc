@@ -1,0 +1,375 @@
+---
+alwaysApply: true
+description: API Token4Good (T4G) pour t4g.dazno.de - Documentation complète et endpoints
+---
+
+# 📘 API Token4Good (T4G) - Standards d'Implémentation
+
+**Base URL**: `https://t4g.dazno.de` ou `https://api.dazno.de/api/v1/token4good`  
+**Version**: 1.0  
+**Dernière mise à jour**: 7 janvier 2025
+
+## 🔐 Authentification
+
+Token4Good utilise la **même authentification JWT** que l'API MCP principale.
+
+**Format**:
+```
+Authorization: Bearer <votre_jwt_token>
+```
+
+**Structure JWT requise**:
+- `tenant_id`: Identifiant du tenant
+- `sub`: user_id ou tenant_id
+- `iss`: app.dazno.de
+- `aud`: api.dazno.de
+- `exp`: Timestamp d'expiration
+
+## 📚 Endpoints Token4Good
+
+### 👥 Gestion des Utilisateurs (`/api/v1/token4good/users`)
+
+#### POST `/users` - Créer un Profil Utilisateur
+**Body**:
+```json
+{
+  "user_id": "t4g_user_001",
+  "username": "john_doe",
+  "email": "john@example.com",
+  "skills": ["lightning-network", "bitcoin", "dazbox"]
+}
+```
+
+**Response**:
+```json
+{
+  "user_id": "t4g_user_001",
+  "username": "john_doe",
+  "total_tokens_earned": 50,
+  "available_balance": 50,
+  "user_level": "contributeur",
+  "reputation_score": 0.5,
+  "created_at": "2025-01-10T10:00:00Z"
+}
+```
+
+#### GET `/users/:user_id` - Obtenir un Profil
+#### GET `/users/:user_id/statistics` - Statistiques Utilisateur
+#### GET `/users/:user_id/opportunities` - Opportunités de Gains
+#### GET `/leaderboard` - Leaderboard Communautaire
+
+**Query Params**: `?limit=10`
+
+### 💰 Gestion des Tokens (`/api/v1/token4good/tokens`)
+
+#### POST `/tokens/award` - Attribuer des Tokens
+**Body**:
+```json
+{
+  "user_id": "t4g_user_001",
+  "action_type": "mentoring",
+  "tokens": 50,
+  "description": "Session Lightning Network complétée",
+  "metadata": {"session_id": "session_123"},
+  "impact_score": 1.3
+}
+```
+
+**Types d'actions**:
+- `mentoring` - Session de mentoring
+- `code_review` - Review de code
+- `documentation` - Création de documentation
+- `support_technique` - Support technique
+- `parrainage` - Parrainage de nouveaux membres
+
+**Response**:
+```json
+{
+  "id": "txn_123",
+  "user_id": "t4g_user_001",
+  "action_type": "mentoring",
+  "tokens_earned": 65,
+  "timestamp": "2025-01-10T16:00:00Z",
+  "impact_score": 1.3
+}
+```
+
+#### GET `/tokens/:user_id/balance` - Solde de Tokens
+**Response**:
+```json
+{
+  "user_id": "t4g_user_001",
+  "total_earned": 500,
+  "total_spent": 150,
+  "available_balance": 350,
+  "user_level": "mentor"
+}
+```
+
+#### GET `/tokens/:user_id/transactions` - Historique des Transactions
+**Query Params**: `?limit=50`
+
+### 🎓 Sessions de Mentoring (`/api/v1/token4good/mentoring`)
+
+#### POST `/sessions` - Créer une Session
+**Body**:
+```json
+{
+  "mentor_id": "mentor_001",
+  "mentee_id": "mentee_001",
+  "topic": "Configuration nœud Lightning",
+  "category": "lightning_network",
+  "duration_minutes": 60
+}
+```
+
+**Catégories**:
+- `lightning_network` - Lightning Network Mastery
+- `dazbox_setup` - DazBox Setup Pro
+- `business_dev` - Bitcoin Business Development
+- `dazpay_integration` - DazPay Integration
+
+#### POST `/sessions/complete` - Compléter une Session
+**Body**:
+```json
+{
+  "session_id": "session_123",
+  "feedback": {
+    "rating": 5,
+    "comments": "Excellent mentoring!",
+    "learned_skills": ["node-configuration", "channel-management"]
+  }
+}
+```
+
+#### GET `/sessions/:user_id` - Sessions d'un Utilisateur
+**Query Params**: `?as_mentor=true` ou `?as_mentor=false`
+
+### 🛍️ Marketplace de Services (`/api/v1/token4good/marketplace`)
+
+#### POST `/services` - Créer un Service
+**Body**:
+```json
+{
+  "provider_id": "provider_001",
+  "name": "Migration Nœud Lightning",
+  "description": "Migration complète et sécurisée",
+  "category": "technical_excellence",
+  "token_cost": 300,
+  "estimated_duration": "4-6h",
+  "requirements": ["nœud Lightning existant"],
+  "tags": ["lightning", "migration", "expert"]
+}
+```
+
+**Catégories de services**:
+- `technical_excellence` - Services techniques
+- `business_growth` - Développement business
+- `knowledge_transfer` - Transfert de connaissances
+- `community_services` - Services communautaires
+
+#### POST `/search` - Rechercher des Services
+**Body**:
+```json
+{
+  "category": "technical_excellence",
+  "max_cost": 200,
+  "tags": ["lightning", "optimization"],
+  "provider_level": "expert"
+}
+```
+
+#### POST `/book` - Réserver un Service
+**Body**:
+```json
+{
+  "client_id": "client_001",
+  "service_id": "service_123",
+  "scheduled_at": "2025-01-15T14:00:00Z",
+  "notes": "Besoin urgent"
+}
+```
+
+#### POST `/bookings/complete` - Compléter une Réservation
+**Body**:
+```json
+{
+  "booking_id": "booking_123",
+  "feedback": {
+    "rating": 5,
+    "comments": "Service excellent",
+    "would_recommend": true
+  }
+}
+```
+
+#### GET `/recommendations/:user_id` - Recommandations Personnalisées
+**Query Params**: `?limit=5`
+
+#### GET `/stats` - Statistiques Marketplace (Public, pas d'auth)
+
+### 🏆 Administration (`/api/v1/token4good/admin`)
+
+#### POST `/rewards/weekly-bonuses` - Bonus Hebdomadaires
+**Note**: Requiert permissions administrateur.
+
+#### GET `/system/status` - Statut Système T4G
+**Response inclut**:
+- Santé du système
+- Nombre total d'utilisateurs
+- Nombre de transactions
+- Services actifs
+- Distribution des niveaux
+- Économie des tokens
+
+## ⚡ Endpoints Lightning/Bitcoin
+
+### `/api/v1/token4good/lightning`
+
+#### POST `/invoice/create` - Créer une Facture Lightning
+**Body**:
+```json
+{
+  "amount": 50000,
+  "memo": "Paiement service Token4Good",
+  "expiry": 3600
+}
+```
+
+**Response**:
+```json
+{
+  "status": "success",
+  "payment_request": "lnbc500u1p...",
+  "payment_hash": "abc123...",
+  "checking_id": "check_xyz",
+  "amount": 50000,
+  "expiry": 3600
+}
+```
+
+#### GET `/balance` - Solde Lightning
+**Response**:
+```json
+{
+  "status": "success",
+  "balance_sats": 125000,
+  "balance_msats": 125000000,
+  "wallet_id": "wallet_t4g_001"
+}
+```
+
+#### POST `/invoice/pay` - Payer une Facture Lightning
+**Body**:
+```json
+{
+  "bolt11": "lnbc500u1p..."
+}
+```
+
+#### GET `/invoice/check/:payment_hash` - Vérifier un Paiement
+**Response**:
+```json
+{
+  "status": "success",
+  "payment_hash": "abc123...",
+  "paid": true,
+  "details": {
+    "amount": 50000,
+    "status": "paid",
+    "timestamp": "2025-01-10T16:00:00Z"
+  }
+}
+```
+
+#### GET `/node/info` - Informations Nœud Lightning
+#### GET `/channels` - Canaux Lightning
+#### GET `/status` - Statut Lightning
+
+## 🚨 Gestion d'Erreurs
+
+### Codes de Statut HTTP
+- `200` - Succès
+- `201` - Créé
+- `400` - Requête invalide
+- `401` - Non authentifié (token JWT manquant/invalide)
+- `403` - Interdit (permissions insuffisantes)
+- `404` - Non trouvé
+- `429` - Trop de requêtes (rate limit)
+- `500` - Erreur serveur
+
+### Format des Erreurs
+```json
+{
+  "detail": "Message d'erreur descriptif",
+  "error": {
+    "type": "ValidationError",
+    "field": "user_id",
+    "message": "User ID requis"
+  }
+}
+```
+
+## ✅ Best Practices d'Implémentation
+
+### Authentification
+- ✅ Utiliser le même token JWT que l'API MCP principale
+- ✅ Renouveler le token avant expiration
+- ✅ Valider JWT dans middleware avant chaque endpoint
+- ❌ Ne pas exposer le token dans le code source
+
+### Validation des Données
+- ✅ Vérifier tous les champs requis
+- ✅ Valider les formats (email, user_id, etc.)
+- ✅ Vérifier les limites (tokens >= 0, etc.)
+- ✅ Sanitizer les inputs
+
+### Gestion des Tokens T4G
+- ✅ Vérifier le solde avant transactions
+- ✅ Implémenter retry logic pour paiements
+- ✅ Logger toutes transactions importantes
+- ✅ Vérifier permissions utilisateur
+
+### Marketplace
+- ✅ Vérifier disponibilité avant réservation
+- ✅ Gérer annulations proprement
+- ✅ Collecter et analyser feedbacks
+- ✅ Vérifier solde client avant réservation
+
+### Lightning Network
+- ✅ Vérifier statut paiements régulièrement
+- ✅ Gérer timeouts de factures
+- ✅ Monitorer canaux Lightning
+- ❌ Ne pas supposer qu'un paiement est instantané
+
+## 🏆 Système de Niveaux T4G
+
+### Contributeur (0-500 T4G)
+- Accès aux services de base
+- Peut participer aux sessions de mentoring
+- Peut recevoir des tokens
+
+### Mentor (500-1500 T4G)
+- Accès marketplace complète
+- Bonus 10% sur tous les gains
+- Peut créer des services personnalisés
+- Priorité sur les réservations
+
+### Expert (1500+ T4G)
+- Services premium exclusifs
+- Priorité support
+- Influence sur les décisions communautaires
+- Leadership et reconnaissance
+
+## 📊 Métriques de Performance
+
+- **Réponse API cible**: <10ms (p50), <50ms (p95)
+- **Lightning operations**: ~120ms (dépendance externe)
+- **Rate limit**: 100 req/min par utilisateur
+- **Cache**: Stats publiques et leaderboard
+
+## 🔗 Références
+
+- Documentation complète: [_SPECS/api-pour-t4g-daznode.md](mdc:_SPECS/api-pour-t4g-daznode.md)
+- Architecture globale: [architecture-token4good.mdc](mdc:.cursor/rules/architecture-token4good.mdc)
+- Backend Rust: [backend-rust.mdc](mdc:.cursor/rules/backend-rust.mdc)
