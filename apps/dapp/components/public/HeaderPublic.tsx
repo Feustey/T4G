@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { Button, ButtonIcon } from '..';
 import { useMediaQuery } from '../../hooks';
-import { useAuth } from '../../contexts/AuthContext';
 import Link from 'next/link';
 import { LangType, LocaleType } from '../../types';
 import { useRouter } from 'next/router';
@@ -13,6 +12,11 @@ export interface IHeaderPublic {
 export const HeaderPublic: React.FC<IHeaderPublic> = ({ lang }) => {
   const router = useRouter();
   const locale = router.locale as LocaleType;
+
+  const handleLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push(`/${locale}/login`);
+  };
 
   const isMobile = useMediaQuery(992);
   return (
@@ -46,10 +50,7 @@ export const HeaderPublic: React.FC<IHeaderPublic> = ({ lang }) => {
       {isMobile ? (
         <ButtonIcon
           accessibilityLabel={lang.utils.signIn}
-          onClick={(e) => {
-            e.preventDefault();
-            signIn('t4g', { callbackUrl: `/${locale}/onboarding` });
-          }}
+          onClick={handleLogin}
           iconName={'user'}
         />
       ) : (
@@ -57,10 +58,7 @@ export const HeaderPublic: React.FC<IHeaderPublic> = ({ lang }) => {
           iconStart={'user'}
           label={lang.utils.signIn}
           variant="primary"
-          onClick={(e) => {
-            e.preventDefault();
-            signIn('t4g', { callbackUrl: `/${locale}/onboarding` });
-          }}
+          onClick={handleLogin}
         />
       )}
     </header>
