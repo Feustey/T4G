@@ -39,12 +39,14 @@ const nextConfig = {
     return config;
   },
   
-  // Variables d'environnement publiques
+  // Variables d'environnement publiques avec fallbacks
+  // Note: Ces valeurs sont injectées au build time et écrasent les fallbacks du code
+  // Il faut donc définir des fallbacks ici aussi pour éviter undefined
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_DAZNO_API_URL: process.env.NEXT_PUBLIC_DAZNO_API_URL,
-    NEXT_PUBLIC_DAZNO_USERS_API_URL: process.env.NEXT_PUBLIC_DAZNO_USERS_API_URL,
-    NEXT_PUBLIC_DAZNO_VERIFY_URL: process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_DAZNO_API_URL: process.env.NEXT_PUBLIC_DAZNO_API_URL || 'https://www.dazno.de/api',
+    NEXT_PUBLIC_DAZNO_USERS_API_URL: process.env.NEXT_PUBLIC_DAZNO_USERS_API_URL || 'https://www.dazno.de/api',
+    NEXT_PUBLIC_DAZNO_VERIFY_URL: process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://www.dazno.de/api/verify',
   },
   
   // Désactiver TypeScript/ESLint checking pendant le build (déjà fait en dev)
