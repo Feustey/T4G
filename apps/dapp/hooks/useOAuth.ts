@@ -78,16 +78,14 @@ export const useOAuth = () => {
         return false;
       }
 
-      // Login avec le backend
-      await login(
-        session.user.email || '',
-        'supabase',
-        session.access_token,
-        {
+      // Login avec le backend via Supabase
+      await login('supabase', {
+        token: session.access_token,
+        providerUserData: {
           email: session.user.email,
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
         }
-      );
+      });
 
       // Rediriger vers dashboard
       router.push('/dashboard');

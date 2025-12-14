@@ -113,6 +113,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           });
           break;
 
+        case 'supabase':
+          // Authentification via Supabase
+          if (!credentials?.token || !credentials?.providerUserData) {
+            throw new Error('Token Supabase ou données utilisateur manquants');
+          }
+          response = await apiClient.login({
+            email: credentials.providerUserData.email,
+            provider: 'supabase',
+            token: credentials.token,
+            provider_user_data: credentials.providerUserData,
+          });
+          break;
+
         default:
           throw new Error(`Provider non supporté: ${provider}`);
       }
