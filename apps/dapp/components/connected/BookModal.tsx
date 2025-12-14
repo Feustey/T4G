@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import { Avatar, BookingButton, Button, Message } from 'apps/dapp/components';
-import useSwr from 'swr';
+import { Avatar, BookingButton, Message } from 'apps/dapp/components';
 import { useAuth } from '../../contexts/AuthContext';
-import { SessionType, UserType } from '@shared/types';
-import { capitalise } from 'apps/dapp/services';
-import { setUserAbout } from 'apps/dapp/services';
-import { useRouter } from 'next/router';
 import { LangType, ReceiveServiceType } from 'apps/dapp/types';
 import { SelectElement } from '@t4g/ui/elements';
 import Image from 'next/image';
@@ -20,10 +15,7 @@ export const BookModal: React.FC<BookModalProps> = function ({
   benefit,
 }: BookModalProps) {
 
-  const session = useSession().data as SessionType;
-  const user: UserType = session!.user;
-
-  const router = useRouter();
+  const { user } = useAuth();
 
   const [topic, setTopic] = useState<string>();
 
