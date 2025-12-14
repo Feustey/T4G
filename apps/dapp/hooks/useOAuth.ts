@@ -131,16 +131,14 @@ export const useOAuth = () => {
 
       const daznoUser = await response.json();
 
-      // Login avec le backend
-      await login(
-        daznoUser.user.email,
-        'dazeno',
-        token,
-        {
+      // Login avec le backend via Dazno
+      await login('dazeno', {
+        token: token,
+        providerUserData: {
           email: daznoUser.user.email,
           name: daznoUser.user.name,
         }
-      );
+      });
 
       // Rediriger vers dashboard
       router.push('/dashboard');
