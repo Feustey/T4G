@@ -19,7 +19,7 @@
 // import { EditExperienceForm } from "./EditExperienceForm";
 // import useSwr from "swr";
 // import moment from "moment/moment";
-// import { useSession } from "next-auth/react";
+// import { useAuth } from '@/contexts/AuthContext';
 // import { SessionType, UserType } from "@shared/types";
 
 // interface SetupProfileFormPageProps {

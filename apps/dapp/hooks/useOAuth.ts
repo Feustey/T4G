@@ -1,9 +1,10 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
-import { createClient } from '@supabase/supabase-js';
+// Note: Supabase OTP désactivé - Utilisation d'OAuth uniquement (t4g, LinkedIn, Dazno)
+// import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+// const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const useOAuth = () => {
   const { login } = useAuth();
@@ -43,7 +44,9 @@ export const useOAuth = () => {
 
   /**
    * Authentification avec Supabase OTP (email magic link)
+   * NOTE: Désactivé - Utilisation d'OAuth uniquement (t4g, LinkedIn, Dazno)
    */
+  /*
   const loginWithOTP = async (email: string) => {
     try {
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -65,10 +68,13 @@ export const useOAuth = () => {
       throw error;
     }
   };
+  */
 
   /**
    * Vérifier la session Supabase et authentifier l'utilisateur
+   * NOTE: Désactivé - Utilisation d'OAuth uniquement (t4g, LinkedIn, Dazno)
    */
+  /*
   const verifySupabaseSession = async () => {
     try {
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -95,6 +101,7 @@ export const useOAuth = () => {
       return false;
     }
   };
+  */
 
   /**
    * Authentification avec Dazno (session existante ou nouvelle)
@@ -159,20 +166,20 @@ export const useOAuth = () => {
       return;
     }
 
-    // 2. Vérifier session Supabase
-    const hasSupabaseSession = await verifySupabaseSession();
-    if (hasSupabaseSession) {
-      return;
-    }
+    // 2. Vérifier session Supabase - DÉSACTIVÉ
+    // const hasSupabaseSession = await verifySupabaseSession();
+    // if (hasSupabaseSession) {
+    //   return;
+    // }
 
     // Aucune session active
     return false;
   };
 
   return {
-    loginWithOTP,
+    // loginWithOTP, // Désactivé - OAuth uniquement
     loginWithDazno,
-    verifySupabaseSession,
+    // verifySupabaseSession, // Désactivé - OAuth uniquement
     checkExistingDaznoSession,
     initAuth,
   };

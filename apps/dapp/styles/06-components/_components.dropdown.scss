@@ -17,14 +17,14 @@
   box-sizing: border-box;
   display: block;
   inline-size: fit-content;
-  min-block-size: rem(48px);
+  min-block-size: 3rem; /* 48px */
   block-size: fit-content;
   outline: 0;
 }
 
 .dropdown > label {
   display: inline-block;
-  margin-block-end: rem(4px);
+  margin-block-end: 0.25rem;
 }
 
 .dropdown summary {
@@ -33,7 +33,7 @@
   list-style: none;
   position: relative;
   inline-size: fit-content;
-  border-radius: rem(4px);
+  border-radius: 0.25rem;
   background-color: var(--semantic-color_background-primary);
   padding: 20px 20px 20px 20px;
   outline: 0;
@@ -52,7 +52,7 @@
 .dropdown:not([aria-disabled='true']) summary:active,
 .dropdown:not([aria-disabled='true']) details[open] summary,
 .dropdown:not([aria-disabled='true']) summary:focus-visible {
-  //   box-shadow: inset 0 0 0 rem(2px) var(--semantic-color_border-active);
+  //   box-shadow: inset 0 0 0 0.125rem var(--semantic-color_border-active);
 }
 
 .dropdown[aria-disabled='true'] summary {
@@ -73,11 +73,11 @@
   content: '';
   mask: url("data:image/svg+xml;charset=utf-8, <svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' clip-rule='evenodd' d='m8 8.781 3.3-3.3.943.943L8 10.667 3.757 6.424l.943-.943 3.3 3.3z'/></svg>");
   mask-size: cover;
-  inline-size: rem(24px);
-  block-size: rem(24px);
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
   position: absolute;
   display: block;
-  inset-inline-end: rem(10px);
+  inset-inline-end: 0.625rem;
   transition: transform 200ms ease;
   background-color: blue;
 }
@@ -89,7 +89,7 @@
   align-items: flex-start;
   position: absolute;
   background-color: grey;
-  border-radius: rem(4px);
+  border-radius: 0.25rem;
   block-size: fit-content;
   inline-size: fit-content;
   padding: 20px;
@@ -97,7 +97,7 @@
   z-index: 2;
   overflow-y: auto;
   transform: translateY(20px);
-  max-block-size: rem(260px);
+  max-block-size: 16.25rem;
 }
 
 .dropdown_items:focus {
@@ -119,7 +119,7 @@
   margin: 0;
   width: 100%;
   block-size: 100%;
-  border-radius: rem(4px);
+  border-radius: 0.25rem;
   display: inline-flex;
   position: relative;
   height: auto;
@@ -150,14 +150,14 @@
 
 .dropdown_items > input:checked + label {
   color: white;
-  padding-inline-end: rem(48px);
+  padding-inline-end: 3rem;
 }
 
 .dropdown_items > input + label::after {
   content: '';
   mask: url("data:image/svg+xml;charset=utf-8, <svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' clip-rule='evenodd' d='m6.667 10.115 6.128-6.129.943.943L6.667 12 2.424 7.757l.943-.942 3.3 3.3Z'/></svg>");
-  width: rem(24px);
-  block-size: rem(24px);
+  width: 1.5rem;
+  block-size: 1.5rem;
   position: relative;
   display: block;
   margin-inline-start: 20px;
@@ -169,7 +169,7 @@
   position: absolute;
   inset-inline-end: 0;
   margin-block: 0;
-  margin-inline: rem(12px);
+  margin-inline: 0.75rem;
 }
 
 .dropdown details[open] summary::after {

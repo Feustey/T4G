@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "token4good-dapp",
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
@@ -25,7 +24,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://dazno.de"
+          "value": "https://token-for-good.com"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -61,13 +60,6 @@
       "destination": "/fr",
       "permanent": false
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@next_public_api_url",
-    "NEXT_PUBLIC_DAZNO_API_URL": "@next_public_dazno_api_url",
-    "NEXT_PUBLIC_DAZNO_USERS_API_URL": "@next_public_dazno_users_api_url",
-    "NODE_ENV": "production",
-    "SKIP_ENV_VALIDATION": "true"
-  }
+  ]
 }
 

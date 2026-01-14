@@ -1,10 +1,9 @@
 {
   "version": 2,
-  "name": "token4good-dapp",
   "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "cd apps/dapp && npm run build",
+  "outputDirectory": "apps/dapp/.next",
+  "installCommand": "npm install --legacy-peer-deps && cd apps/dapp && npm install --legacy-peer-deps",
   "rewrites": [
     {
       "source": "/api/backend/:path*",
@@ -13,6 +12,10 @@
     {
       "source": "/health",
       "destination": "https://apirust-production.up.railway.app/health"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://apirust-production.up.railway.app/api/:path*"
     }
   ],
   "headers": [
@@ -61,5 +64,8 @@
       "destination": "/fr",
       "permanent": false
     }
-  ]
+  ],
+  "github": {
+    "silent": true
+  }
 }

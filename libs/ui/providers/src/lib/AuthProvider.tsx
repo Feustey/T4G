@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import React, { createContext, ReactNode, useContext } from "react";
 import { Providers } from "@t4g/types";
 

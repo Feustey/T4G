@@ -4,12 +4,14 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "start": "NODE_OPTIONS='--inspect' nx serve",
-    "build": "nx build",
+    "build": "cd apps/dapp && npm run build",
+    "build:nx": "nx build",
     "test": "nx test",
     "lint": "npx eslint apps/dapp",
     "lintfix": "nx affected:lint --fix",
     "format": "nx format:write",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "install:dapp": "cd apps/dapp && npm install --legacy-peer-deps"
   },
   "private": true,
   "dependencies": {
@@ -37,6 +39,7 @@
     "flat": "^5.0.2",
     "moment": "^2.29.1",
     "next": "^13.5.0",
+    "next-auth": "^4.24.13",
     "nodemailer": "6.9.9",
     "pino": "^8.11.0",
     "pino-pretty": "^9.4.0",
@@ -108,7 +111,7 @@
     "axios": "^1.7.4",
     "babel-jest": "27.4.6",
     "chai": "^4.3.7",
-    "cypress": "12.1.0",
+    "cypress": "^11.2.0",
     "esbuild": "^0.15.7",
     "eslint": "8.8.0",
     "eslint-config-next": "12.0.9",

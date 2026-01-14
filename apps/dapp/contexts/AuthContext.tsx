@@ -30,12 +30,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Charger l'utilisateur au montage
   useEffect(() => {
     loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Charger l'utilisateur depuis le token stocké
   const loadUser = async () => {
     try {
       setLoading(true);
+      
+      // Vérifier que nous sommes côté client
+      if (typeof window === 'undefined') {
+        setLoading(false);
+        return;
+      }
+      
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -51,7 +59,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('Erreur lors du chargement de l\'utilisateur:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
       // Token invalide ou expiré
-      apiClient.clearToken();
+      if (typeof window !== 'undefined') {
+        apiClient.clearToken();
+      }
       setUser(null);
     } finally {
       setLoading(false);
@@ -144,7 +154,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Déconnexion
   const logout = () => {
-    apiClient.clearToken();
+    if (typeof window !== 'undefined') {
+      apiClient.clearToken();
+    }
     setUser(null);
     setError(null);
     // Redirection vers la page de login

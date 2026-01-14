@@ -8,7 +8,7 @@
 // import { ClaimTokensFormPage } from "./ClaimTokensFormPage";
 // import { OnboardingCompletedFormPage } from "./OnboardingCompletedFormPage";
 // import { Components } from "@t4g/types";
-// import { useSession } from "next-auth/react";
+// import { useAuth } from '@/contexts/AuthContext';
 // import { SessionType, UserType } from "@shared/types";
 
 // export const OnboardingForm: React.FC<Components.Onboarding.OnboardingForm.Props> =

@@ -16,7 +16,7 @@ import { useAppContext } from "@t4g/ui/providers";
 import { useRouter } from "next/router";
 import React from "react";
 import { OverlayNotificationLayout } from "../NotificationLayout/OverlayNotificationLayout";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import useSwr from "swr";
 import { SessionType } from "apps/dapp/types";
 

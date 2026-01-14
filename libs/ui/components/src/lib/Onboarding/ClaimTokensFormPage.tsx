@@ -5,7 +5,7 @@
 //   SpinnerIconElement,
 // } from "@t4g/ui/icons";
 // import { ButtonElement } from "@t4g/ui/elements";
-// import { useSession } from "next-auth/react";
+// import { useAuth } from '@/contexts/AuthContext';
 // import { SessionType } from "@shared/types";
 
 // interface ClaimTokensFormPageProps {

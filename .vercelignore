@@ -1,0 +1,9 @@
+token4good-backend
+scripts
+.git
+.github
+staging-deploy
+*.md
+!README.md
+.husky
+

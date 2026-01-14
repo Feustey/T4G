@@ -119,3 +119,7 @@ Si vous rencontrez des erreurs :
 
 4. **Consulter les logs** : Les erreurs détaillées sont affichées dans la console
 
+
+
+
+

@@ -16,7 +16,7 @@ import { Api, Entities } from "@t4g/types";
 import { NewExperience } from "@t4g/service/data";
 import { Button } from "apps/dapp/components";
 import useSwr from "swr";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { SessionType, UserType } from "@shared/types";
 import { apiFetch, apiFetcher } from "apps/dapp/services/config";
 

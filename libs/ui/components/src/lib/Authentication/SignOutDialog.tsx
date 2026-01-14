@@ -1,6 +1,6 @@
 import { ButtonElement } from "@t4g/ui/elements";
 import { useAppContext } from "@t4g/ui/providers";
-import { signOut } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import React from "react";
 import Cookies from "cookies";
 

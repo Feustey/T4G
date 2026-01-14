@@ -1,6 +1,6 @@
 // import React from "react";
 // import { Api, Components } from "@t4g/types";
-// import { useSession } from "next-auth/react";
+// import { useAuth } from '@/contexts/AuthContext';
 // import useSwr from "swr";
 // import { ServiceCategory } from "@t4g/service/data";
 // import { Spinner } from "../../../../../../apps/dapp/components";

@@ -2,7 +2,7 @@ import { AvatarElement, TextElement } from "@t4g/ui/elements";
 import { DeleteIconElement, EditIconElement } from "@t4g/ui/icons";
 import React from "react";
 import { Auth, Layouts } from "@t4g/types";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { SessionType, UserType } from "@shared/types";
 
 type UserProfileProps = Layouts.AppLayout.UserProfile.Props;

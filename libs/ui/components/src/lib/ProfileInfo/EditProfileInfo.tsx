@@ -6,7 +6,7 @@ import { useAppContext } from "@t4g/ui/providers";
 import { Api } from "@t4g/types";
 import { EditProgram } from "./EditProgram";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import useSwr from "swr";
 import Resizer from "react-image-file-resizer";
 import { SessionType, UserType } from "@shared/types";

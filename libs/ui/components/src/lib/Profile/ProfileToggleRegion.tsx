@@ -2,7 +2,7 @@ import React from "react";
 import { AvatarElement, TextIconElement } from "@t4g/ui/elements";
 import { ChevronDownIconElement } from "@t4g/ui/icons";
 import { Layouts } from "@t4g/types";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { SessionType, UserType } from "@shared/types";
 import useSwr from "swr";
 

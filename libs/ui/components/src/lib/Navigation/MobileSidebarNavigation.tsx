@@ -2,7 +2,7 @@ import { useAppContext } from "@t4g/ui/providers";
 import { useRouter } from "next/router";
 import React from "react";
 import { NavigationItem } from "./NavigationItem";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { Auth } from "@t4g/types";
 import { SessionType, UserType } from "@shared/types";
 

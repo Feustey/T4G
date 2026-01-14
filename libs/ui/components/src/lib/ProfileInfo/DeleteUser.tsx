@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useAppContext } from "@t4g/ui/providers";
 import { Button, Message } from "apps/dapp/components";
 import useSwr from "swr";
-import { signOut, useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { SessionType, UserType } from "@shared/types";
 import { useRouter } from "next/router";
 

@@ -1,15 +1,25 @@
 const { join } = require('path');
-const { createGlobPatternsForDependencies } = require('@nrwl/next/tailwind');
+
+// Essayer d'importer Nx, sinon utiliser une version simple
+let createGlobPatternsForDependencies;
+try {
+  createGlobPatternsForDependencies = require('@nrwl/next/tailwind').createGlobPatternsForDependencies;
+} catch (e) {
+  // Fallback si Nx n'est pas disponible
+  createGlobPatternsForDependencies = () => [];
+}
 
 module.exports = {
   mode: 'jit',
-  presets: [require('../../tailwind-workspace-preset.js')],
+  // presets: [require('../../tailwind-workspace-preset.js')], // Désactivé pour Vercel
   content: [
     join(__dirname, 'pages/**/*.{ts,tsx}'),
+    join(__dirname, 'components/**/*.{ts,tsx}'),
+    join(__dirname, 'layouts/**/*.{ts,tsx}'),
     join(__dirname, '../../libs/ui/**/*.{ts,tsx}'),
     ...createGlobPatternsForDependencies(__dirname),
   ],
-  darkMode: 'media', // or 'media' or 'class'
+  darkMode: 'media',
   theme: {
     extend: {},
   },

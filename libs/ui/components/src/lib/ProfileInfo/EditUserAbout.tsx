@@ -4,7 +4,7 @@ import { useAppContext } from "@t4g/ui/providers";
 import { Api, Entities } from "@t4g/types";
 import { Button, Message } from "apps/dapp/components";
 import useSwr from "swr";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { SessionType, UserType } from "@shared/types";
 import { capitalise } from "apps/dapp/services";
 import { setUserAbout } from "apps/dapp/services";

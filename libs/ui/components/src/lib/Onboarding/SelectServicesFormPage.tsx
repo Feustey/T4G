@@ -2,7 +2,7 @@
 // import { DividerElement } from "@t4g/ui/elements";
 // import { TFGTokenIconElement } from "@t4g/ui/icons";
 // import { Api, Components } from "@t4g/types";
-// import { useSession } from "next-auth/react";
+// import { useAuth } from '@/contexts/AuthContext';
 // import useSwr from "swr";
 // import { Spinner } from "apps/dapp/components";
 // import { ServiceCategory } from "@t4g/service/data";

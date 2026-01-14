@@ -13,7 +13,7 @@
 // import dynamic, { LoaderComponent } from "next/dynamic";
 // import { useAppContext } from "@t4g/ui/providers";
 // import useSwr from "swr";
-// import { useSession } from "next-auth/react";
+// import { useAuth } from '@/contexts/AuthContext';
 // import { SessionType } from "@shared/types";
 
 // const Editor = dynamic<EditorProps>(

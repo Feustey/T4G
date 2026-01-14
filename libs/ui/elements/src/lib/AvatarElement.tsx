@@ -1,6 +1,6 @@
 import { Elements } from "@t4g/types";
 import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/contexts/AuthContext';
 import { SessionType } from "@shared/types";
 
 export const AvatarElement: React.FC<Elements.AvatarElement.Props> = ({
