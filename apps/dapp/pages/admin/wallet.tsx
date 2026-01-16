@@ -4,7 +4,6 @@ import { LinkElement } from '../../components/elements';
 import { Wallet, TransactionList } from '../../components/ui';
 import { GetServerSideProps } from 'next';
 import { Components } from '@t4g/types';
-import { getPageProps } from '@t4g/ui/pages';
 import useSwr from 'swr';
 import Head from 'next/head';
 import { useIndexing } from '../../hooks';

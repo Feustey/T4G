@@ -16,7 +16,7 @@ import {
 } from 'apps/dapp/types';
 import { capitalise } from 'apps/dapp/services';
 import { useAuth } from '../../contexts/AuthContext';
-import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
+import { AppModal } from '@t4g/ui/layouts';
 import useSwr from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
 import { apiFetcher } from 'apps/dapp/services/config';
