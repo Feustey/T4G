@@ -58,13 +58,7 @@
       ]
     }
   ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/fr",
-      "permanent": false
-    }
-  ],
+  "redirects": [],
   "github": {
     "silent": true
   }
