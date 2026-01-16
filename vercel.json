@@ -3,7 +3,7 @@
   "framework": "nextjs",
   "buildCommand": "cd apps/dapp && npm run build",
   "outputDirectory": "apps/dapp/.next",
-  "installCommand": "npm install --legacy-peer-deps && cd apps/dapp && npm install --legacy-peer-deps",
+  "installCommand": "npm install --legacy-peer-deps",
   "rewrites": [
     {
       "source": "/api/backend/:path*",
