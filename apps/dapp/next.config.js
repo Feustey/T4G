@@ -62,6 +62,10 @@ const nextConfig = {
       '@t4g/ui/layouts': require('path').resolve(__dirname, '../../libs/ui/layouts/src/index.ts'),
       '@t4g/ui/pages': require('path').resolve(__dirname, '../../libs/ui/pages/src/index.ts'),
       '@t4g/ui/providers': require('path').resolve(__dirname, '../../libs/ui/providers/src/index.ts'),
+      // Alias pour apps/dapp (résout apps/dapp/* vers le répertoire local)
+      'apps/dapp': require('path').resolve(__dirname, '.'),
+      // Alias @ pour apps/dapp (compatible avec tsconfig.json)
+      '@': require('path').resolve(__dirname, '.'),
     };
     
     return config;
