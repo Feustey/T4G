@@ -1,9 +1,10 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "cd apps/dapp && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "apps/dapp/.next",
   "installCommand": "npm install --legacy-peer-deps",
+  "rootDirectory": "apps/dapp",
   "rewrites": [
     {
       "source": "/api/backend/:path*",
