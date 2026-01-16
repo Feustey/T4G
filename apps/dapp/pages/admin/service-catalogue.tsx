@@ -3,7 +3,7 @@ import { AppLayout } from '../../components/elements';
 import {
   ServiceCatalogueList,
   ServiceCreateForm,
-} from '@t4g/ui/components';
+} from '../../components/ui';
 import { Api, Components } from '@t4g/types';
 import { ButtonElement } from '../../components/elements';
 import { useAppContext } from '../../contexts/AppContext';

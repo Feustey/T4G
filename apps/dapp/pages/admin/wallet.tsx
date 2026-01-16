@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppLayout } from '../../components/elements';
 import { LinkElement } from '../../components/elements';
-import { Wallet, TransactionList } from '@t4g/ui/components';
+import { Wallet, TransactionList } from '../../components/ui';
 import { GetServerSideProps } from 'next';
 import { Components } from '@t4g/types';
 import { getPageProps } from '@t4g/ui/pages';

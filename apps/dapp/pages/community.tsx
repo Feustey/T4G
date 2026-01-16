@@ -1,5 +1,5 @@
 import React from 'react';
-import { CopyIconElement, PolygonIconElement } from '@t4g/ui/icons';
+import { CopyIconElement, PolygonIconElement } from '../components/icons';
 import getConfig from 'next/config';
 import Head from 'next/head';
 import useSwr from 'swr';

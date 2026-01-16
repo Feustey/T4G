@@ -1,5 +1,5 @@
 import React from 'react';
-import { TransactionList } from '@t4g/ui/components';
+import { TransactionList } from '../components/ui';
 import { Components } from '@t4g/types';
 import useSwr from 'swr';
 import Head from 'next/head';

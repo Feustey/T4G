@@ -5,14 +5,13 @@ import Head from 'next/head';
 import ConnectedLayout from '../../layouts/ConnectedLayout';
 import { useIndexing } from '../../hooks';
 import { AuthPageType, CategoryType, LangType, SessionType } from 'apps/dapp/types';
-import { ServicesList } from '@t4g/ui/components';
+import { ServicesList } from '../../components/ui';
 import { useAppSelector } from 'apps/dapp/hooks';
 import { selectProposedServices } from 'apps/dapp/store/slices/proposedServicesSlice';
 import { alumniServices } from 'apps/dapp/data';
 import Image from 'next/image';
 import { Breadcrumb, Icons } from 'apps/dapp/components';
-import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
-import { RightPanel } from 'libs/ui/layouts/src/lib/AppLayout/RightPanel';
+// AppModal and RightPanel commented out - not available in local build
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 

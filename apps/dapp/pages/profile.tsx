@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditProfileInfo } from '@t4g/ui/components';
+import { EditProfileInfo } from '../components/ui';
 import { Components } from '@t4g/types';
 import Head from 'next/head';
 import ConnectedLayout from '../layouts/ConnectedLayout';
@@ -7,10 +7,8 @@ import { useIndexing } from '../hooks';
 import { AuthPageType, SessionType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components';
-import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
-import { RightPanel } from 'libs/ui/layouts/src/lib/AppLayout/RightPanel';
 import { useAppContext } from '../contexts/AppContext';
-import { DeleteUser } from 'libs/ui/components/src/lib/ProfileInfo/DeleteUser';
+import { DeleteUser } from '../components/ui/DeleteUser';
 
 const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
   lang,
