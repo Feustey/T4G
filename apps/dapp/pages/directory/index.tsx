@@ -14,7 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Image from 'next/image';
 import useSwr, { SWRResponse } from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
-import { User, UserWallet } from 'libs/types/src/lib/api/index.types';
+import { User, UserWallet } from '@t4g/types';
 import { __values } from 'tslib';
 import { apiFetcher } from 'apps/dapp/services/config';
 

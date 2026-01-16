@@ -20,7 +20,7 @@ import { AppModal } from '@t4g/ui/layouts';
 import useSwr from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
 import { apiFetcher } from 'apps/dapp/services/config';
-import { User } from 'libs/types/src/lib/api/index.types';
+import { User } from '@t4g/types';
 
 interface IProfilePage {
   lang: LangType;

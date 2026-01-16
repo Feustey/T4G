@@ -2,7 +2,7 @@ import { UserCVType, UserRoleType } from 'apps/dapp/types';
 import { Avatar } from './Avatar';
 import Link from 'next/link';
 import { capitalise } from 'apps/dapp/services';
-import { User } from 'libs/types/src/lib/api/index.types';
+import { User } from '@t4g/types';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 import { Skeleton } from '../shared/Skeleton'; // Supposant que vous avez un composant Skeleton
