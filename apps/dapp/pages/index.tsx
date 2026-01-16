@@ -1,59 +1,29 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { LangType, LocaleType } from '../types';
-import { Spinner } from '../components'; // Optionnel: pour un meilleur retour visuel
-import { useAuth } from '../contexts/AuthContext';
+import { GetServerSideProps } from 'next';
+import { LangType } from '../types';
+import { Spinner } from '../components';
 
 export interface IPage {
   lang: LangType;
 }
 
 /**
- * Page d'accueil qui redirige les utilisateurs selon leur statut d'authentification et d'onboarding.
- * Affiche un spinner pendant la redirection.
+ * Page d'accueil qui redirige les utilisateurs vers la page de login.
+ * La redirection se fait côté serveur pour éviter les erreurs 500.
  */
 export function Page({ lang }: IPage) {
-  const router = useRouter();
-  const locale = router.locale as LocaleType;
-  const { user, isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      // Utilisateur authentifié
-      if (!user.is_onboarded) {
-        // Première connexion → onboarding
-        router.push('/onboarding', '/onboarding', { locale });
-      } else {
-        // Utilisateur déjà onboardé → dashboard
-        router.push('/dashboard', '/dashboard', { locale });
-      }
-    } else {
-      // Non authentifié → login
-      router.push('/login', '/login', { locale });
-    }
-  }, [router, locale, isAuthenticated, user]);
-
   return (
     <>
       <Head>
         <title>Token For Good</title>
-        {/* Les balises meta sont conservées pour le référencement, même si la page est transitoire */}
-        <meta name="description" content={lang.page.home.head.metaDesc} />
-        <meta name="keywords" content={`${lang.utils.keywords}`} />
+        <meta name="description" content={lang?.page?.home?.head?.metaDesc || 'Token For Good'} />
         <meta key="robots" name="robots" content="noindex,follow" />
         <meta
           property="og:image"
           content="https://app.token-for-good.com/social.png"
         />
         <meta property="og:title" content="Token For Good" />
-        <meta
-          property="og:description"
-          content={lang.page.home.head.metaDesc}
-        />
-        {/* ... autres balises meta ... */}
       </Head>
-      {/* Affiche un spinner pour indiquer à l'utilisateur qu'une action est en cours */}
       <div
         style={{
           display: 'flex',
@@ -62,10 +32,23 @@ export function Page({ lang }: IPage) {
           height: '100vh',
         }}
       >
-        <Spinner lang={lang} spinnerText={lang.utils.redirecting} size="lg" />
+        <Spinner lang={lang} spinnerText={lang?.utils?.redirecting || 'Redirection...'} size="lg" />
       </div>
     </>
   );
 }
+
+/**
+ * Redirection côté serveur pour éviter l'erreur 500 lors du SSR.
+ * Les utilisateurs sont redirigés vers /login où la logique d'authentification est gérée.
+ */
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    redirect: {
+      destination: '/login',
+      permanent: false,
+    },
+  };
+};
 
 export default Page;
