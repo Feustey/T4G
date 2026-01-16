@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd apps/dapp && npm run build",
+  "buildCommand": "cp -r apps/dapp/public ./public && cd apps/dapp && npm run build",
   "outputDirectory": "apps/dapp/.next",
   "installCommand": "npm install --legacy-peer-deps",
   "rewrites": [
