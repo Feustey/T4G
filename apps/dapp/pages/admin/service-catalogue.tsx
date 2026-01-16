@@ -6,7 +6,7 @@ import {
 } from '@t4g/ui/components';
 import { Api, Components } from '@t4g/types';
 import { ButtonElement } from '@t4g/ui/elements';
-import { useAppContext } from '@t4g/ui/providers';
+import { useAppContext } from '../../contexts/AppContext';
 import useSwr from 'swr';
 import Head from 'next/head';
 import { useAuth } from '../../contexts/AuthContext';

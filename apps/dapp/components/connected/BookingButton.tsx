@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from 'apps/dapp/hooks';
-import { useAppContext } from '@t4g/ui/providers';
+import { useAppContext } from '../../contexts/AppContext';
 import { LangType } from 'apps/dapp/types';
 import { useState } from 'react';
 import { Button } from '..';

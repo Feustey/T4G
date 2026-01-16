@@ -12,7 +12,7 @@ import { TableSkeleton } from 'apps/dapp/components';
 import { HiddenIconElement } from '@t4g/ui/icons';
 import { ButtonElement } from '@t4g/ui/elements';
 import { UpdateDeliveryStatus } from 'libs/ui/components/src/lib/Admin/UpdateDeliveryStatus';
-import { useAppContext } from '@t4g/ui/providers';
+import { useAppContext } from '../../contexts/AppContext';
 import { selectPendingTransactions } from 'apps/dapp/store/slices';
 import { apiFetcher } from 'apps/dapp/services/config';
 

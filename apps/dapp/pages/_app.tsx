@@ -3,8 +3,8 @@ import localFont from '@next/font/local';
 // NextAuth supprimé - utilisation d'AuthContext JWT
 // import './styles.css'; // Temporarily commented due to build error
 import '../styles/styles.scss';
-import '../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import { AppContextProvider } from '@t4g/ui/providers';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { AppContextProvider } from '../contexts/AppContext';
 import React from 'react';
 import { useLanguage } from '../hooks';
 import { Spinner, UserNotifications } from '../components';

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useAppContext } from '@t4g/ui/providers';
+import { useAppContext } from '../../contexts/AppContext';
 import { BenefitCard, Button, Icons } from 'apps/dapp/components';
 import { capitalise } from 'apps/dapp/services';
 import {

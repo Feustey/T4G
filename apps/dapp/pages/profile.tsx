@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components';
 import { AppModal } from 'libs/ui/layouts/src/lib/AppLayout/AppModal';
 import { RightPanel } from 'libs/ui/layouts/src/lib/AppLayout/RightPanel';
-import { useAppContext } from '@t4g/ui/providers';
+import { useAppContext } from '../contexts/AppContext';
 import { DeleteUser } from 'libs/ui/components/src/lib/ProfileInfo/DeleteUser';
 
 const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
