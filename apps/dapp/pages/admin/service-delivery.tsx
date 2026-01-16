@@ -1,6 +1,6 @@
 import { Components } from '@t4g/types';
 import { BlockchainReceipt } from '@t4g/ui/components';
-import { AppLayout } from '@t4g/ui/layouts';
+import { AppLayout } from '../../components/elements';
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import useSwr from 'swr';
@@ -10,7 +10,7 @@ import { AuthPageType, SessionType } from 'apps/dapp/types';
 import { useAuth } from '../../contexts/AuthContext';
 import { TableSkeleton } from 'apps/dapp/components';
 import { HiddenIconElement } from '@t4g/ui/icons';
-import { ButtonElement } from '@t4g/ui/elements';
+import { ButtonElement } from '../../components/elements';
 import { UpdateDeliveryStatus } from 'libs/ui/components/src/lib/Admin/UpdateDeliveryStatus';
 import { useAppContext } from '../../contexts/AppContext';
 import { selectPendingTransactions } from 'apps/dapp/store/slices';

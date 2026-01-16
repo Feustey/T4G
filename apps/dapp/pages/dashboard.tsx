@@ -1,4 +1,4 @@
-import moment from 'moment/moment';
+import moment from 'moment';
 import Image from 'next/image';
 import React, { useState, useMemo } from 'react';
 import Head from 'next/head';

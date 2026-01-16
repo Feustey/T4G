@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppLayout } from '@t4g/ui/layouts';
+import { AppLayout } from '../../components/elements';
 import { useAuth } from '../../contexts/AuthContext';
 import Head from 'next/head';
 import ConnectedLayout from '../../layouts/ConnectedLayout';

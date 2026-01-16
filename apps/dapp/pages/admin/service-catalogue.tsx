@@ -1,11 +1,11 @@
 import React from 'react';
-import { AppLayout } from '@t4g/ui/layouts';
+import { AppLayout } from '../../components/elements';
 import {
   ServiceCatalogueList,
   ServiceCreateForm,
 } from '@t4g/ui/components';
 import { Api, Components } from '@t4g/types';
-import { ButtonElement } from '@t4g/ui/elements';
+import { ButtonElement } from '../../components/elements';
 import { useAppContext } from '../../contexts/AppContext';
 import useSwr from 'swr';
 import Head from 'next/head';

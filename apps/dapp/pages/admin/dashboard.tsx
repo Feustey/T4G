@@ -1,9 +1,9 @@
 import React from 'react';
-import { AppLayout } from '@t4g/ui/layouts';
-import { DividerElement } from '@t4g/ui/elements';
+import { AppLayout } from '../../components/elements';
+import { DividerElement } from '../../components/elements';
 import { Components } from '@t4g/types';
 import useSwr from 'swr';
-import moment from 'moment/moment';
+import moment from 'moment';
 import Link from 'next/link';
 import { TableSkeleton } from '../../components';
 

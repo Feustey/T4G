@@ -1,4 +1,4 @@
-import moment from 'moment/moment';
+import moment from 'moment';
 import React from 'react';
 import Head from 'next/head';
 import { useAppSelector, useIndexing } from '../hooks';

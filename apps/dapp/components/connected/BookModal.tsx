@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Avatar, BookingButton, Message } from 'apps/dapp/components';
 import { useAuth } from '../../contexts/AuthContext';
 import { LangType, ReceiveServiceType } from 'apps/dapp/types';
-import { SelectElement } from '@t4g/ui/elements';
+import { SelectElement } from '../elements';
 import Image from 'next/image';
 
 interface BookModalProps {
