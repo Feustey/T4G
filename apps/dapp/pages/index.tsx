@@ -91,7 +91,33 @@ export function Page({ lang, htmlContent }: IPage) {
 export default Page;
 
 export const getStaticProps: GetStaticProps = async () => {
-  const filePath = path.join(process.cwd(), 'public', 'landing', 'index.html');
+  // Dans un monorepo Nx, process.cwd() pointe vers la racine du workspace
+  // Nous devons construire le chemin correct vers apps/dapp/public/landing/index.html
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  let filePath: string;
+  
+  if (isProduction) {
+    // En production (Vercel), le répertoire de travail est déjà apps/dapp
+    filePath = path.join(process.cwd(), 'public', 'landing', 'index.html');
+  } else {
+    // En développement, depuis la racine du monorepo
+    const workspaceRoot = process.cwd();
+    filePath = path.join(workspaceRoot, 'apps', 'dapp', 'public', 'landing', 'index.html');
+  }
+  
+  // Vérifier si le fichier existe et utiliser le bon chemin
+  if (!fs.existsSync(filePath)) {
+    // Essayer l'autre chemin
+    const altPath = path.join(process.cwd(), 'public', 'landing', 'index.html');
+    if (fs.existsSync(altPath)) {
+      filePath = altPath;
+    } else {
+      // Dernier essai : depuis apps/dapp
+      filePath = path.join(process.cwd(), 'apps', 'dapp', 'public', 'landing', 'index.html');
+    }
+  }
+  
   const htmlContent = fs.readFileSync(filePath, 'utf8');
 
   return {
