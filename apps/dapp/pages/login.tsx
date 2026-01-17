@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { LangType, LocaleType } from '../types';
 import PublicLayout from '../layouts/PublicLayout';
-import { useIndexing } from '../hooks';
+import { useIndexing, useOAuth } from '../hooks';
 import { GetServerSideProps } from 'next';
 import OnboardingLayout from '../layouts/OnboardingLayout';
 import { Button } from '../components';
@@ -19,6 +19,7 @@ export function Page({ lang }: IPage) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
   const { login, isAuthenticated, user } = useAuth();
+  const { loginWithLinkedIn, loginWithDazno } = useOAuth();
 
   const [debugButtonsVisible, setDebugButtonsVisible] =
     useState<boolean>(false);
@@ -107,8 +108,8 @@ export function Page({ lang }: IPage) {
                     e.preventDefault();
                     setIsLoggingIn(true);
                     try {
-                      // Rediriger vers OAuth Dazno (à implémenter côté backend)
-                      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/dazno/authorize?redirect=${encodeURIComponent(window.location.origin + `/${locale}/login`)}`;
+                      // Utiliser le hook useOAuth pour Dazno
+                      await loginWithDazno();
                     } catch (error) {
                       console.error('Erreur login Dazno:', error);
                       setIsLoggingIn(false);
@@ -119,12 +120,12 @@ export function Page({ lang }: IPage) {
                   label={'Login with LinkedIn'}
                   variant="primary"
                   disabled={isLoggingIn}
-                  onClick={async (e) => {
+                  onClick={(e) => {
                     e.preventDefault();
                     setIsLoggingIn(true);
                     try {
-                      // Rediriger vers OAuth LinkedIn (à implémenter côté backend)
-                      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/linkedin/authorize?redirect=${encodeURIComponent(window.location.origin + `/onboarding`)}`;
+                      // Utiliser le hook useOAuth pour LinkedIn
+                      loginWithLinkedIn();
                     } catch (error) {
                       console.error('Erreur login LinkedIn:', error);
                       setIsLoggingIn(false);

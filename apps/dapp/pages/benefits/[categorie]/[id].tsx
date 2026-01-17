@@ -16,7 +16,7 @@ import {
 import { useIndexing } from 'apps/dapp/hooks';
 import { capitalise, getServiceByIdServerSide } from 'apps/dapp/services';
 import { useAuth } from '../../../contexts/AuthContext';
-import { AppModal } from '@t4g/ui/layouts';
+import { AppModal } from '../../../lib/ui-layouts';
 
 interface IBenefitPage {
   lang: LangType;

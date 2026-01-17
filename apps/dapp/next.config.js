@@ -1,31 +1,34 @@
-// next.config.vercel.js - Configuration simplifiée pour Vercel
+// next.config.js - Configuration unifiée Token4Good v2
+// Fusion de next.config.js, next.config.production.js et next.config.nx.js
 const { withSentryConfig } = require('@sentry/nextjs');
+const withNx = require('@nrwl/next/plugins/with-nx');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  // Configuration Nx
+  nx: {
+    svgr: false,
+  },
+  
+  // Configuration de base
+  reactStrictMode: true,
   swcMinify: true,
   
-  // Transpiler les packages du monorepo
-  transpilePackages: [
-    '@t4g/types',
-    '@t4g/service/blockchain',
-    '@t4g/service/data',
-    '@t4g/service/middleware',
-    '@t4g/service/services',
-    '@t4g/service/smartcontracts',
-    '@t4g/service/users',
-    '@t4g/ui/components',
-    '@t4g/ui/elements',
-    '@t4g/ui/hooks',
-    '@t4g/ui/icons',
-    '@t4g/ui/layouts',
-    '@t4g/ui/pages',
-    '@t4g/ui/providers',
-    '@shared/types',
-  ],
+  // Transpile les packages du monorepo
+  transpilePackages: ['@t4g/service/data'],
   
-  webpack: (config, { isServer }) => {
+  // Configuration expérimentale pour les répertoires externes
+  experimental: {
+    externalDir: true, // Permettre les imports depuis l'extérieur de l'app
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+  
+  // Configuration Webpack pour le monorepo
+  webpack: (config, { isServer, defaultLoaders, dev, webpack }) => {
+    const path = require('path');
+    const libsPath = path.resolve(__dirname, '../../libs');
+    
     // Fix pour les modules Node.js
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -35,75 +38,193 @@ const nextConfig = {
       crypto: false,
     };
     
-    // Éviter les duplications de React (fix pour erreur "Cannot read properties of null")
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        react: require('path').resolve(__dirname, '../../node_modules/react'),
-        'react-dom': require('path').resolve(__dirname, '../../node_modules/react-dom'),
-      };
-    }
-    
-    // Aliases pour le monorepo
+    // Résolution des alias pour les librairies locales
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@shared/types': require('path').resolve(__dirname, '../../shared/types/src'),
-      '@t4g/types': require('path').resolve(__dirname, '../../libs/types/src'),
-      '@t4g/service/blockchain': require('path').resolve(__dirname, '../../libs/service/blockchain/src'),
-      '@t4g/service/data': require('path').resolve(__dirname, '../../libs/service/data/src'),
-      '@t4g/service/middleware': require('path').resolve(__dirname, '../../libs/service/middleware/src'),
-      '@t4g/service/services': require('path').resolve(__dirname, '../../libs/service/services/src'),
-      '@t4g/service/smartcontracts': require('path').resolve(__dirname, '../../libs/service/smartcontracts/src'),
-      '@t4g/service/users': require('path').resolve(__dirname, '../../libs/service/users/src'),
-      '@t4g/ui/components': require('path').resolve(__dirname, '../../libs/ui/components/src'),
-      '@t4g/ui/elements': require('path').resolve(__dirname, '../../libs/ui/elements/src'),
-      '@t4g/ui/hooks': require('path').resolve(__dirname, '../../libs/ui/hooks/src'),
-      '@t4g/ui/icons': require('path').resolve(__dirname, '../../libs/ui/icons/src'),
-      '@t4g/ui/layouts': require('path').resolve(__dirname, '../../libs/ui/layouts/src'),
-      '@t4g/ui/pages': require('path').resolve(__dirname, '../../libs/ui/pages/src'),
-      '@t4g/ui/providers': require('path').resolve(__dirname, '../../libs/ui/providers/src'),
-      // Alias pour apps/dapp (résout apps/dapp/* vers le répertoire local)
-      'apps/dapp': require('path').resolve(__dirname, '.'),
-      // Alias @ pour apps/dapp (compatible avec tsconfig.json)
-      '@': require('path').resolve(__dirname, '.'),
+      '@': path.resolve(__dirname, '.'),
+      'apps/dapp': path.resolve(__dirname, '.'),
+      '@t4g/service/data': path.resolve(__dirname, '../../libs/service/data/src'),
+      '@t4g/ui/components': path.resolve(__dirname, '../../libs/ui/components/src'),
+      '@t4g/ui/elements': path.resolve(__dirname, '../../libs/ui/elements/src'),
+      '@t4g/ui/hooks': path.resolve(__dirname, '../../libs/ui/hooks/src'),
+      '@t4g/ui/icons': path.resolve(__dirname, '../../libs/ui/icons/src'),
+      '@t4g/ui/layouts': path.resolve(__dirname, '../../libs/ui/layouts/src'),
+      '@t4g/ui/pages': path.resolve(__dirname, '../../libs/ui/pages/src'),
+      '@t4g/ui/providers': path.resolve(__dirname, '../../libs/ui/providers/src'),
+      '@t4g/service/blockchain': path.resolve(__dirname, '../../libs/service/blockchain/src'),
+      '@t4g/service/middleware': path.resolve(__dirname, '../../libs/service/middleware/src'),
+      '@t4g/service/services': path.resolve(__dirname, '../../libs/service/services/src'),
+      '@t4g/service/smartcontracts': path.resolve(__dirname, '../../libs/service/smartcontracts/src'),
+      '@t4g/service/users': path.resolve(__dirname, '../../libs/service/users/src'),
+      '@t4g/types': path.resolve(__dirname, '../../libs/types/src'),
     };
-    
+
+    // Ajouter une règle pour traiter les fichiers TypeScript des libs
+    const oneOfRule = config.module.rules.find((rule) => rule.oneOf);
+    if (oneOfRule) {
+      // Ajouter une règle spécifique pour les libs AVANT les autres règles
+      oneOfRule.oneOf.unshift({
+        test: /\.(ts|tsx|js|jsx)$/,
+        include: [libsPath],
+        use: defaultLoaders.babel || defaultLoaders.swcLoader || {
+          loader: 'next-swc-loader',
+          options: {},
+        },
+      });
+      
+      // Modifier les règles existantes pour ne pas exclure les libs
+      oneOfRule.oneOf.forEach((rule) => {
+        if (rule.exclude) {
+          if (typeof rule.exclude === 'function') {
+            const originalExclude = rule.exclude;
+            rule.exclude = (modulePath) => {
+              // Ne pas exclure les libs
+              if (modulePath && modulePath.includes(libsPath)) {
+                return false;
+              }
+              return originalExclude ? originalExclude(modulePath) : false;
+            };
+          }
+        }
+      });
+    }
+
+    // Optimisations pour la production
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        chunks: 'all',
+        cacheGroups: {
+          ...config.optimization.splitChunks?.cacheGroups,
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      };
+    }
+
     return config;
   },
   
+  // Internationalisation
+  i18n: {
+    locales: ['en', 'fr'],
+    defaultLocale: 'fr',
+    localeDetection: false,
+  },
+  
+  // Trailing slash pour compatibilité
+  trailingSlash: true,
+  
   // Variables d'environnement publiques avec fallbacks
-  // Note: Ces valeurs sont injectées au build time et écrasent les fallbacks du code
-  // Il faut donc définir des fallbacks ici aussi pour éviter undefined
   env: {
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
     NEXT_PUBLIC_DAZNO_API_URL: process.env.NEXT_PUBLIC_DAZNO_API_URL || 'https://www.dazno.de/api',
     NEXT_PUBLIC_DAZNO_USERS_API_URL: process.env.NEXT_PUBLIC_DAZNO_USERS_API_URL || 'https://www.dazno.de/api',
     NEXT_PUBLIC_DAZNO_VERIFY_URL: process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://www.dazno.de/api/verify',
   },
   
-  // Désactiver TypeScript/ESLint checking pendant le build (déjà fait en dev)
-  typescript: {
-    ignoreBuildErrors: true,
+  // Configuration des images
+  images: {
+    domains: [
+      'dazno.de',
+      'www.dazno.de',
+      'api.dazno.de',
+      'token4good.com',
+      't4g.dazno.de',
+      'token4good.vercel.app'
+    ],
+    formats: ['image/webp', 'image/avif'],
   },
+  
+  // Headers pour CORS et sécurité
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: 'https://t4g.dazno.de' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
+        ],
+      },
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+        ],
+      },
+    ];
+  },
+  
+  // Redirections
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/fr',
+        permanent: false,
+      },
+    ];
+  },
+  
+  // Rewrites pour le backend Rust et landing page
+  async rewrites() {
+    const backendApiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+    return [
+      // Servir les fichiers statiques de la landing page
+      {
+        source: '/landing/:path*',
+        destination: '/landing/:path*',
+      },
+      {
+        source: '/api/:path*',
+        destination: `${backendApiBase}/:path*`,
+      },
+    ];
+  },
+  
+  // Configuration TypeScript
+  typescript: {
+    ignoreBuildErrors: process.env.NODE_ENV === 'production',
+  },
+  
+  // Configuration ESLint
   eslint: {
     ignoreDuringBuilds: true,
   },
   
-  // Images
-  images: {
-    domains: ['dazno.de', 'api.dazno.de'],
+  // Configuration du compilateur
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  
+  // Configuration runtime publique
+  publicRuntimeConfig: {
+    polygonScanUrl: process.env.POLYGONSCAN_BASEURL,
+    updatesUrl: process.env.UPDATES_URL,
   },
 };
 
-// Sentry configuration (désactivé pour le déploiement initial)
+// Configuration Sentry pour la production
 const sentryWebpackPluginOptions = {
   silent: true,
-  org: 'token4good',
-  project: 'dapp',
-  dryRun: true, // Ne pas uploader à Sentry
+  hideSourceMaps: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  dryRun: !process.env.SENTRY_AUTH_TOKEN, // Ne pas uploader si pas de token
 };
 
-// Export sans Sentry pour éviter les erreurs de build
-module.exports = nextConfig;
-// module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
-
+// Export avec Nx et optionnellement Sentry
+const configWithNx = withNx(nextConfig);
+module.exports = process.env.SENTRY_AUTH_TOKEN 
+  ? withSentryConfig(configWithNx, sentryWebpackPluginOptions)
+  : configWithNx;

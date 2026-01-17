@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { CategoryType, LangType, SessionType } from '../../types';
 import { CustomLink, Icons, IconsT4G, MenuItem } from '../';
 import { useRouter } from 'next/router';
-import { UserType } from '@shared/types';
+import { UserType } from '../../lib/shared-types';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 import { useAuth } from '../../contexts/AuthContext';

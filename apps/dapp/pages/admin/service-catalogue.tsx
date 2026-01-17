@@ -4,7 +4,7 @@ import {
   ServiceCatalogueList,
   ServiceCreateForm,
 } from '../../components/ui';
-import { Api, Components } from '@t4g/types';
+import { Api, Components } from '../../lib/types';
 import { ButtonElement } from '../../components/elements';
 import { useAppContext } from '../../contexts/AppContext';
 import useSwr from 'swr';

@@ -1,4 +1,4 @@
-import { LangType } from '@shared/types';
+import { LangType } from '../../lib/shared-types';
 import { Select, TextInput } from '..';
 import { LocaleType, UserExperienceType } from 'apps/dapp/types';
 import {

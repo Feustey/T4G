@@ -1,6 +1,6 @@
 import React, { HTMLAttributes, useRef } from 'react';
 import { IconsT4G } from './Icons';
-import { LangType } from '@shared/types';
+import { LangType } from '../../lib/shared-types';
 
 export interface ISelectOption {
   label: string;

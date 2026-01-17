@@ -16,11 +16,11 @@ import {
 } from 'apps/dapp/types';
 import { capitalise } from 'apps/dapp/services';
 import { useAuth } from '../../contexts/AuthContext';
-import { AppModal } from '@t4g/ui/layouts';
+import { AppModal } from '../../lib/ui-layouts';
 import useSwr from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
 import { apiFetcher } from 'apps/dapp/services/config';
-import { User } from '@t4g/types';
+import { User } from '../../lib/types';
 
 interface IProfilePage {
   lang: LangType;

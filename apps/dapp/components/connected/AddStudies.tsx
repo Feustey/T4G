@@ -1,5 +1,5 @@
 import React from 'react';
-import { LangType } from '@shared/types';
+import { LangType } from '../../lib/shared-types';
 import {
   programTopics as ENProgramTopics,
   programs as ENPrograms,

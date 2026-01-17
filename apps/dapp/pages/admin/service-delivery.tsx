@@ -1,4 +1,4 @@
-import { Components } from '@t4g/types';
+import { Components } from '../../lib/types';
 import { BlockchainReceipt } from '../../components/ui';
 import { AppLayout } from '../../components/elements';
 import React, { useEffect, useState } from 'react';

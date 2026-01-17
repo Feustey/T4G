@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditProfileInfo } from '../components/ui';
-import { Components } from '@t4g/types';
+import { Components } from '../lib/types';
 import Head from 'next/head';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import { useIndexing } from '../hooks';
@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components';
 import { useAppContext } from '../contexts/AppContext';
 import { DeleteUser } from '../components/ui/DeleteUser';
-import { RightPanel, AppModal } from '@t4g/ui/layouts';
+import { RightPanel, AppModal } from '../lib/ui-layouts';
 
 const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
   lang,

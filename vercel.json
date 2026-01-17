@@ -1,8 +1,10 @@
 {
-  "buildCommand": "cd apps/dapp && ./build.sh",
+  "version": 2,
+  "name": "token4good-dapp",
+  "framework": "nextjs",
+  "buildCommand": "cd apps/dapp && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "apps/dapp/.next",
-  "installCommand": "npm install --legacy-peer-deps",
-  "framework": null,
+  "installCommand": "cd apps/dapp && npm install --legacy-peer-deps",
   "rewrites": [
     {
       "source": "/api/backend/:path*",
@@ -27,7 +29,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://dazno.de"
+          "value": "https://t4g.dazno.de"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -53,11 +55,14 @@
         {
           "key": "Referrer-Policy",
           "value": "origin-when-cross-origin"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
         }
       ]
     }
   ],
-  "redirects": [],
   "github": {
     "silent": true
   }

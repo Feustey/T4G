@@ -1,6 +1,6 @@
 import React from 'react';
 import { TransactionList } from '../components/ui';
-import { Components } from '@t4g/types';
+import { Components } from '../lib/types';
 import useSwr from 'swr';
 import Head from 'next/head';
 import { useAuth } from '../contexts/AuthContext';

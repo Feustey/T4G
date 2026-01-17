@@ -11,7 +11,7 @@ import { selectProposedServices } from 'apps/dapp/store/slices/proposedServicesS
 import { alumniServices } from 'apps/dapp/data';
 import Image from 'next/image';
 import { Breadcrumb, Icons } from 'apps/dapp/components';
-import { RightPanel, AppModal } from '@t4g/ui/layouts';
+import { RightPanel, AppModal } from '../../lib/ui-layouts';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 

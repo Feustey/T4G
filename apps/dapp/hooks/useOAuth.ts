@@ -156,6 +156,106 @@ export const useOAuth = () => {
   };
 
   /**
+   * Authentification avec LinkedIn OAuth
+   */
+  const loginWithLinkedIn = () => {
+    // Construire l'URL de redirection pour LinkedIn OAuth
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/linkedin`);
+    const clientId = process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || process.env.LINKEDIN_CLIENT_ID;
+    
+    if (!clientId) {
+      console.error('LINKEDIN_CLIENT_ID non configuré');
+      throw new Error('Configuration LinkedIn manquante');
+    }
+
+    // Rediriger vers LinkedIn OAuth avec les scopes nécessaires
+    const scope = encodeURIComponent('openid profile email');
+    const state = Math.random().toString(36).substring(7);
+    
+    // Stocker le state pour validation
+    sessionStorage.setItem('linkedin_oauth_state', state);
+    
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
+    
+    window.location.href = authUrl;
+  };
+
+  /**
+   * Authentification avec t4g OAuth
+   */
+  const loginWitht4g = () => {
+    // Construire l'URL de redirection pour t4g OAuth
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/t4g`);
+    const clientId = process.env.NEXT_PUBLIC_T4G_CLIENT_ID || process.env.CLIENT_ID;
+    const authUrl = process.env.NEXT_PUBLIC_T4G_AUTH_URL || process.env.AUTH_URL;
+    
+    if (!clientId || !authUrl) {
+      console.error('T4G OAuth non configuré');
+      throw new Error('Configuration t4g manquante');
+    }
+
+    // Rediriger vers t4g OAuth
+    const scope = encodeURIComponent('openid profile email');
+    const state = Math.random().toString(36).substring(7);
+    
+    // Stocker le state pour validation
+    sessionStorage.setItem('t4g_oauth_state', state);
+    
+    const fullAuthUrl = `${authUrl}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
+    
+    window.location.href = fullAuthUrl;
+  };
+
+  /**
+   * Gérer le callback OAuth (LinkedIn ou t4g)
+   */
+  const handleOAuthCallback = async (provider: 'linkedin' | 't4g', code: string, state: string) => {
+    try {
+      // Vérifier le state pour éviter les attaques CSRF
+      const savedState = sessionStorage.getItem(`${provider}_oauth_state`);
+      if (savedState !== state) {
+        throw new Error('State invalide - possible attaque CSRF');
+      }
+
+      // Nettoyer le state
+      sessionStorage.removeItem(`${provider}_oauth_state`);
+
+      // Échanger le code contre les données utilisateur via notre API
+      const response = await fetch(`/api/auth/callback/${provider}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Échec authentification OAuth');
+      }
+
+      const userData = await response.json();
+
+      // Login avec le backend via le provider
+      await login(provider, {
+        providerUserData: {
+          email: userData.email,
+          given_name: userData.given_name || userData.firstName,
+          family_name: userData.family_name || userData.lastName,
+          name: userData.name || `${userData.given_name || ''} ${userData.family_name || ''}`.trim(),
+          sub: userData.sub || userData.id,
+        },
+      });
+
+      // Rediriger vers le dashboard
+      router.push('/dashboard');
+    } catch (error) {
+      console.error(`Erreur callback ${provider}:`, error);
+      throw error;
+    }
+  };
+
+  /**
    * Initialiser l'authentification (vérifier sessions existantes)
    */
   const initAuth = async () => {
@@ -179,6 +279,9 @@ export const useOAuth = () => {
   return {
     // loginWithOTP, // Désactivé - OAuth uniquement
     loginWithDazno,
+    loginWithLinkedIn,
+    loginWitht4g,
+    handleOAuthCallback,
     // verifySupabaseSession, // Désactivé - OAuth uniquement
     checkExistingDaznoSession,
     initAuth,

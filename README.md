@@ -42,13 +42,16 @@ JWT Auth                   JWT + OAuth                 Bitcoin Layer 2
 
 ## 📚 Documentation
 
-| Pour... | Commencer par... |
-|---------|------------------|
-| 🚀 **Déployer rapidement** | [QUICKSTART.md](QUICKSTART.md) (5 min) |
-| 📖 **Comprendre le projet** | [FINAL_DELIVERY.md](FINAL_DELIVERY.md) |
-| 🔧 **Configuration production** | [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) |
-| 📊 **État de la migration** | [MIGRATION_PROGRESS.md](MIGRATION_PROGRESS.md) |
-| 🗂️ **Tous les docs** | [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) |
+> **✨ Nouvelle Organisation** : Documentation réorganisée dans [`/docs/`](/docs/) pour faciliter la navigation.
+
+| Pour... | Voir... |
+|---------|---------|
+| 🚀 **Démarrage rapide** | [START_HERE.md](START_HERE.md) |
+| 📁 **Index documentation** | [/docs/README.md](/docs/README.md) |
+| 🚢 **Déploiement** | [/docs/deployment/](/docs/deployment/) |
+| 🔌 **API & Intégrations** | [/docs/api/](/docs/api/) + [/docs/integration/](/docs/integration/) |
+| 🔄 **Migrations** | [/docs/migration/](/docs/migration/) |
+| 📊 **Status projet** | [/docs/status/](/docs/status/) |
 
 ---
 

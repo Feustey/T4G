@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppLayout } from '../../components/elements';
 import { DividerElement } from '../../components/elements';
-import { Components } from '@t4g/types';
+import { Components } from '../../lib/types';
 import useSwr from 'swr';
 import moment from 'moment';
 import Link from 'next/link';

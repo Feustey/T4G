@@ -1,7 +1,7 @@
 import { CategoryType, LangType } from '../../types';
 import { ButtonIcon, CustomLink, Icons, MenuItem } from '../';
 import { useRouter } from 'next/router';
-import { UserType } from '@shared/types';
+import { UserType } from '../../lib/shared-types';
 import { useRef, useState, useEffect } from 'react';
 import { trapFocus } from 'apps/dapp/services';
 import { apiFetcher } from 'apps/dapp/services/config';
