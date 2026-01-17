@@ -24,10 +24,10 @@ export function Page({ lang }: IPage) {
     // Attendre que le chargement soit terminé
     if (loading) return;
 
+    setRedirecting(true);
+
     if (isAuthenticated && user) {
       // Utilisateur authentifié → redirection
-      setRedirecting(true);
-      
       if (!user.is_onboarded) {
         // Première connexion → onboarding
         router.push('/onboarding', '/onboarding', { locale });
@@ -36,12 +36,8 @@ export function Page({ lang }: IPage) {
         router.push('/dashboard', '/dashboard', { locale });
       }
     } else {
-      // Non authentifié → rediriger vers la landing page statique
-      setRedirecting(true);
-      // Utiliser window.location pour servir le fichier HTML statique directement
-      if (typeof window !== 'undefined') {
-        window.location.href = '/landing/index.html';
-      }
+      // Non authentifié → rediriger vers la page landing Next.js
+      router.push('/landing', '/landing', { locale });
     }
   }, [router, locale, isAuthenticated, user, loading]);
 
