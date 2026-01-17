@@ -12,7 +12,6 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/health') ||
-    pathname === '/landing' ||
     PUBLIC_FILE.test(pathname) ||
     ASSET_PATHS.test(pathname)
   ) {

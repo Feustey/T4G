@@ -1,30 +1,37 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { GetStaticProps } from 'next';
+import fs from 'fs';
+import path from 'path';
 import { LangType, LocaleType } from '../types';
 import { Spinner } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 
 export interface IPage {
   lang: LangType;
+  htmlContent: string;
 }
 
 /**
- * Page d'accueil qui redirige les utilisateurs selon leur statut d'authentification et d'onboarding.
- * Affiche un spinner pendant la redirection.
- * Note: Le SSR est géré par AuthContext qui vérifie typeof window !== 'undefined'
+ * Page d'accueil :
+ * - Affiche la landing page pour les visiteurs non authentifiés
+ * - Redirige les utilisateurs authentifiés vers dashboard ou onboarding
  */
-export function Page({ lang }: IPage) {
+export function Page({ lang, htmlContent }: IPage) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
   const { user, isAuthenticated, loading } = useAuth();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
     // Attendre que le chargement soit terminé avant de rediriger
     if (loading) return;
 
     if (isAuthenticated && user) {
-      // Utilisateur authentifié
+      // Utilisateur authentifié → préparer la redirection
+      setShouldRedirect(true);
+      
       if (!user.is_onboarded) {
         // Première connexion → onboarding
         router.push('/onboarding', '/onboarding', { locale });
@@ -32,41 +39,64 @@ export function Page({ lang }: IPage) {
         // Utilisateur déjà onboardé → dashboard
         router.push('/dashboard', '/dashboard', { locale });
       }
-    } else {
-      // Non authentifié → login
-      router.push('/login', '/login', { locale });
     }
   }, [router, locale, isAuthenticated, user, loading]);
 
+  // Afficher le spinner pendant le chargement ou la redirection
+  if (loading || shouldRedirect) {
+    return (
+      <>
+        <Head>
+          <title>Token For Good</title>
+          <meta name="description" content={lang?.page?.home?.head?.metaDesc || 'Token For Good'} />
+          <meta name="keywords" content={lang?.utils?.keywords || 'Token For Good'} />
+          <meta key="robots" name="robots" content="noindex,follow" />
+          <meta
+            property="og:image"
+            content="https://app.token-for-good.com/social.png"
+          />
+          <meta property="og:title" content="Token For Good" />
+          <meta
+            property="og:description"
+            content={lang?.page?.home?.head?.metaDesc || 'Token For Good'}
+          />
+        </Head>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+          }}
+        >
+          <Spinner lang={lang} spinnerText={lang?.utils?.redirecting || 'Redirection...'} size="lg" />
+        </div>
+      </>
+    );
+  }
+
+  // Afficher la landing page pour les visiteurs non authentifiés
   return (
     <>
       <Head>
-        <title>Token For Good</title>
-        <meta name="description" content={lang?.page?.home?.head?.metaDesc || 'Token For Good'} />
-        <meta name="keywords" content={lang?.utils?.keywords || 'Token For Good'} />
-        <meta key="robots" name="robots" content="noindex,follow" />
-        <meta
-          property="og:image"
-          content="https://app.token-for-good.com/social.png"
-        />
-        <meta property="og:title" content="Token For Good" />
-        <meta
-          property="og:description"
-          content={lang?.page?.home?.head?.metaDesc || 'Token For Good'}
-        />
+        <title>Token for Good - Valorise les échanges dans la communauté des Grandes Ecoles</title>
+        <meta name="description" content="Token for Good est la meilleure plateforme collaborative Web3 qui distribue des tokens au sein d'une communauté de Grande Ecole. Elle dynamise et valorise les contributions positives des communautés alumni et étudiantes." />
+        <meta name="keywords" content="Token for Good, T4G, Web3, Bitcoin, Lightning Network, Alumni, Grande Ecole" />
       </Head>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      >
-        <Spinner lang={lang} spinnerText={lang?.utils?.redirecting || 'Redirection...'} size="lg" />
-      </div>
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
     </>
   );
 }
 
 export default Page;
+
+export const getStaticProps: GetStaticProps = async () => {
+  const filePath = path.join(process.cwd(), 'public', 'landing', 'index.html');
+  const htmlContent = fs.readFileSync(filePath, 'utf8');
+
+  return {
+    props: {
+      htmlContent,
+    },
+  };
+};
