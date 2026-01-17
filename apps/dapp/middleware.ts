@@ -7,7 +7,7 @@ const ASSET_PATHS = /^\/(assets|favicon|android-chrome|apple-touch-icon|mstile|s
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   
-  // Exclure les chemins qui ne nécessitent pas de redirection de locale
+  // Exclure les chemins qui ne nécessitent pas de traitement
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/') ||
@@ -19,14 +19,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Gestion de la locale pour les autres routes
-  if (req.nextUrl.locale === 'default') {
-    const locale = req.cookies.get('NEXT_LOCALE')?.value || 'fr';
-
-    return NextResponse.redirect(
-      new URL(`/${locale}${pathname}${req.nextUrl.search}`, req.url)
-    );
-  }
-  
+  // Laisser Next.js i18n gérer automatiquement les locales
   return NextResponse.next();
 }

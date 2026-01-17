@@ -14,6 +14,13 @@
       "destination": "https://apirust-production.up.railway.app/health"
     }
   ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/fr",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
@@ -52,13 +59,6 @@
           "value": "origin-when-cross-origin"
         }
       ]
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/fr",
-      "permanent": false
     }
   ]
 }
