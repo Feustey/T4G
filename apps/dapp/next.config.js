@@ -166,13 +166,7 @@ const nextConfig = {
   
   // Redirections
   async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/fr',
-        permanent: false,
-      },
-    ];
+    return [];
   },
   
   // Rewrites pour le backend Rust et landing page

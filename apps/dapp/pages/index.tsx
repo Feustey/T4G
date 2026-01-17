@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { LangType, LocaleType } from '../types';
+import { LangType } from '../types';
 import { Spinner } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,30 +16,26 @@ export interface IPage {
  */
 export function Page({ lang }: IPage) {
   const router = useRouter();
-  const locale = router.locale as LocaleType;
   const { user, isAuthenticated, loading } = useAuth();
-  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     // Attendre que le chargement soit terminé
     if (loading) return;
 
-    setRedirecting(true);
-
     if (isAuthenticated && user) {
       // Utilisateur authentifié → redirection
       if (!user.is_onboarded) {
         // Première connexion → onboarding
-        router.push('/onboarding', '/onboarding', { locale });
+        router.push('/onboarding');
       } else {
         // Utilisateur déjà onboardé → dashboard
-        router.push('/dashboard', '/dashboard', { locale });
+        router.push('/dashboard');
       }
     } else {
       // Non authentifié → rediriger vers la page landing Next.js
-      router.push('/landing', '/landing', { locale });
+      router.push('/landing');
     }
-  }, [router, locale, isAuthenticated, user, loading]);
+  }, [router, isAuthenticated, user, loading]);
 
   // Toujours afficher le spinner pendant le chargement ou la redirection
   return (

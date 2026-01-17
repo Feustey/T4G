@@ -27,15 +27,17 @@ export const getStaticProps: GetStaticProps = async () => {
     path.join(process.cwd(), 'public', 'landing', 'index.html'),
     // En développement local depuis la racine du monorepo
     path.join(process.cwd(), 'apps', 'dapp', 'public', 'landing', 'index.html'),
-    // Chemin absolu depuis __dirname
-    path.join(__dirname, '..', '..', 'public', 'landing', 'index.html'),
+    // Chemin alternatif pour Nx monorepo
+    path.join(process.cwd(), '..', '..', 'apps', 'dapp', 'public', 'landing', 'index.html'),
   ];
 
   let htmlContent = '';
   let fileFound = false;
+  const testedPaths: string[] = [];
 
   for (const filePath of possiblePaths) {
     try {
+      testedPaths.push(filePath);
       if (fs.existsSync(filePath)) {
         htmlContent = fs.readFileSync(filePath, 'utf8');
         fileFound = true;
@@ -43,13 +45,61 @@ export const getStaticProps: GetStaticProps = async () => {
         break;
       }
     } catch (error) {
-      console.log(`❌ Chemin non trouvé : ${filePath}`);
+      console.log(`❌ Erreur lors de la lecture du chemin : ${filePath}`, error);
     }
   }
 
   if (!fileFound) {
-    console.error('❌ Fichier landing/index.html introuvable dans aucun des chemins testés');
-    throw new Error('Landing page HTML file not found');
+    console.error('❌ Fichier landing/index.html introuvable dans aucun des chemins testés:');
+    console.error(testedPaths.join('\n'));
+    console.error('Current working directory:', process.cwd());
+    
+    // Retourner une page d'erreur simple au lieu de throw
+    return {
+      props: {
+        htmlContent: `
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Token for Good</title>
+            <style>
+              body {
+                font-family: system-ui, -apple-system, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+              }
+              .container {
+                text-align: center;
+                padding: 2rem;
+              }
+              h1 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+              }
+              a {
+                color: white;
+                text-decoration: underline;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Token for Good</h1>
+              <p>Plateforme collaborative Web3</p>
+              <p><a href="/login">Se connecter</a></p>
+            </div>
+          </body>
+          </html>
+        `,
+      },
+    };
   }
 
   return {
@@ -57,4 +107,4 @@ export const getStaticProps: GetStaticProps = async () => {
       htmlContent,
     },
   };
-}
+};
