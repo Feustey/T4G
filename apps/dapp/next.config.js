@@ -20,7 +20,6 @@ const nextConfig = {
   // Configuration expérimentale pour les répertoires externes
   experimental: {
     externalDir: true, // Permettre les imports depuis l'extérieur de l'app
-    optimizeCss: true,
     scrollRestoration: true,
   },
   

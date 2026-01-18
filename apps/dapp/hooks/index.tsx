@@ -6,5 +6,6 @@ export * from './useIndexing';
 export * from './useLanguage';
 export * from './useMediaQuery';
 export * from './useMutationObserver';
+export * from './useOAuth';
 export * from './usePagination';
 export * from './usePrevious';

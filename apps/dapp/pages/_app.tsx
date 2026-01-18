@@ -1,5 +1,5 @@
 import { AppProps } from 'next/app';
-import localFont from '@next/font/local';
+import localFont from 'next/font/local';
 // NextAuth supprimé - utilisation d'AuthContext JWT
 // import './styles.css'; // Temporarily commented due to build error
 import '../styles/styles.scss';
