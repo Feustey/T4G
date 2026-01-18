@@ -1,7 +1,15 @@
 // next.config.js - Configuration unifiée Token4Good v2
 // Fusion de next.config.js, next.config.production.js et next.config.nx.js
 const { withSentryConfig } = require('@sentry/nextjs');
-const withNx = require('@nrwl/next/plugins/with-nx');
+
+// Nx optionnel - uniquement en développement local
+let withNx;
+try {
+  withNx = require('@nrwl/next/plugins/with-nx');
+} catch {
+  // Fallback sans Nx pour Vercel
+  withNx = (config) => config;
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
