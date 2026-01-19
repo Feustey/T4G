@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { UserType } from "@shared/types";
+import { UserType } from "../../../types/shared";
 
 export namespace AppProvider {
   export interface IAppContext {

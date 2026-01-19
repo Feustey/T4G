@@ -1,9 +1,9 @@
 import { Dispatch, ReactElement, SetStateAction } from "react";
 import { Entities } from "../types";
-import { Notification, ServiceCategory } from "@t4g/service/data";
+import { Notification, ServiceCategory } from "../../stubs/service-data-types";
 import { Api } from "../types";
 import { Service } from "../api/index.types";
-import { LangType } from "@shared/types";
+import { LangType } from "../../../types/shared";
 
 /**
  * Types Variables

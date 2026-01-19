@@ -1,7 +1,7 @@
-import { Auth } from "@t4g/types";
+import { Auth } from "../../stubs/t4g-types";
 import * as React from "react";
 import { ReactNode } from "react";
-import { UserType } from "@shared/types";
+import { UserType } from "../../../types/shared";
 
 export namespace AppLayout {
   export namespace AppLayout {
