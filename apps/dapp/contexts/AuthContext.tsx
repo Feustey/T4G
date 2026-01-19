@@ -144,9 +144,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setError(null);
     } catch (err) {
       console.error('Erreur de connexion:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      
+      // Message d'erreur plus clair pour le backend non accessible
+      let errorMessage: string;
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
+        errorMessage = `⚠️ Backend non accessible (${backendUrl}). Vérifiez que Railway est en ligne.`;
+      } else {
+        errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      }
+      
       setError(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }

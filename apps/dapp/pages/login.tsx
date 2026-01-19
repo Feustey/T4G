@@ -37,8 +37,17 @@ export function Page({ lang }: IPage) {
       setDebugButtonsVisible(false);
     }
 
-    // Vérifier la session Dazno
+    // Vérifier la session Dazno (uniquement si pas en local)
     const checkDazno = async () => {
+      // Ne pas vérifier Dazno en développement local
+      if (typeof window !== 'undefined') {
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          setIsCheckingDazeno(false);
+          return;
+        }
+      }
+
       setIsCheckingDazeno(true);
       try {
         const daznoSession = await checkDaznoSession();
@@ -159,7 +168,8 @@ export function Page({ lang }: IPage) {
                     router.push(`/${locale}/onboarding`);
                   } catch (error) {
                     console.error('Erreur login admin:', error);
-                    alert('Erreur de connexion');
+                    const message = error instanceof Error ? error.message : 'Erreur de connexion';
+                    alert(message);
                     setIsLoggingIn(false);
                   }
                 }}
@@ -178,7 +188,8 @@ export function Page({ lang }: IPage) {
                     router.push(`/${locale}/onboarding`);
                   } catch (error) {
                     console.error('Erreur login alumni:', error);
-                    alert('Erreur de connexion');
+                    const message = error instanceof Error ? error.message : 'Erreur de connexion';
+                    alert(message);
                     setIsLoggingIn(false);
                   }
                 }}
@@ -197,7 +208,8 @@ export function Page({ lang }: IPage) {
                     // La redirection sera gérée par le useEffect
                   } catch (error) {
                     console.error('Erreur login student:', error);
-                    alert('Erreur de connexion');
+                    const message = error instanceof Error ? error.message : 'Erreur de connexion';
+                    alert(message);
                     setIsLoggingIn(false);
                   }
                 }}

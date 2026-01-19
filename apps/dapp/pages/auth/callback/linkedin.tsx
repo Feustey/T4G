@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useOAuth } from '../../../hooks/useOAuth';
 import Head from 'next/head';
@@ -7,9 +7,20 @@ export default function LinkedInCallback() {
   const router = useRouter();
   const { handleOAuthCallback } = useOAuth();
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !router.isReady || hasProcessedRef.current) return;
+
     const processCallback = async () => {
+      // Verrouiller immédiatement pour éviter les appels multiples
+      hasProcessedRef.current = true;
+
       try {
         const { code, state, error: oauthError } = router.query;
 
@@ -39,21 +50,44 @@ export default function LinkedInCallback() {
       } catch (err) {
         console.error('Erreur callback LinkedIn:', err);
         setError(err instanceof Error ? err.message : 'Erreur inconnue');
+        // Réinitialiser en cas d'erreur pour permettre un nouveau essai
+        hasProcessedRef.current = false;
         setTimeout(() => {
           router.push('/login?error=linkedin_callback_failed');
         }, 2000);
       }
     };
 
-    // Attendre que le router soit prêt
-    if (router.isReady) {
-      processCallback();
-    }
-  }, [router.isReady, router.query, handleOAuthCallback, router]);
+    // Traiter le callback
+    processCallback();
+  }, [mounted, router.isReady, router.query, handleOAuthCallback]);
+
+  // Afficher un loader pendant l'hydratation
+  if (!mounted) {
+    return (
+      <>
+        <Head>
+          <title>Connexion LinkedIn...</title>
+        </Head>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2>🔄 Connexion en cours...</h2>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <Head>
+        <title>{error ? 'Erreur de connexion' : 'Connexion LinkedIn...'}</title>
         <style>{`
           @keyframes spin {
             0% { transform: rotate(0deg); }

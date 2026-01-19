@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
 // Note: Supabase OTP désactivé - Utilisation d'OAuth uniquement (t4g, LinkedIn, Dazno)
@@ -209,16 +210,23 @@ export const useOAuth = () => {
   /**
    * Gérer le callback OAuth (LinkedIn ou t4g)
    */
-  const handleOAuthCallback = async (provider: 'linkedin' | 't4g', code: string, state: string) => {
+  const handleOAuthCallback = useCallback(async (provider: 'linkedin' | 't4g', code: string, state: string) => {
     try {
       // Vérifier le state pour éviter les attaques CSRF
       const savedState = sessionStorage.getItem(`${provider}_oauth_state`);
-      if (savedState !== state) {
+      
+      // En développement local, être plus permissif avec la validation du state
+      if (process.env.NODE_ENV === 'production' && savedState !== state) {
         throw new Error('State invalide - possible attaque CSRF');
       }
-
-      // Nettoyer le state
-      sessionStorage.removeItem(`${provider}_oauth_state`);
+      
+      // Log en dev pour debug
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[OAuth Debug] Provider: ${provider}, State reçu: ${state}, State sauvegardé: ${savedState}`);
+        if (savedState !== state) {
+          console.warn('[OAuth Warning] State mismatch détecté mais ignoré en développement');
+        }
+      }
 
       // Échanger le code contre les données utilisateur via notre API
       const response = await fetch(`/api/auth/callback/${provider}`, {
@@ -247,13 +255,16 @@ export const useOAuth = () => {
         },
       });
 
+      // Nettoyer le state seulement après succès complet
+      sessionStorage.removeItem(`${provider}_oauth_state`);
+
       // Rediriger vers le dashboard
       router.push('/dashboard');
     } catch (error) {
       console.error(`Erreur callback ${provider}:`, error);
       throw error;
     }
-  };
+  }, [login, router]);
 
   /**
    * Initialiser l'authentification (vérifier sessions existantes)

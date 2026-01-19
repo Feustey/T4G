@@ -8,7 +8,8 @@ class APIClient {
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    // En développement, utilise le backend Railway de production
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
   }
 
   private getHeaders(): HeadersInit {

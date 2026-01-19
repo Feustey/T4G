@@ -3,6 +3,15 @@ export async function checkDaznoSession(): Promise<{
   user?: any;
   token?: string;
 }> {
+  // En développement local, ne pas essayer de vérifier Dazno (CORS)
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      console.log('[Dazno] Vérification ignorée en développement local');
+      return { authenticated: false };
+    }
+  }
+
   try {
     const verifyUrl = process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://dazno.de/api/auth/verify-session';
     
@@ -47,7 +56,10 @@ export async function checkDaznoSession(): Promise<{
 
     return { authenticated: false };
   } catch (error) {
-    console.error('Erreur vérification session Dazno:', error);
+    // Ne logger qu'en mode verbose
+    if (process.env.NODE_ENV !== 'development') {
+      console.error('Erreur vérification session Dazno:', error);
+    }
     return { authenticated: false };
   }
 }

@@ -33,11 +33,13 @@ function CustomApp({
 
   return (
     <>
-      <style>{`
-        html {
-          --font-family-primary: ${squadaOne.style.fontFamily};
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          html {
+            --font-family-primary: ${squadaOne.style.fontFamily};
+          }
+        `
+      }} />
       <AuthProvider>
           <Script
             strategy="afterInteractive"
