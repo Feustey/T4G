@@ -130,7 +130,7 @@ export default function LandingPage() {
       <Script src="/landing/js/webflow.841c1d07.73e2161a3279ba00.js" strategy="lazyOnload" />
 
       {/* Styles inline pour les variables CSS et thème dark */}
-      <style global>{`
+      <style jsx global>{`
         :root {
           --color-blue-50: #edefff;
           --color-blue-100: #dee2ff;
