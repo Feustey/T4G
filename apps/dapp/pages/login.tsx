@@ -71,12 +71,18 @@ export function Page({ lang }: IPage) {
 
   // Rediriger si déjà authentifié
   useEffect(() => {
+    console.log('🔵 useEffect redirection - isAuthenticated:', isAuthenticated, 'user:', user);
     if (isAuthenticated && user) {
+      console.log('🔵 Utilisateur authentifié, is_onboarded:', user.is_onboarded);
       // Rediriger selon le statut d'onboarding
-      if (user.is_onboarded) {
+      // Si is_onboarded est true, aller au dashboard
+      // Sinon (false ou undefined), aller vers onboarding-simple
+      if (user.is_onboarded === true) {
+        console.log('🔵 Redirection vers dashboard');
         router.push(`/${locale}/`); // Dashboard
       } else {
-        router.push(`/${locale}/onboarding`);
+        console.log('🔵 Redirection vers onboarding-simple (is_onboarded:', user.is_onboarded, ')');
+        router.push(`/${locale}/onboarding-simple`);
       }
     }
   }, [isAuthenticated, user, locale, router]);
@@ -162,7 +168,7 @@ export function Page({ lang }: IPage) {
                   setIsLoggingIn(true);
                   try {
                     await login('custom', {
-                      email: 'admin@token-for-good.com',
+                      email: `test.admin.${Date.now()}@token-for-good.com`,
                       password: 'admin',
                     });
                     router.push(`/${locale}/onboarding`);
@@ -182,7 +188,7 @@ export function Page({ lang }: IPage) {
                   setIsLoggingIn(true);
                   try {
                     await login('custom', {
-                      email: 'alumni@token-for-good.com',
+                      email: `test.alumni.${Date.now()}@token-for-good.com`,
                       password: 'alumni',
                     });
                     router.push(`/${locale}/onboarding`);
@@ -198,18 +204,27 @@ export function Page({ lang }: IPage) {
                 label={'Login as student'}
                 variant="secondary"
                 onClick={async (e) => {
+                  alert('Bouton cliqué ! Vérifiez la console du navigateur (F12)');
+                  console.log('🔵 Bouton student cliqué');
                   e.preventDefault();
                   setIsLoggingIn(true);
                   try {
+                    console.log('🔵 Appel de login...');
+                    const email = `test.student.${Date.now()}@token-for-good.com`;
+                    console.log('🔵 Email:', email);
                     await login('custom', {
-                      email: 'student@token-for-good.com',
+                      email: email,
                       password: 'student',
                     });
-                    // La redirection sera gérée par le useEffect
+                    console.log('🔵 Login réussi !');
+                    console.log('🔵 Tentative de redirection manuelle vers onboarding-simple...');
+                    await router.push(`/${locale}/onboarding-simple`);
+                    console.log('🔵 Redirection manuelle effectuée');
+                    alert('Login réussi ! Redirection vers onboarding...');
                   } catch (error) {
-                    console.error('Erreur login student:', error);
+                    console.error('🔴 Erreur login student:', error);
                     const message = error instanceof Error ? error.message : 'Erreur de connexion';
-                    alert(message);
+                    alert('ERREUR: ' + message);
                     setIsLoggingIn(false);
                   }
                 }}

@@ -112,16 +112,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
           break;
 
         case 'credentials':
-        case 'custom':
-          // Auth personnalisée pour tests (FAKE_AUTH)
+        case 'custom': {
+          // Auth personnalisée pour tests - utilise provider t4g
           if (!credentials?.email || !credentials?.password) {
             throw new Error('Email et mot de passe requis');
           }
+          
+          // Extraire le rôle du mot de passe pour les tests
+          const testRole = credentials.password; // admin, alumni, student
+          const emailParts = credentials.email.split('@')[0].split('.');
+          const firstname = emailParts[0] || 'Test';
+          const lastname = emailParts[1] || 'User';
+          
           response = await apiClient.login({
             email: credentials.email,
-            password: credentials.password,
+            provider: 't4g',
+            provider_user_data: {
+              email: credentials.email,
+              name: `${firstname.charAt(0).toUpperCase() + firstname.slice(1)} ${lastname.charAt(0).toUpperCase() + lastname.slice(1)}`,
+              id: `test_${testRole}_${Date.now()}`,
+              role: testRole,
+            },
           });
           break;
+        }
 
         case 'supabase':
           // Authentification via Supabase
@@ -140,16 +154,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
           throw new Error(`Provider non supporté: ${provider}`);
       }
 
+      console.log('🟢 AuthContext - Login réussi, user:', response.user);
       setUser(response.user);
       setError(null);
+      console.log('🟢 AuthContext - States mis à jour');
     } catch (err) {
-      console.error('Erreur de connexion:', err);
+      console.error('🔴 AuthContext - Erreur de connexion:', err);
       
       // Message d'erreur plus clair pour le backend non accessible
       let errorMessage: string;
       if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
-        errorMessage = `⚠️ Backend non accessible (${backendUrl}). Vérifiez que Railway est en ligne.`;
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+        const isLocal = backendUrl.includes('localhost');
+        errorMessage = isLocal 
+          ? `⚠️ Backend non accessible (${backendUrl}). Assurez-vous que le backend Rust est démarré localement.`
+          : `⚠️ Backend non accessible (${backendUrl}). Vérifiez que le serveur est en ligne.`;
       } else {
         errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
       }

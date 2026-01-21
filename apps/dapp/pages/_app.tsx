@@ -91,10 +91,22 @@ function Auth({ children, lang, role }) {
     return children;
   }
 
+  // Conversion des rôles backend vers format frontend
+  const roleMap = {
+    'mentee': 'STUDENT',
+    'mentor': 'ALUMNI',
+    'admin': 'ADMIN',
+  };
+  
+  const userRole = currentUser?.role ? (roleMap[currentUser.role.toLowerCase()] || currentUser.role.toUpperCase()) : null;
+  
+  console.log('🔵 Auth - userRole:', userRole, 'expected roles:', role);
+
   // Vérifier le rôle
-  if (currentUser && role.includes(currentUser.role)) {
+  if (currentUser && userRole && role.includes(userRole)) {
     return children;
   } else {
+    console.log('🔴 Auth - Rôle non autorisé, redirection vers 404');
     router.push('/404', '/404', { locale: locale });
     return null;
   }

@@ -8,8 +8,10 @@ class APIClient {
   private token: string | null = null;
 
   constructor() {
-    // En développement, utilise le backend Railway de production
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
+    // URL du backend configurée via NEXT_PUBLIC_API_URL
+    // Développement local: http://localhost:3000
+    // Production: https://apirust-production.up.railway.app
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   }
 
   private getHeaders(): HeadersInit {
@@ -307,16 +309,19 @@ export const apiClient = new APIClient();
 export interface User {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  role: 'STUDENT' | 'ALUMNI' | 'MENTOR' | 'ADMIN';
+  firstname: string; // Backend utilise "firstname" sans underscore
+  lastname: string;  // Backend utilise "lastname" sans underscore
+  first_name?: string; // Rétrocompatibilité
+  last_name?: string;  // Rétrocompatibilité
+  role: string; // Backend renvoie "mentee", "mentor", etc.
   program?: string;
   graduated_year?: number;
   avatar_url?: string;
   bio?: string;
-  created_at: string;
-  updated_at: string;
-  is_onboarded: boolean;
+  created_at?: string;
+  updated_at?: string;
+  is_onboarded?: boolean; // Optionnel car le backend ne le renvoie pas toujours
+  lightning_address?: string; // Ajouté car le backend le renvoie
 }
 
 export interface CreateUserRequest {
@@ -436,7 +441,7 @@ export interface PaymentStatus {
 export interface LoginRequest {
   email: string;
   password?: string;
-  provider?: string;
+  provider: string; // Requis par le backend Rust
   token?: string;
   provider_user_data?: any;
 }

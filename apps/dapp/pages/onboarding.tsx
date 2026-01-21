@@ -41,6 +41,7 @@ import { useRouter } from 'next/router';
 import { alumniServices } from '../data';
 import { getCVServerSide } from '../services/user';
 import { apiClient } from '../services/apiClient';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface IOnboarding {
   lang: LangType;
@@ -72,12 +73,31 @@ export function Onboarding({
   lang,
   baseAvatar,
   baseCV,
-  user,
+  user: userProp,
   baseExperiences,
 }: IOnboarding & AuthPageType) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
   const dispatchRedux = useAppDispatch();
+  
+  // Utiliser l'utilisateur depuis AuthContext (priorité) ou props (fallback)
+  const { user: authUser } = useAuth();
+  let user = authUser || userProp;
+  
+  // Conversion des rôles backend vers format frontend
+  if (user && user.role) {
+    const roleMap = {
+      'mentee': 'STUDENT',
+      'mentor': 'ALUMNI',
+      'admin': 'ADMIN',
+    };
+    user = {
+      ...user,
+      role: roleMap[user.role.toLowerCase()] || user.role.toUpperCase(),
+    } as any;
+  }
+  
+  console.log('🔵 Onboarding - user:', user);
 
   const baseExperience = baseExperiences?.[0] || {};
 
@@ -125,12 +145,16 @@ export function Onboarding({
     return isStudentFormValid && experienceComplete && !state.dateError;
   }, [isStudentFormValid, state]);
 
-  const isFormValid = user.role === 'STUDENT' ? isStudentFormValid : isAlumniFormValid;
+  const isFormValid = user?.role === 'STUDENT' ? isStudentFormValid : isAlumniFormValid;
 
   // 6. Corriger et sécuriser la fonction de soumission
   async function finishUserOnboarding(e: React.MouseEvent<HTMLElement>) {
     e.preventDefault();
     if (!isFormValid) return;
+    if (!user || !user.id) {
+      console.log('🔴 Onboarding - Pas d\'utilisateur lors de la soumission');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -184,6 +208,21 @@ export function Onboarding({
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  // Si pas d'utilisateur authentifié, afficher spinner et rediriger
+  if (!user || !user.id) {
+    console.log('🔴 Onboarding - Pas d\'utilisateur, redirection vers login');
+    router.push(`/${locale}/login`);
+    return (
+      <>
+        <Head>
+          <title>{lang.page.onboarding.head.title}</title>
+          {useIndexing(false)}
+        </Head>
+        <Spinner lang={lang} spinnerText="Redirection..." />
+      </>
+    );
   }
 
   return (
@@ -334,11 +373,19 @@ Onboarding.role = ['ALUMNI', 'STUDENT'];
 
 export const getServerSideProps: GetServerSideProps = async function (context) {
   // Authentification gérée côté client avec AuthContext JWT
-  // Redirection vers login si pas authentifié
+  // Les props sont gérées côté client, on retourne des valeurs par défaut
   return {
-    redirect: {
-      destination: '/login',
-      permanent: false,
+    props: {
+      baseAvatar: null,
+      baseCV: {},
+      baseExperiences: [],
+      user: {
+        id: '',
+        email: '',
+        firstname: '',
+        lastname: '',
+        role: 'STUDENT',
+      },
     },
   };
   
