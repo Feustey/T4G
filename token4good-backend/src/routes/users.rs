@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
+    middleware::auth_extractor::AuthUserExtractor,
     models::user::{CreateUserRequest, UpdateUserRequest, User, UserRole},
     AppState,
 };
@@ -23,14 +24,26 @@ pub struct UserQuery {
 pub fn user_routes() -> Router<AppState> {
     Router::new()
         .route("/", get(list_users).post(create_user))
+        // Routes /me DOIVENT être avant /:id pour éviter les conflits
+        .route("/me", get(get_current_user))
+        .route("/me/notifications", get(get_user_notifications))
+        .route("/me/wallet", get(get_current_user_wallet))
+        .route("/me/services", get(get_current_user_services))
+        .route("/me/transactions", get(get_current_user_transactions))
+        .route("/me/profile", get(get_current_user_profile))
+        .route("/me/cv", get(get_current_user_cv))
+        .route("/me/about", get(get_current_user_about))
+        .route("/me/metrics", get(get_current_user_metrics))
+        .route("/me/pending", get(get_current_user_pending))
+        // Routes /:id après /me
         .route("/:id", get(get_user).put(update_user).delete(delete_user))
         .route("/:id/profile", get(get_user_profile))
         .route("/:id/cv", get(get_user_cv))
         .route("/:id/wallet", get(get_user_wallet))
         .route("/:id/transactions", get(get_user_transactions))
         .route("/:id/services", get(get_user_services))
-        .route("/me", get(get_current_user))
-        .route("/me/notifications", get(get_user_notifications))
+        .route("/:id/avatar", get(get_user_avatar))
+        .route("/:id/disable-first-access", get(disable_first_access))
 }
 
 pub async fn list_users(
@@ -175,23 +188,102 @@ pub async fn get_user_wallet(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
+    // Récupérer le solde Lightning via l'API Dazno si l'utilisateur a un token
+    let (balance_msat, pending_balance_msat, num_channels) = if let Some(dazno_token) = &user.dazno_token {
+        match state.dazno.get_wallet_balance(dazno_token, &id).await {
+            Ok(balance) => {
+                // Récupérer les canaux pour compter le nombre de canaux actifs
+                let channels_count = match state.dazno.get_wallet_channels(dazno_token, &id).await {
+                    Ok(channels) => channels.len() as u32,
+                    Err(e) => {
+                        tracing::warn!("Failed to get channels for user {}: {}", id, e);
+                        0
+                    }
+                };
+                (balance.balance_msat, balance.pending_msat, channels_count)
+            }
+            Err(e) => {
+                tracing::warn!("Failed to get Lightning balance for user {}: {}", id, e);
+                (0, 0, 0)
+            }
+        }
+    } else {
+        (0, 0, 0)
+    };
+
     let wallet_info = WalletInfo {
-        balance_msat: 0, // TODO: implémenter le calcul du solde réel
-        pending_balance_msat: 0,
+        balance_msat,
+        pending_balance_msat,
         lightning_address: user.lightning_address,
-        num_channels: 0,
-        num_pending_channels: 0, // TODO: ajouter ce champ à NodeInfo si disponible via LND API
+        num_channels,
+        num_pending_channels: 0, // Les canaux en attente sont inclus dans pending_balance_msat
     };
 
     Ok(Json(wallet_info))
 }
 
 pub async fn get_user_transactions(
-    State(_state): State<AppState>,
-    Path(_id): Path<String>,
+    State(state): State<AppState>,
+    Path(id): Path<String>,
 ) -> Result<Json<Vec<TransactionRecord>>, StatusCode> {
-    // TODO: Récupérer les transactions Lightning et RGB
-    let transactions = vec![];
+    let user = state
+        .db
+        .get_user_by_id(&id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    let mut transactions = vec![];
+
+    // Récupérer les transactions Lightning via l'API Dazno
+    if let Some(dazno_token) = &user.dazno_token {
+        match state.dazno.get_wallet_payments(dazno_token, &id, None, None).await {
+            Ok(lightning_txs) => {
+                for tx in lightning_txs {
+                    transactions.push(TransactionRecord {
+                        id: tx.id,
+                        transaction_type: tx.transaction_type,
+                        amount_msat: tx.amount_msat,
+                        fee_msat: tx.fee_msat,
+                        status: tx.status,
+                        payment_hash: tx.payment_hash,
+                        description: tx.description,
+                        created_at: tx.created_at,
+                        settled_at: tx.settled_at,
+                    });
+                }
+            }
+            Err(e) => {
+                tracing::warn!("Failed to get Lightning transactions for user {}: {}", id, e);
+            }
+        }
+    }
+
+    // Récupérer les transactions RGB depuis la base de données
+    match state.db.get_user_proofs(&id).await {
+        Ok(proofs) => {
+            for proof in proofs {
+                transactions.push(TransactionRecord {
+                    id: proof.id.clone(),
+                    transaction_type: "rgb_proof".to_string(),
+                    amount_msat: 0, // RGB proofs n'ont pas de montant direct
+                    fee_msat: 0,
+                    status: proof.status.clone(),
+                    payment_hash: proof.id.clone(),
+                    description: format!("RGB Proof: {}", proof.proof_type),
+                    created_at: proof.created_at,
+                    settled_at: Some(proof.updated_at),
+                });
+            }
+        }
+        Err(e) => {
+            tracing::warn!("Failed to get RGB proofs for user {}: {}", id, e);
+        }
+    }
+
+    // Trier par date de création (plus récent en premier)
+    transactions.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+
     Ok(Json(transactions))
 }
 
@@ -209,19 +301,279 @@ pub async fn get_user_services(
 }
 
 pub async fn get_current_user(
-    State(_state): State<AppState>,
-    // TODO: Extraire l'utilisateur du JWT token
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
 ) -> Result<Json<User>, StatusCode> {
-    // Pour l'instant, retourner un utilisateur de test
-    Err(StatusCode::NOT_IMPLEMENTED)
+    // Récupérer l'utilisateur complet depuis la base de données
+    let user = state
+        .db
+        .get_user_by_id(&auth_user.id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    Ok(Json(user))
 }
 
 pub async fn get_user_notifications(
-    State(_state): State<AppState>,
-    // TODO: Extraire l'utilisateur du JWT token
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
 ) -> Result<Json<Vec<Notification>>, StatusCode> {
-    let notifications = vec![];
-    Ok(Json(notifications))
+    // Récupérer les notifications depuis la base de données
+    match state.db.get_user_notifications(&auth_user.id).await {
+        Ok(notifications) => Ok(Json(notifications)),
+        Err(e) => {
+            tracing::warn!("Failed to get notifications for user {}: {}", auth_user.id, e);
+            // Retourner une liste vide en cas d'erreur plutôt que de faire échouer la requête
+            Ok(Json(vec![]))
+        }
+    }
+}
+
+// Handlers pour les routes /me/*
+pub async fn get_current_user_wallet(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<WalletInfo>, StatusCode> {
+    get_user_wallet(State(state), Path(auth_user.id)).await
+}
+
+pub async fn get_current_user_services(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<Vec<UserService>>, StatusCode> {
+    get_user_services(State(state), Path(auth_user.id)).await
+}
+
+pub async fn get_current_user_transactions(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<Vec<TransactionRecord>>, StatusCode> {
+    get_user_transactions(State(state), Path(auth_user.id)).await
+}
+
+pub async fn get_current_user_profile(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<UserProfile>, StatusCode> {
+    get_user_profile(State(state), Path(auth_user.id)).await
+}
+
+pub async fn get_current_user_cv(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<UserCV>, StatusCode> {
+    get_user_cv(State(state), Path(auth_user.id)).await
+}
+
+pub async fn get_current_user_about(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<String>, StatusCode> {
+    let user = state
+        .db
+        .get_user_by_id(&auth_user.id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    // Return bio as a string (empty string if None)
+    let about = user.bio.unwrap_or_else(|| String::new());
+
+    Ok(Json(about))
+}
+
+pub async fn get_current_user_metrics(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<UserMetrics>, StatusCode> {
+    // Récupérer les transactions pour calculer les métriques
+    let transactions = match get_user_transactions(State(state.clone()), Path(auth_user.id.clone())).await {
+        Ok(Json(txs)) => txs,
+        Err(_) => vec![],
+    };
+
+    // Calculer les métriques à partir des transactions
+    let mut total_earned_msat = 0u64;
+    let mut total_spent_msat = 0u64;
+    
+    for tx in &transactions {
+        if tx.transaction_type == "invoice" && tx.status == "settled" {
+            total_earned_msat += tx.amount_msat;
+        } else if tx.transaction_type == "payment" && tx.status == "settled" {
+            total_spent_msat += tx.amount_msat + tx.fee_msat;
+        }
+    }
+
+    // Récupérer les services fournis et consommés
+    let services_provided = match state.db.count_user_services_provided(&auth_user.id).await {
+        Ok(count) => count,
+        Err(e) => {
+            tracing::warn!("Failed to count services provided: {}", e);
+            0
+        }
+    };
+
+    let services_consumed = match state.db.count_user_services_consumed(&auth_user.id).await {
+        Ok(count) => count,
+        Err(e) => {
+            tracing::warn!("Failed to count services consumed: {}", e);
+            0
+        }
+    };
+
+    // Calculer le score de réputation basé sur l'activité
+    let reputation_score = calculate_reputation_score(
+        transactions.len() as u32,
+        total_earned_msat,
+        total_spent_msat,
+        services_provided,
+        services_consumed,
+    );
+
+    let metrics = UserMetrics {
+        total_transactions: transactions.len() as u32,
+        total_earned_msat,
+        total_spent_msat,
+        services_provided,
+        services_consumed,
+        reputation_score,
+    };
+    
+    Ok(Json(metrics))
+}
+
+// Helper pour calculer le score de réputation
+fn calculate_reputation_score(
+    total_txs: u32,
+    earned: u64,
+    spent: u64,
+    provided: u32,
+    consumed: u32,
+) -> f32 {
+    let mut score = 0.0;
+    
+    // Score basé sur le nombre de transactions (max 25 points)
+    score += (total_txs as f32 * 0.5).min(25.0);
+    
+    // Score basé sur le volume de transactions (max 25 points)
+    let total_volume = (earned + spent) as f32 / 1_000_000.0; // Convertir en sats
+    score += (total_volume * 0.01).min(25.0);
+    
+    // Score basé sur les services fournis (max 25 points)
+    score += (provided as f32 * 2.0).min(25.0);
+    
+    // Score basé sur l'engagement (max 25 points)
+    if provided > 0 && consumed > 0 {
+        score += ((provided + consumed) as f32 * 1.0).min(25.0);
+    }
+    
+    // Normaliser sur 5.0
+    (score / 20.0).min(5.0)
+}
+
+pub async fn get_current_user_pending(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<Vec<PendingTransaction>>, StatusCode> {
+    let mut pending = vec![];
+
+    // Récupérer les transactions Lightning en attente via Dazno
+    if let Ok(user) = state.db.get_user_by_id(&auth_user.id).await {
+        if let Some(dazno_token) = &user.unwrap_or_else(|| {
+            // Fallback si pas d'utilisateur trouvé
+            return;
+        }).dazno_token {
+            match state.dazno.get_wallet_payments(dazno_token, &auth_user.id, None, None).await {
+                Ok(transactions) => {
+                    for tx in transactions {
+                        // Filtrer seulement les transactions en attente
+                        if tx.status == "pending" || tx.status == "processing" {
+                            pending.push(PendingTransaction {
+                                id: tx.id,
+                                transaction_type: tx.transaction_type,
+                                amount_msat: tx.amount_msat,
+                                status: tx.status,
+                                created_at: tx.created_at,
+                            });
+                        }
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to get pending Lightning transactions: {}", e);
+                }
+            }
+        }
+    }
+
+    // Récupérer les demandes de mentoring en attente
+    match state.db.get_user_pending_mentoring(&auth_user.id).await {
+        Ok(mentoring_requests) => {
+            for request in mentoring_requests {
+                pending.push(PendingTransaction {
+                    id: request.id,
+                    transaction_type: "mentoring_request".to_string(),
+                    amount_msat: 0,
+                    status: request.status,
+                    created_at: request.created_at,
+                });
+            }
+        }
+        Err(e) => {
+            tracing::warn!("Failed to get pending mentoring requests: {}", e);
+        }
+    }
+
+    Ok(Json(pending))
+}
+
+pub async fn get_user_avatar(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<AvatarResponse>, StatusCode> {
+    let user = state
+        .db
+        .get_user_by_id(&id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    let avatar = AvatarResponse {
+        avatar: user.avatar,
+    };
+
+    Ok(Json(avatar))
+}
+
+pub async fn disable_first_access(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<DashboardAccessResponse>, StatusCode> {
+    let user = state
+        .db
+        .get_user_by_id(&id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    // Incrémenter le compteur d'accès au dashboard
+    let access_count = match state.db.increment_dashboard_access(&id).await {
+        Ok(count) => count,
+        Err(e) => {
+            tracing::warn!("Failed to increment dashboard access count for user {}: {}", id, e);
+            // En cas d'erreur, utiliser une valeur par défaut depuis les preferences
+            user.preferences
+                .get("dashboardAccessCount")
+                .and_then(|v| v.as_u64())
+                .unwrap_or(1) as u32 + 1
+        }
+    };
+
+    let response = DashboardAccessResponse {
+        dashboardAccessCount: access_count,
+    };
+
+    Ok(Json(response))
 }
 
 #[derive(Debug, Serialize)]
@@ -236,6 +588,44 @@ pub struct UserProfile {
     pub score: u32,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub lightning_address: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UserAbout {
+    pub id: String,
+    pub bio: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub last_login: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UserMetrics {
+    pub total_transactions: u32,
+    pub total_earned_msat: u64,
+    pub total_spent_msat: u64,
+    pub services_provided: u32,
+    pub services_consumed: u32,
+    pub reputation_score: f32,
+}
+
+#[derive(Debug, Serialize)]
+pub struct PendingTransaction {
+    pub id: String,
+    pub amount_msat: u64,
+    pub description: String,
+    pub status: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AvatarResponse {
+    pub avatar: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[allow(non_snake_case)]
+pub struct DashboardAccessResponse {
+    pub dashboardAccessCount: i32,
 }
 
 #[derive(Debug, Serialize)]
