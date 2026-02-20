@@ -27,7 +27,12 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "apps/dapp/*": ["./*"],
+      "apps/dapp/components": ["./components/index.tsx"],
+      "apps/dapp/types": ["./types/index.tsx"],
+      "apps/dapp/data/en": ["./data/en/index.ts"],
+      "apps/dapp/data/fr": ["./data/fr/index.ts"]
     }
   },
   "include": [
