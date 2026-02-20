@@ -511,6 +511,24 @@
       "head": {
         "title": "Dashboard - T4G"
       },
+      "title": "Dashboard",
+      "pendingActions": "Pending actions",
+      "completeProfile": {
+        "text": "Complete your profile to access all services",
+        "button": "Complete my profile"
+      },
+      "notifications": {
+        "title": "Notifications"
+      },
+      "discoverBenefits": {
+        "text": "Discover all the benefits available in the community",
+        "button": "Discover benefits"
+      },
+      "discoverServices": {
+        "text": "Explore services offered by the community",
+        "button": "Discover services"
+      },
+      "topServices": "Popular services",
       "main": {
         "title1": "Pending",
         "section1": {
@@ -708,6 +726,7 @@
     "addStudies": {
       "program": "Program",
       "programTopic": "Program Topic",
+      "school": "School",
       "graduatedYear": {
         "alumni": "Date of graduation",
         "student": "Date of beginning"

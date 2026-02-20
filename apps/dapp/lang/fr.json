@@ -519,6 +519,24 @@
       "head": {
         "title": "Tableau de bord - T4G"
       },
+      "title": "Tableau de bord",
+      "pendingActions": "Actions en attente",
+      "completeProfile": {
+        "text": "Complétez votre profil pour accéder à tous les services",
+        "button": "Compléter mon profil"
+      },
+      "notifications": {
+        "title": "Notifications"
+      },
+      "discoverBenefits": {
+        "text": "Découvrez tous les avantages disponibles dans la communauté",
+        "button": "Découvrir les bénéfices"
+      },
+      "discoverServices": {
+        "text": "Explorez les services proposés par la communauté",
+        "button": "Découvrir les services"
+      },
+      "topServices": "Services populaires",
       "main": {
         "title1": "En attente",
         "section1": {
@@ -716,6 +734,7 @@
     "addStudies": {
       "program": "Programme",
       "programTopic": "Domaine d'étude",
+      "school": "École",
       "graduatedYear": {
         "alumni": "Date d'obtention",
         "student": "Date de début"
