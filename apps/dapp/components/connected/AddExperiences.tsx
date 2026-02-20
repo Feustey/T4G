@@ -1,18 +1,19 @@
 import { LangType } from '../../lib/shared-types';
 import { Select, TextInput } from '..';
-import { LocaleType, UserExperienceType } from 'apps/dapp/types';
+import { LocaleType } from '../../types/localeType';
+import { UserExperienceType } from '../../types/userExperience';
 import {
   countries as ENCountries,
   months as ENMonths,
   years as ENYears,
   industries as ENIndustries,
-} from 'apps/dapp/data/en';
+} from '../../data/en';
 import {
   countries as FRCountries,
   months as FRMonths,
   years as FRYears,
   industries as FRIndustries,
-} from 'apps/dapp/data/fr';
+} from '../../data/fr';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
