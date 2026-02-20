@@ -13,7 +13,9 @@ import {
   schools as FRSchools
 } from '../../data/fr';
 import { ISelectOption, Select } from '..';
-import { LocaleType, UserCVType, UserType } from 'apps/dapp/types';
+import { LocaleType } from '../../types/localeType';
+import { UserCVType } from '../../types/userCV';
+import { UserType } from '../../types/userType';
 import { useRouter } from 'next/router';
 
 export interface IAddStudies {
