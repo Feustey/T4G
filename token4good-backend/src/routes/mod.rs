@@ -5,6 +5,7 @@ pub mod health;
 pub mod mentoring;
 pub mod metrics;
 pub mod proofs;
+pub mod service_categories;
 pub mod services;
 pub mod token4good;
 pub mod transactions;

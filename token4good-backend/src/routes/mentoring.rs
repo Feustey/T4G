@@ -8,7 +8,6 @@ use crate::{
     models::mentoring::{
         CreateProofPayload, CreateRequestPayload, MentoringProof, MentoringRequest, RequestStatus,
     },
-    services::rgb::RGBError,
     AppState,
 };
 
@@ -130,23 +129,7 @@ async fn create_proof(
             payload.comment.clone(),
         )
         .await
-        .map_err(|e| match e {
-            RGBError::ContractCreation(msg) => {
-                format!("Erreur de création du contrat RGB: {}", msg)
-            }
-            RGBError::Validation(msg) => format!("Erreur de validation RGB: {}", msg),
-            RGBError::Signature(msg) => format!("Erreur de signature RGB: {}", msg),
-            RGBError::CliError(msg) => format!("Erreur CLI RGB: {}", msg),
-            RGBError::Configuration(msg) => {
-                format!("Configuration RGB invalide: {}", msg)
-            }
-            RGBError::Storage(msg) => format!("Erreur stockage: {}", msg),
-            RGBError::Transfer(msg) => format!("Erreur transfert: {}", msg),
-            RGBError::Interface(msg) => format!("Erreur interface: {}", msg),
-            RGBError::Runtime(msg) => format!("Erreur runtime RGB: {}", msg),
-            RGBError::Schema(msg) => format!("Erreur schema RGB: {}", msg),
-            RGBError::Io(e) => format!("Erreur I/O: {}", e),
-        })?;
+        .map_err(|e| e.to_string())?;
 
     // 3. Créer la preuve dans MongoDB
     let request_id = request.id.clone();

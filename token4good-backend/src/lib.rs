@@ -4,6 +4,7 @@ pub mod routes;
 pub mod services;
 
 use axum::Router;
+use axum::http::Method;
 use std::{env, error::Error};
 use tower_http::cors::{Any, CorsLayer};
 
@@ -60,6 +61,29 @@ pub async fn build_state() -> Result<AppState, Box<dyn Error>> {
     Ok(AppState { db, rgb, dazno })
 }
 
+fn build_cors_layer() -> CorsLayer {
+    // Liste des origines autorisées
+    let allowed_origins = vec![
+        "http://localhost:4200".parse().unwrap(),           // Dev frontend
+        "http://localhost:3000".parse().unwrap(),           // Dev backend
+        "https://token4good.vercel.app".parse().unwrap(),   // Production
+        "https://t4g.dazno.de".parse().unwrap(),            // Production alternative
+    ];
+
+    CorsLayer::new()
+        .allow_origin(allowed_origins)
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::PATCH,
+            Method::OPTIONS,
+        ])
+        .allow_headers(Any)
+        .allow_credentials(true)
+}
+
 pub fn build_router(state: AppState) -> Router {
     Router::new()
         .nest("/health", routes::health::health_routes())
@@ -102,6 +126,10 @@ pub fn build_router(state: AppState) -> Router {
                 state.clone(),
                 crate::middleware::auth::auth_middleware,
             )),
+        )
+        .nest(
+            "/service-categories",
+            routes::service_categories::service_category_routes(),
         )
         .nest(
             "/api/transactions",
@@ -151,11 +179,6 @@ pub fn build_router(state: AppState) -> Router {
         .layer(axum::middleware::from_fn(
             crate::middleware::validation::request_size_limit_middleware,
         ))
-        .layer(
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods(Any)
-                .allow_headers(Any),
-        )
+        .layer(build_cors_layer())
         .with_state(state)
 }

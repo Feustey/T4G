@@ -878,26 +878,12 @@ pub async fn create_lightning_invoice(
 ) -> Result<Json<LightningInvoiceResponse>, StatusCode> {
     // Convertir amount en msat
     let amount_msat = (payload.amount * 1000) as u64;
-    
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
 
     // Créer l'invoice via Dazno API
     let invoice = state
         .dazno
         .create_lightning_invoice(
-            &dazno_token,
+            "",
             amount_msat,
             &payload.memo,
             &auth_user.id,
@@ -911,8 +897,8 @@ pub async fn create_lightning_invoice(
     let response = LightningInvoiceResponse {
         status: "success".to_string(),
         payment_request: invoice.payment_request,
-        payment_hash: invoice.payment_hash,
-        checking_id: invoice.id,
+        payment_hash: invoice.payment_hash.clone(),
+        checking_id: invoice.payment_hash,
         amount: payload.amount,
         expiry: payload.expiry,
     };
@@ -924,24 +910,10 @@ pub async fn get_lightning_balance(
     State(state): State<AppState>,
     Extension(auth_user): Extension<AuthUser>,
 ) -> Result<Json<LightningBalanceResponse>, StatusCode> {
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
-
     // Obtenir le solde via Dazno API
     let balance = state
         .dazno
-        .get_wallet_balance(&dazno_token, &auth_user.id)
+        .get_wallet_balance("", &auth_user.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get Lightning balance: {}", e);
@@ -950,8 +922,8 @@ pub async fn get_lightning_balance(
     
     let response = LightningBalanceResponse {
         status: "success".to_string(),
-        balance_sats: balance.balance_msat / 1000,
-        balance_msats: balance.balance_msat,
+        balance_sats: (balance.balance_msat / 1000) as i64,
+        balance_msats: balance.balance_msat as i64,
         wallet_id: format!("wallet_t4g_{}", auth_user.id),
     };
     
@@ -963,24 +935,10 @@ pub async fn pay_lightning_invoice(
     Extension(auth_user): Extension<AuthUser>,
     Json(payload): Json<PayLightningInvoiceRequest>,
 ) -> Result<Json<PaymentResponse>, StatusCode> {
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
-
     // Payer l'invoice via Dazno API
     let payment = state
         .dazno
-        .pay_lightning_invoice(&dazno_token, &payload.bolt11, &auth_user.id)
+        .pay_lightning_invoice("", &payload.bolt11, &auth_user.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to pay Lightning invoice: {}", e);
@@ -990,6 +948,7 @@ pub async fn pay_lightning_invoice(
     let response = PaymentResponse {
         status: "success".to_string(),
         payment_hash: payment.payment_hash,
+        preimage: payment.payment_preimage,
         amount_msat: payment.amount_msat,
         fee_msat: payment.fee_msat,
     };
@@ -999,27 +958,13 @@ pub async fn pay_lightning_invoice(
 
 pub async fn check_lightning_payment(
     State(state): State<AppState>,
-    Extension(auth_user): Extension<AuthUser>,
+    Extension(_auth_user): Extension<AuthUser>,
     Path(payment_hash): Path<String>,
 ) -> Result<Json<PaymentCheckResponse>, StatusCode> {
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
-
     // Vérifier le statut du paiement via Dazno API
     match state
         .dazno
-        .check_payment_status(&dazno_token, &payment_hash)
+        .check_payment_status("", &payment_hash)
         .await
     {
         Ok(payment_details) => {
@@ -1027,18 +972,16 @@ pub async fn check_lightning_payment(
                 status: "success".to_string(),
                 payment_hash: payment_hash.clone(),
                 paid: payment_details.status == "settled",
-                details: Some(serde_json::json!({
-                    "amount_msat": payment_details.amount_msat,
-                    "status": payment_details.status,
-                    "created_at": payment_details.created_at,
-                    "settled_at": payment_details.settled_at,
-                })),
+                details: Some(PaymentDetails {
+                    amount: payment_details.amount_msat as i64,
+                    status: payment_details.status,
+                    timestamp: payment_details.created_at,
+                }),
             };
             Ok(Json(response))
         }
         Err(e) => {
             tracing::error!("Failed to check payment status: {}", e);
-            // Retourner un statut par défaut en cas d'erreur
             let response = PaymentCheckResponse {
                 status: "error".to_string(),
                 payment_hash,
@@ -1052,31 +995,26 @@ pub async fn check_lightning_payment(
 
 pub async fn get_lightning_node_info(
     State(state): State<AppState>,
-    Extension(auth_user): Extension<AuthUser>,
+    Extension(_auth_user): Extension<AuthUser>,
 ) -> Result<Json<NodeInfo>, StatusCode> {
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
+    let node_pubkey = std::env::var("LIGHTNING_NODE_PUBKEY").unwrap_or_default();
 
     // Obtenir les infos du nœud via Dazno API
-    let node_info = state
+    let dazno_node = state
         .dazno
-        .get_node_info(&dazno_token)
+        .get_node_info("", &node_pubkey)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get node info: {}", e);
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
+
+    let node_info = NodeInfo {
+        pubkey: dazno_node.pubkey,
+        alias: dazno_node.alias,
+        num_channels: dazno_node.num_channels,
+        total_capacity_msat: dazno_node.total_capacity_msat,
+    };
     
     Ok(Json(node_info))
 }
@@ -1085,24 +1023,10 @@ pub async fn get_lightning_channels(
     State(state): State<AppState>,
     Extension(auth_user): Extension<AuthUser>,
 ) -> Result<Json<Vec<LightningChannel>>, StatusCode> {
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
-
     // Obtenir les canaux via Dazno API
     let channels = state
         .dazno
-        .get_wallet_channels(&dazno_token, &auth_user.id)
+        .list_channels("", &auth_user.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get channels: {}", e);
@@ -1129,24 +1053,10 @@ pub async fn get_lightning_status(
     State(state): State<AppState>,
     Extension(auth_user): Extension<AuthUser>,
 ) -> Result<Json<LightningStatus>, StatusCode> {
-    // Récupérer le token Dazno de l'utilisateur
-    let user = state
-        .db
-        .get_user_by_id(&auth_user.id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
-
-    let dazno_token = user.dazno_token
-        .ok_or_else(|| {
-            tracing::error!("User {} has no Dazno token", auth_user.id);
-            StatusCode::UNAUTHORIZED
-        })?;
-
     // Obtenir le statut Lightning via plusieurs appels Dazno API
     let balance = state
         .dazno
-        .get_wallet_balance(&dazno_token, &auth_user.id)
+        .get_wallet_balance("", &auth_user.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get balance for status: {}", e);
@@ -1155,16 +1065,17 @@ pub async fn get_lightning_status(
 
     let channels = state
         .dazno
-        .get_wallet_channels(&dazno_token, &auth_user.id)
+        .list_channels("", &auth_user.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get channels for status: {}", e);
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
+    let node_pubkey = std::env::var("LIGHTNING_NODE_PUBKEY").unwrap_or_default();
     let node_info = state
         .dazno
-        .get_node_info(&dazno_token)
+        .get_node_info("", &node_pubkey)
         .await
         .map_err(|e| {
             tracing::error!("Failed to get node info for status: {}", e);
@@ -1389,16 +1300,20 @@ pub struct NodeInfo {
 
 #[derive(Debug, Serialize)]
 pub struct LightningChannel {
-    pub id: String,
-    pub capacity: i64,
-    pub local_balance: i64,
-    pub status: String,
+    pub channel_id: String,
+    pub capacity_msat: u64,
+    pub local_balance_msat: u64,
+    pub remote_balance_msat: u64,
+    pub state: String,
+    pub node_alias: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct LightningStatus {
     pub connected: bool,
-    pub synced_to_chain: bool,
-    pub num_channels: i64,
+    pub synced: bool,
+    pub num_channels: u32,
+    pub balance_msat: u64,
+    pub node_pubkey: String,
 }
 

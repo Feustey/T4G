@@ -1,10 +1,26 @@
-use amplify::ByteArray;
-use bpcore::Txid;
-use rgbstd::{ContractId, WitnessStatus};
-use serde::{Deserialize, Serialize};
-use sha2::Digest;
+//! RGB Client-Side Validation Service (Option B — sans daemon)
+//!
+//! Implémente la validation client-side du protocole RGB :
+//! - Signatures ECDSA secp256k1 réelles via la crate `bitcoin`
+//! - Commitments SHA-256 chaînés (compatible Tapret)
+//! - Single-use seals liés à des UTXOs Bitcoin
+//! - Stash local persistant (JSON sur disque)
+//! - Vérification de transactions optionnelle via API Esplora (reqwest)
+//!
+//! Pour l'intégration AluVM/Contractum complète (Codex RGB 0.12+), une mise à
+//! jour sera nécessaire une fois le compilateur `contractum` stable.
+
 use std::{collections::HashMap, error::Error, path::PathBuf, str::FromStr, sync::Arc};
+
+use bitcoin::secp256k1::{All, Message, Secp256k1, SecretKey};
+use bitcoin::secp256k1::ecdsa::Signature;
+use rand::RngCore;
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use thiserror::Error;
+use tokio::sync::RwLock;
+
+// ─── Erreurs ─────────────────────────────────────────────────────────────────
 
 #[derive(Error, Debug)]
 pub enum RGBError {
@@ -20,405 +36,103 @@ pub enum RGBError {
     Configuration(String),
     #[error("Transfer error: {0}")]
     Transfer(String),
-    #[error("Interface error: {0}")]
-    Interface(String),
-    #[error("CLI error: {0}")]
-    CliError(String),
-    #[error("Runtime error: {0}")]
-    Runtime(String),
-    #[error("Schema error: {0}")]
-    Schema(String),
+    #[error("Esplora error: {0}")]
+    Esplora(String),
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 }
 
-// Token4Good mentoring proof schema constants
-const MENTORING_SCHEMA_NAME: &str = "MentoringProof";
-const _MENTORING_TICKER: &str = "T4G-PROOF";
+// ─── Types internes ───────────────────────────────────────────────────────────
 
-#[derive(Clone)]
-pub struct RGBService {
-    data_dir: PathBuf,
-    contracts: Arc<std::sync::Mutex<HashMap<String, ProofContract>>>,
-    network: String,
+/// Single-use seal : liaison à un UTXO Bitcoin (txid:vout + blinding factor)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+struct RgbSeal {
+    txid: String,
+    vout: u32,
+    /// Facteur de bruit pour la confidentialité du commitment seal
+    blinding: [u8; 32],
 }
 
-#[derive(Debug, Clone)]
-#[allow(dead_code)]
-struct ProofContract {
-    id: ContractId,
+impl RgbSeal {
+    /// Commitment du seal = SHA256(txid_bytes ‖ vout ‖ blinding)
+    fn commitment(&self) -> [u8; 32] {
+        let mut h = Sha256::new();
+        h.update(hex::decode(&self.txid).unwrap_or_default());
+        h.update(self.vout.to_le_bytes());
+        h.update(self.blinding);
+        h.finalize().into()
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ProofMetadata {
+    mentor_id: String,
+    mentee_id: String,
+    request_id: String,
+    rating: u8,
+    comment: String,
+    timestamp: u64,
+}
+
+impl ProofMetadata {
+    /// Hash du contenu des métadonnées = SHA256(tous les champs)
+    fn content_hash(&self) -> [u8; 32] {
+        let mut h = Sha256::new();
+        h.update(self.mentor_id.as_bytes());
+        h.update(b":");
+        h.update(self.mentee_id.as_bytes());
+        h.update(b":");
+        h.update(self.request_id.as_bytes());
+        h.update(b":");
+        h.update([self.rating]);
+        h.update(b":");
+        h.update(self.comment.as_bytes());
+        h.update(b":");
+        h.update(self.timestamp.to_le_bytes());
+        h.finalize().into()
+    }
+}
+
+/// Opération de genèse du contrat (équivalent RGB Genesis)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct GenesisOp {
+    contract_id: String,
+    /// Schéma du contrat
+    schema: String,
+    /// Clé publique de l'émetteur (hex compressé 33 bytes)
+    issuer_pubkey: String,
+    /// Hash du contenu des métadonnées
+    content_hash: [u8; 32],
+    /// UTXO seal initial (optionnel — requis pour ancrage on-chain)
+    seal: Option<RgbSeal>,
+    /// Signature ECDSA de l'émetteur (hex 64 bytes)
+    issuer_sig: String,
+    timestamp: u64,
+}
+
+/// Transition d'état RGB (transfert du seal vers un nouveau UTXO)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct StateTransition {
+    from_seal: RgbSeal,
+    to_seal: RgbSeal,
+    /// Commitment = SHA256(from_seal_commit ‖ to_seal_commit ‖ contract_id)
+    commitment: [u8; 32],
+    /// Signature ECDSA sur le commitment
+    sig: String,
+    timestamp: u64,
+}
+
+/// Contrat stocké localement dans le stash client-side
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct StoredContract {
+    contract_id: String,
     metadata: ProofMetadata,
-    status: WitnessStatus,
+    genesis: GenesisOp,
+    transitions: Vec<StateTransition>,
+    current_seal: Option<RgbSeal>,
 }
 
-impl RGBService {
-    pub fn new() -> Result<Self, Box<dyn Error>> {
-        // Initialize RGB data directory
-        let rgb_data_dir =
-            std::env::var("RGB_DATA_DIR").unwrap_or_else(|_| "/tmp/rgb_data".to_string());
-
-        let data_dir = PathBuf::from(&rgb_data_dir);
-        std::fs::create_dir_all(&data_dir)?;
-
-        // Initialize in-memory storage for development
-        let contracts = Arc::new(std::sync::Mutex::new(HashMap::new()));
-
-        // Set network (regtest for development)
-        let network = "regtest".to_string();
-
-        tracing::info!(
-            "Initialized RGB service with data directory: {}",
-            data_dir.display()
-        );
-
-        Ok(Self {
-            data_dir,
-            contracts,
-            network,
-        })
-    }
-
-    pub async fn create_proof_contract(
-        &self,
-        mentor_id: &str,
-        mentee_id: &str,
-        request_id: &str,
-        rating: u8,
-        comment: Option<String>,
-    ) -> Result<(String, String), RGBError> {
-        // Validate input parameters
-        if mentor_id.is_empty() || mentee_id.is_empty() || request_id.is_empty() {
-            return Err(RGBError::ContractCreation(
-                "Invalid parameters: IDs cannot be empty".to_string(),
-            ));
-        }
-
-        if rating > 5 {
-            return Err(RGBError::ContractCreation(
-                "Rating must be between 0 and 5".to_string(),
-            ));
-        }
-
-        // Create proof metadata
-        let timestamp = chrono::Utc::now().timestamp() as u64;
-        let proof_metadata = ProofMetadata {
-            mentor_id: mentor_id.to_string(),
-            mentee_id: mentee_id.to_string(),
-            request_id: request_id.to_string(),
-            rating,
-            comment: comment.unwrap_or_default(),
-            timestamp,
-        };
-
-        // Generate deterministic contract ID from metadata
-        let contract_data = format!(
-            "{}:{}:{}:{}:{}",
-            mentor_id, mentee_id, request_id, rating, timestamp
-        );
-        let hash = sha2::Sha256::digest(contract_data.as_bytes());
-        let mut contract_bytes = [0u8; 32];
-        contract_bytes.copy_from_slice(&hash[..32]);
-        let contract_id = ContractId::from_slice(&contract_bytes).map_err(|e| {
-            RGBError::ContractCreation(format!("Failed to create contract ID: {}", e))
-        })?;
-
-        // Create a mock genesis operation for the proof
-        // In a real implementation, this would use proper RGB genesis construction
-        let _genesis_data = format!(
-            "{{\"schema\": \"{}\", \"proof\": {}}}",
-            MENTORING_SCHEMA_NAME,
-            serde_json::to_string(&proof_metadata).map_err(|e| RGBError::Storage(e.to_string()))?
-        );
-
-        // Create proof contract
-        let proof_contract = ProofContract {
-            id: contract_id,
-            metadata: proof_metadata.clone(),
-            status: WitnessStatus::Genesis,
-        };
-
-        // Store in contracts map
-        {
-            let mut contracts = self
-                .contracts
-                .lock()
-                .map_err(|e| RGBError::Storage(format!("Failed to lock contracts: {}", e)))?;
-            contracts.insert(contract_id.to_string(), proof_contract);
-        }
-
-        // Persist to filesystem (simplified)
-        self.persist_contract(contract_id)?;
-
-        // Generate signature
-        let signature = self.generate_signature(&contract_id, &proof_metadata)?;
-
-        tracing::info!(
-            "Created RGB proof contract: {} for mentor: {}, mentee: {}, rating: {}",
-            contract_id,
-            mentor_id,
-            mentee_id,
-            rating
-        );
-
-        Ok((contract_id.to_string(), signature))
-    }
-
-    pub async fn verify_proof(
-        &self,
-        contract_id: &str,
-        _signature: &str,
-    ) -> Result<bool, RGBError> {
-        // Parse contract ID
-        let contract_id = ContractId::from_str(contract_id)
-            .map_err(|e| RGBError::Validation(format!("Invalid contract ID: {}", e)))?;
-
-        // Check if contract exists
-        let exists = {
-            let contracts = self
-                .contracts
-                .lock()
-                .map_err(|e| RGBError::Storage(format!("Failed to lock contracts: {}", e)))?;
-            contracts.contains_key(&contract_id.to_string())
-        };
-
-        if !exists {
-            return Ok(false);
-        }
-
-        // In a real implementation, this would validate the contract state
-        // using RGB consensus rules
-        Ok(true)
-    }
-
-    pub async fn get_proof_details(&self, contract_id: &str) -> Result<ProofDetails, RGBError> {
-        // Parse contract ID
-        let _contract_id_parsed = ContractId::from_str(contract_id)
-            .map_err(|e| RGBError::Validation(format!("Invalid contract ID: {}", e)))?;
-
-        // Get contract from storage
-        let proof_contract = {
-            let contracts = self
-                .contracts
-                .lock()
-                .map_err(|e| RGBError::Storage(format!("Failed to lock contracts: {}", e)))?;
-            contracts.get(contract_id).cloned()
-        };
-
-        match proof_contract {
-            Some(contract) => Ok(ProofDetails {
-                mentor_id: contract.metadata.mentor_id,
-                mentee_id: contract.metadata.mentee_id,
-                request_id: contract.metadata.request_id,
-                timestamp: contract.metadata.timestamp,
-                rating: contract.metadata.rating,
-                comment: contract.metadata.comment,
-                contract_id: contract_id.to_string(),
-                signature: format!("rgb_sig_{}", &contract_id[..16]),
-            }),
-            None => Err(RGBError::Storage("Contract not found".to_string())),
-        }
-    }
-
-    pub async fn transfer_proof(
-        &self,
-        contract_id: &str,
-        from_outpoint: &str,
-        to_outpoint: &str,
-        amount: u64,
-    ) -> Result<String, RGBError> {
-        // Parse contract ID
-        let _contract_id_parsed = ContractId::from_str(contract_id)
-            .map_err(|e| RGBError::Transfer(format!("Invalid contract ID: {}", e)))?;
-
-        // Validate outpoint format
-        let from_parts: Vec<&str> = from_outpoint.split(':').collect();
-        let to_parts: Vec<&str> = to_outpoint.split(':').collect();
-
-        if from_parts.len() != 2 || to_parts.len() != 2 {
-            return Err(RGBError::Transfer(
-                "Invalid outpoint format. Expected: txid:vout".to_string(),
-            ));
-        }
-
-        // Validate transaction IDs
-        let _from_txid = Txid::from_str(from_parts[0])
-            .map_err(|e| RGBError::Transfer(format!("Invalid from txid: {}", e)))?;
-        let _to_txid = Txid::from_str(to_parts[0])
-            .map_err(|e| RGBError::Transfer(format!("Invalid to txid: {}", e)))?;
-
-        // Create a mock transition for the transfer
-        let transition_data = format!(
-            "{{\"from\": \"{}\", \"to\": \"{}\", \"amount\": {}}}",
-            from_outpoint, to_outpoint, amount
-        );
-
-        let _transition = self.create_mock_transition(&transition_data)?;
-        let transfer_id = format!("transfer_{}", uuid::Uuid::new_v4());
-
-        // Update contract status (simplified)
-        {
-            let mut contracts = self
-                .contracts
-                .lock()
-                .map_err(|e| RGBError::Storage(format!("Failed to lock contracts: {}", e)))?;
-
-            if let Some(contract) = contracts.get_mut(contract_id) {
-                contract.status = WitnessStatus::from([1u8, 0, 0, 0, 0, 0, 0, 0]);
-            } else {
-                return Err(RGBError::Transfer("Contract not found".to_string()));
-            }
-        }
-
-        tracing::info!(
-            "Created RGB transfer {} for contract {} from {} to {} (amount: {})",
-            transfer_id,
-            contract_id,
-            from_outpoint,
-            to_outpoint,
-            amount
-        );
-
-        Ok(transfer_id)
-    }
-
-    pub async fn get_contract_history(
-        &self,
-        contract_id: &str,
-    ) -> Result<Vec<TransferRecord>, RGBError> {
-        // Parse contract ID
-        let _contract_id = ContractId::from_str(contract_id)
-            .map_err(|e| RGBError::Validation(format!("Invalid contract ID: {}", e)))?;
-
-        // Get contract from storage
-        let proof_contract = {
-            let contracts = self
-                .contracts
-                .lock()
-                .map_err(|e| RGBError::Storage(format!("Failed to lock contracts: {}", e)))?;
-            contracts.get(contract_id).cloned()
-        };
-
-        match proof_contract {
-            Some(contract) => {
-                // Convert transitions to transfer records
-                let mut records = Vec::new();
-
-                // Add genesis as initial record
-                records.push(TransferRecord {
-                    from: "genesis".to_string(),
-                    to: "initial_owner".to_string(),
-                    timestamp: contract.metadata.timestamp,
-                    txid: "genesis_operation".to_string(),
-                });
-
-                // Add mock transition
-                records.push(TransferRecord {
-                    from: "owner_0".to_string(),
-                    to: "owner_1".to_string(),
-                    timestamp: chrono::Utc::now().timestamp() as u64,
-                    txid: "transition_0".to_string(),
-                });
-
-                Ok(records)
-            }
-            None => Err(RGBError::Storage("Contract not found".to_string())),
-        }
-    }
-
-    pub async fn list_proofs(&self) -> Result<Vec<ProofDetails>, RGBError> {
-        let contracts = self
-            .contracts
-            .lock()
-            .map_err(|e| RGBError::Storage(format!("Failed to lock contracts: {}", e)))?;
-
-        let proofs = contracts
-            .iter()
-            .map(|(contract_id, contract)| ProofDetails {
-                mentor_id: contract.metadata.mentor_id.clone(),
-                mentee_id: contract.metadata.mentee_id.clone(),
-                request_id: contract.metadata.request_id.clone(),
-                timestamp: contract.metadata.timestamp,
-                rating: contract.metadata.rating,
-                comment: contract.metadata.comment.clone(),
-                contract_id: contract_id.clone(),
-                signature: format!("rgb_sig_{}", &contract_id[..16]),
-            })
-            .collect();
-
-        Ok(proofs)
-    }
-
-    pub async fn health_check(&self) -> Result<(), RGBError> {
-        // Check if data directory exists and is writable
-        if !self.data_dir.exists() {
-            return Err(RGBError::Configuration(format!(
-                "RGB data directory does not exist: {}",
-                self.data_dir.display()
-            )));
-        }
-
-        // Test write access
-        let test_file = self.data_dir.join("health_check.tmp");
-        std::fs::write(&test_file, "test").map_err(|e| {
-            RGBError::Configuration(format!("Cannot write to RGB data directory: {}", e))
-        })?;
-        std::fs::remove_file(test_file).map_err(|e| {
-            RGBError::Configuration(format!("Cannot delete from RGB data directory: {}", e))
-        })?;
-
-        // Check contracts storage
-        let _contracts = self.contracts.lock().map_err(|e| {
-            RGBError::Configuration(format!("Cannot access contracts storage: {}", e))
-        })?;
-
-        Ok(())
-    }
-
-    fn create_mock_genesis(
-        &self,
-        _contract_id: ContractId,
-        _data: &str,
-    ) -> Result<String, RGBError> {
-        // Return a mock genesis identifier
-        Ok(format!("genesis_{}", uuid::Uuid::new_v4()))
-    }
-
-    fn create_mock_transition(&self, _data: &str) -> Result<String, RGBError> {
-        // Return a mock transition identifier
-        Ok(format!("transition_{}", uuid::Uuid::new_v4()))
-    }
-
-    fn persist_contract(&self, contract_id: ContractId) -> Result<(), RGBError> {
-        // Persist contract to filesystem
-        let contract_file = self.data_dir.join(format!("{}.rgb", contract_id));
-
-        // Serialize genesis data (simplified for development)
-        let data = format!(
-            "{{\"contract_id\": \"{}\", \"timestamp\": {}}}",
-            contract_id,
-            chrono::Utc::now().timestamp()
-        );
-
-        std::fs::write(contract_file, data)?;
-
-        Ok(())
-    }
-
-    fn generate_signature(
-        &self,
-        contract_id: &ContractId,
-        metadata: &ProofMetadata,
-    ) -> Result<String, RGBError> {
-        // In production, this would use proper secp256k1 signing
-        // For now, create a deterministic signature
-        let sig_data = format!(
-            "{}:{}:{}:{}:{}",
-            contract_id, metadata.mentor_id, metadata.mentee_id, metadata.timestamp, self.network
-        );
-        let sig_hash = sha2::Sha256::digest(sig_data.as_bytes());
-        Ok(format!("rgb_sig_{}", hex::encode(&sig_hash[..16])))
-    }
-}
+// ─── Types publics ────────────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProofDetails {
@@ -440,163 +154,625 @@ pub struct TransferRecord {
     pub txid: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct ProofMetadata {
-    mentor_id: String,
-    mentee_id: String,
-    request_id: String,
-    rating: u8,
-    comment: String,
-    timestamp: u64,
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+/// Service de validation RGB client-side.
+///
+/// Utilise secp256k1 ECDSA pour les signatures, SHA-256 pour les commitments,
+/// et un stash JSON persistant pour le stockage local.
+#[derive(Clone)]
+pub struct RGBService {
+    data_dir: PathBuf,
+    network: String,
+    /// Contexte secp256k1 (thread-safe via Arc)
+    secp: Arc<Secp256k1<All>>,
+    /// Clé privée de l'émetteur (chargée depuis disque ou RGB_ISSUER_KEY)
+    issuer_secret_key: SecretKey,
+    /// Clé publique compressée hex de l'émetteur
+    issuer_pubkey_hex: String,
+    /// Stash in-memory des contrats (persisté sur disque)
+    contracts: Arc<RwLock<HashMap<String, StoredContract>>>,
+    /// URL de base de l'API Esplora pour vérification on-chain (optionnel)
+    esplora_url: Option<String>,
 }
+
+impl RGBService {
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        let data_dir = PathBuf::from(
+            std::env::var("RGB_DATA_DIR").unwrap_or_else(|_| "/tmp/rgb_data".to_string()),
+        );
+        let network =
+            std::env::var("BITCOIN_NETWORK").unwrap_or_else(|_| "regtest".to_string());
+        let esplora_url = std::env::var("ESPLORA_URL").ok();
+
+        std::fs::create_dir_all(&data_dir)?;
+
+        let secp = Arc::new(Secp256k1::new());
+        let issuer_secret_key = Self::load_or_create_issuer_key(&data_dir, &secp)?;
+        let issuer_pubkey =
+            bitcoin::secp256k1::PublicKey::from_secret_key(&secp, &issuer_secret_key);
+        let issuer_pubkey_hex = hex::encode(issuer_pubkey.serialize());
+
+        let contracts = Self::load_stash(&data_dir)?;
+
+        tracing::info!(
+            "RGB client-side service initialisé — réseau: {}, pubkey: {}..., {} contrat(s) chargé(s){}",
+            network,
+            &issuer_pubkey_hex[..16],
+            contracts.len(),
+            esplora_url
+                .as_deref()
+                .map(|u| format!(", esplora: {}", u))
+                .unwrap_or_default()
+        );
+
+        Ok(Self {
+            data_dir,
+            network,
+            secp,
+            issuer_secret_key,
+            issuer_pubkey_hex,
+            contracts: Arc::new(RwLock::new(contracts)),
+            esplora_url,
+        })
+    }
+
+    // ─── Clé émetteur ─────────────────────────────────────────────────────────
+
+    fn load_or_create_issuer_key(
+        data_dir: &PathBuf,
+        secp: &Secp256k1<All>,
+    ) -> Result<SecretKey, Box<dyn Error>> {
+        let key_path = data_dir.join("issuer.key");
+
+        // 1. Clé existante sur disque
+        if key_path.exists() {
+            let hex_str = std::fs::read_to_string(&key_path)?;
+            let bytes = hex::decode(hex_str.trim())?;
+            return Ok(SecretKey::from_slice(&bytes)?);
+        }
+
+        // 2. Variable d'environnement (prioritaire en production)
+        if let Ok(hex_str) = std::env::var("RGB_ISSUER_KEY") {
+            let bytes = hex::decode(hex_str.trim())?;
+            let sk = SecretKey::from_slice(&bytes)?;
+            std::fs::write(&key_path, hex::encode(sk.secret_bytes()))?;
+            tracing::info!("Clé émetteur RGB chargée depuis RGB_ISSUER_KEY");
+            return Ok(sk);
+        }
+
+        // 3. Génération d'une nouvelle clé
+        let (sk, _) = secp.generate_keypair(&mut rand::thread_rng());
+        std::fs::write(&key_path, hex::encode(sk.secret_bytes()))?;
+        tracing::warn!(
+            "Nouvelle clé émetteur RGB générée et sauvegardée dans {:?}. \
+             Définir RGB_ISSUER_KEY en production pour garantir la persistance.",
+            key_path
+        );
+        Ok(sk)
+    }
+
+    // ─── Stash persistant ─────────────────────────────────────────────────────
+
+    fn load_stash(
+        data_dir: &PathBuf,
+    ) -> Result<HashMap<String, StoredContract>, Box<dyn Error>> {
+        let path = data_dir.join("stash.json");
+        if path.exists() {
+            let data = std::fs::read_to_string(&path)?;
+            Ok(serde_json::from_str(&data)?)
+        } else {
+            Ok(HashMap::new())
+        }
+    }
+
+    async fn save_stash(&self) -> Result<(), RGBError> {
+        let guard = self.contracts.read().await;
+        let json = serde_json::to_string_pretty(&*guard)
+            .map_err(|e| RGBError::Storage(e.to_string()))?;
+        tokio::fs::write(self.data_dir.join("stash.json"), json).await?;
+        Ok(())
+    }
+
+    // ─── Cryptographie ────────────────────────────────────────────────────────
+
+    /// Signe 32 octets avec la clé émetteur, retourne la signature compacte hex (64 bytes)
+    fn sign_bytes(&self, data: &[u8]) -> Result<String, RGBError> {
+        let hash: [u8; 32] = Sha256::digest(data).into();
+        let msg = Message::from_slice(&hash)
+            .map_err(|e| RGBError::Signature(e.to_string()))?;
+        let sig = self.secp.sign_ecdsa(&msg, &self.issuer_secret_key);
+        Ok(hex::encode(sig.serialize_compact()))
+    }
+
+    /// Vérifie une signature ECDSA compacte (hex 64 bytes) contre une clé publique (hex 33 bytes)
+    fn verify_ecdsa(&self, data: &[u8], sig_hex: &str, pubkey_hex: &str) -> bool {
+        let Ok(sig_bytes) = hex::decode(sig_hex) else { return false };
+        let Ok(pk_bytes) = hex::decode(pubkey_hex) else { return false };
+        let Ok(sig) = Signature::from_compact(&sig_bytes) else { return false };
+        let Ok(pk) = bitcoin::secp256k1::PublicKey::from_slice(&pk_bytes) else {
+            return false;
+        };
+        let hash: [u8; 32] = Sha256::digest(data).into();
+        let Ok(msg) = Message::from_slice(&hash) else { return false };
+        self.secp.verify_ecdsa(&msg, &sig, &pk).is_ok()
+    }
+
+    /// Calcule le contract_id = SHA256(content_hash ‖ schema ‖ issuer_pubkey ‖ timestamp)
+    fn compute_contract_id(&self, content_hash: &[u8; 32], timestamp: u64) -> String {
+        let mut h = Sha256::new();
+        h.update(content_hash);
+        h.update(b"token4good-mentoring-v1");
+        h.update(self.issuer_pubkey_hex.as_bytes());
+        h.update(timestamp.to_le_bytes());
+        hex::encode(h.finalize())
+    }
+
+    fn random_blinding() -> [u8; 32] {
+        let mut b = [0u8; 32];
+        rand::thread_rng().fill_bytes(&mut b);
+        b
+    }
+
+    fn parse_outpoint(s: &str) -> Result<(String, u32), RGBError> {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        if parts.len() != 2 {
+            return Err(RGBError::Transfer(
+                "Format attendu : txid:vout".to_string(),
+            ));
+        }
+        bitcoin::Txid::from_str(parts[0])
+            .map_err(|e| RGBError::Transfer(format!("txid invalide: {}", e)))?;
+        let vout = parts[1]
+            .parse::<u32>()
+            .map_err(|_| RGBError::Transfer("vout invalide".to_string()))?;
+        Ok((parts[0].to_string(), vout))
+    }
+
+    // ─── API publique ─────────────────────────────────────────────────────────
+
+    /// Crée un nouveau contrat RGB Proof-of-Impact (opération Genesis).
+    ///
+    /// Retourne `(contract_id, signature_hex)` où :
+    /// - `contract_id` est le SHA-256 déterministe du contrat (hex 64 chars)
+    /// - `signature_hex` est la signature ECDSA secp256k1 compacte (hex 128 chars)
+    pub async fn create_proof_contract(
+        &self,
+        mentor_id: &str,
+        mentee_id: &str,
+        request_id: &str,
+        rating: u8,
+        comment: Option<String>,
+    ) -> Result<(String, String), RGBError> {
+        if mentor_id.is_empty() || mentee_id.is_empty() || request_id.is_empty() {
+            return Err(RGBError::ContractCreation(
+                "Les IDs ne peuvent pas être vides".to_string(),
+            ));
+        }
+        if rating > 5 {
+            return Err(RGBError::ContractCreation(
+                "La note doit être entre 0 et 5".to_string(),
+            ));
+        }
+
+        let timestamp = chrono::Utc::now().timestamp() as u64;
+        let metadata = ProofMetadata {
+            mentor_id: mentor_id.to_string(),
+            mentee_id: mentee_id.to_string(),
+            request_id: request_id.to_string(),
+            rating,
+            comment: comment.unwrap_or_default(),
+            timestamp,
+        };
+
+        let content_hash = metadata.content_hash();
+        let contract_id = self.compute_contract_id(&content_hash, timestamp);
+
+        // Données signées = content_hash ‖ contract_id ‖ timestamp
+        let mut sign_data = Vec::with_capacity(80);
+        sign_data.extend_from_slice(&content_hash);
+        sign_data.extend_from_slice(contract_id.as_bytes());
+        sign_data.extend_from_slice(&timestamp.to_le_bytes());
+
+        let signature = self.sign_bytes(&sign_data)?;
+
+        let genesis = GenesisOp {
+            contract_id: contract_id.clone(),
+            schema: "token4good-mentoring-v1".to_string(),
+            issuer_pubkey: self.issuer_pubkey_hex.clone(),
+            content_hash,
+            seal: None,
+            issuer_sig: signature.clone(),
+            timestamp,
+        };
+
+        let stored = StoredContract {
+            contract_id: contract_id.clone(),
+            metadata,
+            genesis,
+            transitions: vec![],
+            current_seal: None,
+        };
+
+        {
+            let mut guard = self.contracts.write().await;
+            guard.insert(contract_id.clone(), stored);
+        }
+
+        self.save_stash().await?;
+
+        tracing::info!(
+            "RGB genesis créée : {}... (mentor: {}, mentee: {}, note: {})",
+            &contract_id[..16],
+            mentor_id,
+            mentee_id,
+            rating
+        );
+
+        Ok((contract_id, signature))
+    }
+
+    /// Vérifie qu'une preuve est valide :
+    /// 1. Le contract_id est cohérent avec les métadonnées stockées
+    /// 2. La signature ECDSA est valide pour la clé émetteur du contrat
+    pub async fn verify_proof(
+        &self,
+        contract_id: &str,
+        signature: &str,
+    ) -> Result<bool, RGBError> {
+        let guard = self.contracts.read().await;
+        let Some(c) = guard.get(contract_id) else {
+            return Ok(false);
+        };
+
+        // Recalculer et vérifier le contract_id
+        let content_hash = c.metadata.content_hash();
+        let expected_id = self.compute_contract_id(&content_hash, c.metadata.timestamp);
+        if expected_id != contract_id {
+            tracing::warn!("contract_id mismatch pour {}", contract_id);
+            return Ok(false);
+        }
+
+        // Reconstruire les données signées et vérifier la signature ECDSA
+        let mut sign_data = Vec::with_capacity(80);
+        sign_data.extend_from_slice(&content_hash);
+        sign_data.extend_from_slice(contract_id.as_bytes());
+        sign_data.extend_from_slice(&c.metadata.timestamp.to_le_bytes());
+
+        Ok(self.verify_ecdsa(&sign_data, signature, &c.genesis.issuer_pubkey))
+    }
+
+    /// Récupère les détails d'une preuve RGB.
+    pub async fn get_proof_details(&self, contract_id: &str) -> Result<ProofDetails, RGBError> {
+        let guard = self.contracts.read().await;
+        guard
+            .get(contract_id)
+            .map(|c| ProofDetails {
+                mentor_id: c.metadata.mentor_id.clone(),
+                mentee_id: c.metadata.mentee_id.clone(),
+                request_id: c.metadata.request_id.clone(),
+                timestamp: c.metadata.timestamp,
+                rating: c.metadata.rating,
+                comment: c.metadata.comment.clone(),
+                contract_id: contract_id.to_string(),
+                signature: c.genesis.issuer_sig.clone(),
+            })
+            .ok_or_else(|| RGBError::Storage("Contrat introuvable".to_string()))
+    }
+
+    /// Transfère le seal d'un contrat RGB d'un UTXO vers un autre (state transition).
+    ///
+    /// Le `from_outpoint` et `to_outpoint` sont au format "txid:vout".
+    pub async fn transfer_proof(
+        &self,
+        contract_id: &str,
+        from_outpoint: &str,
+        to_outpoint: &str,
+        _amount: u64,
+    ) -> Result<String, RGBError> {
+        let (from_txid, from_vout) = Self::parse_outpoint(from_outpoint)?;
+        let (to_txid, to_vout) = Self::parse_outpoint(to_outpoint)?;
+
+        let mut guard = self.contracts.write().await;
+        let c = guard
+            .get_mut(contract_id)
+            .ok_or_else(|| RGBError::Transfer("Contrat introuvable".to_string()))?;
+
+        // Récupérer le blinding factor du seal courant s'il correspond
+        let from_blinding = c
+            .current_seal
+            .as_ref()
+            .filter(|s| s.txid == from_txid && s.vout == from_vout)
+            .map(|s| s.blinding)
+            .unwrap_or([0u8; 32]);
+
+        let from_seal = RgbSeal { txid: from_txid, vout: from_vout, blinding: from_blinding };
+        let to_seal =
+            RgbSeal { txid: to_txid, vout: to_vout, blinding: Self::random_blinding() };
+
+        // Commitment = SHA256(from_seal_commit ‖ to_seal_commit ‖ contract_id)
+        let mut h = Sha256::new();
+        h.update(from_seal.commitment());
+        h.update(to_seal.commitment());
+        h.update(contract_id.as_bytes());
+        let commitment: [u8; 32] = h.finalize().into();
+
+        let sig = self.sign_bytes(&commitment)?;
+        let timestamp = chrono::Utc::now().timestamp() as u64;
+
+        c.transitions.push(StateTransition {
+            from_seal: from_seal.clone(),
+            to_seal: to_seal.clone(),
+            commitment,
+            sig,
+            timestamp,
+        });
+        c.current_seal = Some(to_seal);
+
+        drop(guard);
+        self.save_stash().await?;
+
+        let transfer_id = format!("transfer_{}", hex::encode(&commitment[..16]));
+        tracing::info!(
+            "RGB state transition {} pour contrat {}...",
+            &transfer_id[..24],
+            &contract_id[..16]
+        );
+
+        Ok(transfer_id)
+    }
+
+    /// Retourne l'historique des opérations d'un contrat (genesis + transitions).
+    pub async fn get_contract_history(
+        &self,
+        contract_id: &str,
+    ) -> Result<Vec<TransferRecord>, RGBError> {
+        let guard = self.contracts.read().await;
+        let c = guard
+            .get(contract_id)
+            .ok_or_else(|| RGBError::Storage("Contrat introuvable".to_string()))?;
+
+        let mut records = vec![TransferRecord {
+            from: "issuer".to_string(),
+            to: c
+                .genesis
+                .seal
+                .as_ref()
+                .map(|s| format!("{}:{}", s.txid, s.vout))
+                .unwrap_or_else(|| "local".to_string()),
+            timestamp: c.genesis.timestamp,
+            txid: hex::encode(&c.genesis.content_hash[..16]),
+        }];
+
+        for t in &c.transitions {
+            records.push(TransferRecord {
+                from: format!("{}:{}", t.from_seal.txid, t.from_seal.vout),
+                to: format!("{}:{}", t.to_seal.txid, t.to_seal.vout),
+                timestamp: t.timestamp,
+                txid: hex::encode(&t.commitment[..16]),
+            });
+        }
+
+        Ok(records)
+    }
+
+    /// Liste toutes les preuves dans le stash.
+    pub async fn list_proofs(&self) -> Result<Vec<ProofDetails>, RGBError> {
+        let guard = self.contracts.read().await;
+        Ok(guard
+            .iter()
+            .map(|(id, c)| ProofDetails {
+                mentor_id: c.metadata.mentor_id.clone(),
+                mentee_id: c.metadata.mentee_id.clone(),
+                request_id: c.metadata.request_id.clone(),
+                timestamp: c.metadata.timestamp,
+                rating: c.metadata.rating,
+                comment: c.metadata.comment.clone(),
+                contract_id: id.clone(),
+                signature: c.genesis.issuer_sig.clone(),
+            })
+            .collect())
+    }
+
+    /// Health check : vérifie l'accès au répertoire de données.
+    pub async fn health_check(&self) -> Result<(), RGBError> {
+        if !self.data_dir.exists() {
+            return Err(RGBError::Configuration(format!(
+                "Répertoire RGB manquant: {}",
+                self.data_dir.display()
+            )));
+        }
+        let test = self.data_dir.join("health.tmp");
+        std::fs::write(&test, b"ok")?;
+        std::fs::remove_file(test)?;
+
+        let count = self.contracts.read().await.len();
+        tracing::debug!("RGB health OK — {} contrat(s) en mémoire, réseau: {}", count, self.network);
+
+        Ok(())
+    }
+
+    /// Vérifie qu'une transaction existe on-chain via l'API Esplora.
+    ///
+    /// Retourne `true` si ESPLORA_URL n'est pas configurée (pas de vérification).
+    pub async fn verify_tx_esplora(&self, txid: &str) -> Result<bool, RGBError> {
+        let Some(ref base_url) = self.esplora_url else {
+            tracing::debug!("ESPLORA_URL non configurée, vérification UTXO ignorée");
+            return Ok(true);
+        };
+
+        let url = format!("{}/tx/{}", base_url.trim_end_matches('/'), txid);
+        match reqwest::get(&url).await {
+            Ok(resp) if resp.status().is_success() => {
+                tracing::debug!("Transaction {} confirmée via Esplora", txid);
+                Ok(true)
+            }
+            Ok(_) => {
+                tracing::warn!("Transaction {} non trouvée sur Esplora", txid);
+                Ok(false)
+            }
+            Err(e) => Err(RGBError::Esplora(e.to_string())),
+        }
+    }
+
+    /// Retourne la clé publique compressée hex de l'émetteur.
+    pub fn issuer_pubkey(&self) -> &str {
+        &self.issuer_pubkey_hex
+    }
+
+    /// Retourne le réseau configuré.
+    pub fn network(&self) -> &str {
+        &self.network
+    }
+}
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[tokio::test]
-    async fn test_rgb_service_initialization() {
-        let service = RGBService::new();
-        assert!(
-            service.is_ok(),
-            "RGB service should initialize successfully"
-        );
+    fn make_service() -> RGBService {
+        RGBService::new().expect("RGBService doit s'initialiser")
     }
 
     #[tokio::test]
-    async fn test_create_proof_contract_with_rgb_types() {
-        let service = RGBService::new().expect("Failed to create RGB service");
+    async fn test_create_proof_produces_real_signature() {
+        let svc = make_service();
 
-        let result = service
+        let (contract_id, sig) = svc
             .create_proof_contract(
-                "mentor_rgb",
-                "mentee_rgb",
-                "request_rgb",
-                4,
-                Some("RGB-native proof with real types".to_string()),
-            )
-            .await;
-
-        assert!(
-            result.is_ok(),
-            "Should create RGB contract using real types"
-        );
-        let (contract_id, signature) = result.unwrap();
-        assert!(!contract_id.is_empty());
-        assert!(signature.starts_with("rgb_sig_"));
-    }
-
-    #[tokio::test]
-    async fn test_verify_proof_with_storage() {
-        let service = RGBService::new().expect("Failed to create RGB service");
-
-        // Create a proof first
-        let (contract_id, signature) = service
-            .create_proof_contract("mentor_test", "mentee_test", "request_test", 5, None)
-            .await
-            .expect("Failed to create proof");
-
-        // Verify the proof exists in storage
-        let result = service.verify_proof(&contract_id, &signature).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap(), "Proof should be valid");
-    }
-
-    #[tokio::test]
-    async fn test_get_proof_details_from_storage() {
-        let service = RGBService::new().expect("Failed to create RGB service");
-
-        // Create a proof
-        let (contract_id, _) = service
-            .create_proof_contract(
-                "mentor_detail",
-                "mentee_detail",
-                "request_detail",
-                3,
-                Some("Detailed proof".to_string()),
-            )
-            .await
-            .expect("Failed to create proof");
-
-        // Get proof details
-        let details = service.get_proof_details(&contract_id).await;
-        assert!(details.is_ok());
-
-        let proof_details = details.unwrap();
-        assert_eq!(proof_details.mentor_id, "mentor_detail");
-        assert_eq!(proof_details.mentee_id, "mentee_detail");
-        assert_eq!(proof_details.rating, 3);
-    }
-
-    #[tokio::test]
-    async fn test_transfer_proof_with_transitions() {
-        let service = RGBService::new().expect("Failed to create RGB service");
-
-        // Create a proof
-        let (contract_id, _) = service
-            .create_proof_contract(
-                "mentor_transfer",
-                "mentee_transfer",
-                "request_transfer",
+                "mentor_test",
+                "mentee_test",
+                "req_test",
                 5,
-                None,
+                Some("Excellente session".to_string()),
             )
             .await
-            .expect("Failed to create proof");
+            .expect("Création doit réussir");
 
-        // Test transfer
-        let from_outpoint = "0000000000000000000000000000000000000000000000000000000000000001:0";
-        let to_outpoint = "0000000000000000000000000000000000000000000000000000000000000002:1";
+        // contract_id doit être un SHA-256 en hex (64 chars)
+        assert_eq!(contract_id.len(), 64, "contract_id = SHA256 hex 64 chars");
+        // signature compacte secp256k1 = 64 bytes = 128 chars hex
+        assert_eq!(sig.len(), 128, "signature ECDSA compacte = 128 chars hex");
+    }
 
-        let result = service
-            .transfer_proof(&contract_id, from_outpoint, to_outpoint, 1)
+    #[tokio::test]
+    async fn test_verify_valid_signature() {
+        let svc = make_service();
+        let (contract_id, sig) = svc
+            .create_proof_contract("m1", "m2", "r1", 4, None)
+            .await
+            .unwrap();
+
+        let valid = svc.verify_proof(&contract_id, &sig).await.unwrap();
+        assert!(valid, "La signature réelle doit être acceptée");
+    }
+
+    #[tokio::test]
+    async fn test_reject_false_signature() {
+        let svc = make_service();
+        let (contract_id, _) = svc
+            .create_proof_contract("m1", "m2", "r1", 4, None)
+            .await
+            .unwrap();
+
+        // Signature bidon (64 zéros)
+        let fake_sig = "00".repeat(64);
+        let valid = svc.verify_proof(&contract_id, &fake_sig).await.unwrap();
+        assert!(!valid, "Une fausse signature doit être rejetée");
+    }
+
+    #[tokio::test]
+    async fn test_reject_tampered_contract_id() {
+        let svc = make_service();
+        let (contract_id, sig) = svc
+            .create_proof_contract("m1", "m2", "r1", 4, None)
+            .await
+            .unwrap();
+
+        // Altérer le contract_id
+        let mut tampered = contract_id.clone();
+        tampered.replace_range(0..2, "00");
+
+        let valid = svc.verify_proof(&tampered, &sig).await.unwrap();
+        assert!(!valid, "Un contract_id altéré doit être rejeté");
+    }
+
+    #[tokio::test]
+    async fn test_invalid_rating_rejected() {
+        let svc = make_service();
+        let result = svc
+            .create_proof_contract("m", "m2", "r", 10, None)
             .await;
-        assert!(result.is_ok());
-
-        let transfer_id = result.unwrap();
-        assert!(transfer_id.starts_with("transfer_"));
+        assert!(result.is_err());
     }
 
     #[tokio::test]
-    async fn test_contract_history_with_transitions() {
-        let service = RGBService::new().expect("Failed to create RGB service");
-
-        // Create a proof
-        let (contract_id, _) = service
-            .create_proof_contract(
-                "mentor_history",
-                "mentee_history",
-                "request_history",
-                4,
-                None,
-            )
+    async fn test_get_proof_details() {
+        let svc = make_service();
+        let (contract_id, _) = svc
+            .create_proof_contract("mentor_detail", "mentee_detail", "req_detail", 3, None)
             .await
-            .expect("Failed to create proof");
+            .unwrap();
 
-        // Add a transfer
-        let _ = service
-            .transfer_proof(
-                &contract_id,
-                "0000000000000000000000000000000000000000000000000000000000000001:0",
-                "0000000000000000000000000000000000000000000000000000000000000002:1",
-                1,
-            )
-            .await
-            .expect("Failed to create transfer");
-
-        // Get history
-        let history = service.get_contract_history(&contract_id).await;
-        assert!(history.is_ok());
-
-        let records = history.unwrap();
-        assert!(records.len() >= 2); // Genesis + at least one transfer
+        let details = svc.get_proof_details(&contract_id).await.unwrap();
+        assert_eq!(details.mentor_id, "mentor_detail");
+        assert_eq!(details.rating, 3);
+        assert_eq!(details.signature.len(), 128, "signature ECDSA = 128 chars hex");
     }
 
     #[tokio::test]
-    async fn test_rgb_health_check() {
-        let service = RGBService::new().expect("Failed to create RGB service");
+    async fn test_transfer_creates_state_transition() {
+        let svc = make_service();
+        let (contract_id, _) = svc
+            .create_proof_contract("m", "m2", "r", 3, None)
+            .await
+            .unwrap();
 
-        let health = service.health_check().await;
-        assert!(health.is_ok(), "RGB service should be healthy");
+        let from = "0000000000000000000000000000000000000000000000000000000000000001";
+        let to = "0000000000000000000000000000000000000000000000000000000000000002";
+
+        let transfer_id = svc
+            .transfer_proof(&contract_id, &format!("{}:0", from), &format!("{}:1", to), 0)
+            .await
+            .unwrap();
+
+        assert!(transfer_id.starts_with("transfer_"), "L'ID de transfer doit commencer par 'transfer_'");
+
+        // L'historique doit avoir 2 entrées : genesis + transition
+        let history = svc.get_contract_history(&contract_id).await.unwrap();
+        assert_eq!(history.len(), 2);
+        assert_eq!(history[0].from, "issuer");
+    }
+
+    #[tokio::test]
+    async fn test_history_starts_with_genesis() {
+        let svc = make_service();
+        let (contract_id, _) = svc
+            .create_proof_contract("m", "m2", "r", 3, None)
+            .await
+            .unwrap();
+
+        let history = svc.get_contract_history(&contract_id).await.unwrap();
+        assert_eq!(history.len(), 1);
+        assert_eq!(history[0].from, "issuer");
+        assert_eq!(history[0].txid.len(), 32, "commitment hex 16 bytes = 32 chars");
+    }
+
+    #[tokio::test]
+    async fn test_health_check() {
+        let svc = make_service();
+        assert!(svc.health_check().await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_list_proofs() {
+        let svc = make_service();
+        svc.create_proof_contract("ma", "mb", "ra", 5, None).await.unwrap();
+        svc.create_proof_contract("mc", "md", "rb", 3, None).await.unwrap();
+
+        let list = svc.list_proofs().await.unwrap();
+        assert!(list.len() >= 2);
     }
 }

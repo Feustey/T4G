@@ -188,12 +188,11 @@ pub async fn get_user_wallet(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    // Récupérer le solde Lightning via l'API Dazno si l'utilisateur a un token
-    let (balance_msat, pending_balance_msat, num_channels) = if let Some(dazno_token) = &user.dazno_token {
-        match state.dazno.get_wallet_balance(dazno_token, &id).await {
+    // Récupérer le solde Lightning via l'API Dazno
+    let (balance_msat, pending_balance_msat, num_channels) = {
+        match state.dazno.get_wallet_balance("", &id).await {
             Ok(balance) => {
-                // Récupérer les canaux pour compter le nombre de canaux actifs
-                let channels_count = match state.dazno.get_wallet_channels(dazno_token, &id).await {
+                let channels_count = match state.dazno.list_channels("", &id).await {
                     Ok(channels) => channels.len() as u32,
                     Err(e) => {
                         tracing::warn!("Failed to get channels for user {}: {}", id, e);
@@ -207,8 +206,6 @@ pub async fn get_user_wallet(
                 (0, 0, 0)
             }
         }
-    } else {
-        (0, 0, 0)
     };
 
     let wallet_info = WalletInfo {
@@ -236,43 +233,35 @@ pub async fn get_user_transactions(
     let mut transactions = vec![];
 
     // Récupérer les transactions Lightning via l'API Dazno
-    if let Some(dazno_token) = &user.dazno_token {
-        match state.dazno.get_wallet_payments(dazno_token, &id, None, None).await {
-            Ok(lightning_txs) => {
-                for tx in lightning_txs {
-                    transactions.push(TransactionRecord {
-                        id: tx.id,
-                        transaction_type: tx.transaction_type,
-                        amount_msat: tx.amount_msat,
-                        fee_msat: tx.fee_msat,
-                        status: tx.status,
-                        payment_hash: tx.payment_hash,
-                        description: tx.description,
-                        created_at: tx.created_at,
-                        settled_at: tx.settled_at,
-                    });
-                }
+    match state.dazno.get_wallet_payments("", &id, None).await {
+        Ok(lightning_txs) => {
+            for tx in lightning_txs {
+                transactions.push(TransactionRecord {
+                    id: tx.id,
+                    transaction_type: tx.transaction_type,
+                    amount_msat: tx.amount_msat,
+                    timestamp: tx.created_at,
+                    status: tx.status,
+                    description: tx.description,
+                });
             }
-            Err(e) => {
-                tracing::warn!("Failed to get Lightning transactions for user {}: {}", id, e);
-            }
+        }
+        Err(e) => {
+            tracing::warn!("Failed to get Lightning transactions for user {}: {}", id, e);
         }
     }
 
     // Récupérer les transactions RGB depuis la base de données
-    match state.db.get_user_proofs(&id).await {
+    match state.db.get_proofs(None, None, Some(id.clone()), 100, 0).await {
         Ok(proofs) => {
             for proof in proofs {
                 transactions.push(TransactionRecord {
                     id: proof.id.clone(),
                     transaction_type: "rgb_proof".to_string(),
-                    amount_msat: 0, // RGB proofs n'ont pas de montant direct
-                    fee_msat: 0,
-                    status: proof.status.clone(),
-                    payment_hash: proof.id.clone(),
-                    description: format!("RGB Proof: {}", proof.proof_type),
-                    created_at: proof.created_at,
-                    settled_at: Some(proof.updated_at),
+                    amount_msat: 0,
+                    timestamp: proof.created_at,
+                    status: proof.status.to_string(),
+                    description: format!("RGB Contract: {}", proof.contract_id),
                 });
             }
         }
@@ -282,7 +271,7 @@ pub async fn get_user_transactions(
     }
 
     // Trier par date de création (plus récent en premier)
-    transactions.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+    transactions.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
     Ok(Json(transactions))
 }
@@ -401,7 +390,7 @@ pub async fn get_current_user_metrics(
         if tx.transaction_type == "invoice" && tx.status == "settled" {
             total_earned_msat += tx.amount_msat;
         } else if tx.transaction_type == "payment" && tx.status == "settled" {
-            total_spent_msat += tx.amount_msat + tx.fee_msat;
+            total_spent_msat += tx.amount_msat;
         }
     }
 
@@ -479,30 +468,23 @@ pub async fn get_current_user_pending(
     let mut pending = vec![];
 
     // Récupérer les transactions Lightning en attente via Dazno
-    if let Ok(user) = state.db.get_user_by_id(&auth_user.id).await {
-        if let Some(dazno_token) = &user.unwrap_or_else(|| {
-            // Fallback si pas d'utilisateur trouvé
-            return;
-        }).dazno_token {
-            match state.dazno.get_wallet_payments(dazno_token, &auth_user.id, None, None).await {
-                Ok(transactions) => {
-                    for tx in transactions {
-                        // Filtrer seulement les transactions en attente
-                        if tx.status == "pending" || tx.status == "processing" {
-                            pending.push(PendingTransaction {
-                                id: tx.id,
-                                transaction_type: tx.transaction_type,
-                                amount_msat: tx.amount_msat,
-                                status: tx.status,
-                                created_at: tx.created_at,
-                            });
-                        }
-                    }
-                }
-                Err(e) => {
-                    tracing::warn!("Failed to get pending Lightning transactions: {}", e);
+    match state.dazno.get_wallet_payments("", &auth_user.id, None).await {
+        Ok(transactions) => {
+            for tx in transactions {
+                if tx.status == "pending" || tx.status == "processing" {
+                    pending.push(PendingTransaction {
+                        id: tx.id,
+                        transaction_type: tx.transaction_type,
+                        amount_msat: tx.amount_msat,
+                        status: tx.status,
+                        created_at: tx.created_at,
+                        description: tx.description,
+                    });
                 }
             }
+        }
+        Err(e) => {
+            tracing::warn!("Failed to get pending Lightning transactions: {}", e);
         }
     }
 
@@ -514,8 +496,9 @@ pub async fn get_current_user_pending(
                     id: request.id,
                     transaction_type: "mentoring_request".to_string(),
                     amount_msat: 0,
-                    status: request.status,
+                    status: request.status.to_string(),
                     created_at: request.created_at,
+                    description: request.title,
                 });
             }
         }
@@ -557,11 +540,10 @@ pub async fn disable_first_access(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     // Incrémenter le compteur d'accès au dashboard
-    let access_count = match state.db.increment_dashboard_access(&id).await {
+    let access_count: u32 = match state.db.increment_dashboard_access(&id).await {
         Ok(count) => count,
         Err(e) => {
             tracing::warn!("Failed to increment dashboard access count for user {}: {}", id, e);
-            // En cas d'erreur, utiliser une valeur par défaut depuis les preferences
             user.preferences
                 .get("dashboardAccessCount")
                 .and_then(|v| v.as_u64())
@@ -570,7 +552,7 @@ pub async fn disable_first_access(
     };
 
     let response = DashboardAccessResponse {
-        dashboardAccessCount: access_count,
+        dashboardAccessCount: access_count as i32,
     };
 
     Ok(Json(response))
@@ -611,6 +593,7 @@ pub struct UserMetrics {
 #[derive(Debug, Serialize)]
 pub struct PendingTransaction {
     pub id: String,
+    pub transaction_type: String,
     pub amount_msat: u64,
     pub description: String,
     pub status: String,

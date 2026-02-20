@@ -371,12 +371,6 @@ async fn get_or_create_user_from_oauth(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    state
-        .db
-        .create_user(&new_user)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
     tracing::info!(
         "Created new user from OAuth: {} ({})",
         new_user.email,

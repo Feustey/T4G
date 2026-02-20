@@ -30,7 +30,8 @@ tonic-build = "0.11"  # Build support for proto files
 prost = "0.12"  # Protocol Buffers implementation
 
 jsonwebtoken = "8.3"  # Pour l'authentification JWT
-bitcoin = "0.30"  # Bitcoin utilities
+bitcoin = { version = "0.30", features = ["rand-std"] }  # Bitcoin + secp256k1 + rand
+rand = "0.8"      # Génération de clés et blinding factors
 hex = "0.4"
 sha2 = "0.10"
 hmac = "0.12"  # Pour la signature des webhooks

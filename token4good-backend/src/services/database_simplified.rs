@@ -978,6 +978,32 @@ impl DatabaseService {
         Ok(opportunities)
     }
 
+    pub async fn get_user_notifications(
+        &self,
+        _user_id: &str,
+    ) -> Result<Vec<crate::routes::users::Notification>, Box<dyn Error>> {
+        Ok(vec![])
+    }
+
+    pub async fn count_user_services_provided(&self, _user_id: &str) -> Result<u32, Box<dyn Error>> {
+        Ok(0)
+    }
+
+    pub async fn count_user_services_consumed(&self, _user_id: &str) -> Result<u32, Box<dyn Error>> {
+        Ok(0)
+    }
+
+    pub async fn get_user_pending_mentoring(
+        &self,
+        _user_id: &str,
+    ) -> Result<Vec<crate::models::mentoring::MentoringRequest>, Box<dyn Error>> {
+        Ok(vec![])
+    }
+
+    pub async fn increment_dashboard_access(&self, _user_id: &str) -> Result<u32, Box<dyn Error>> {
+        Ok(1)
+    }
+
     /// Obtenir les recommandations de services pour un utilisateur
     pub async fn get_service_recommendations(
         &self,

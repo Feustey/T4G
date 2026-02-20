@@ -896,6 +896,31 @@ impl DaznoService {
         Ok(())
     }
 
+    pub async fn check_payment_status(
+        &self,
+        token: &str,
+        payment_hash: &str,
+    ) -> Result<DaznoLightningPayment, DaznoError> {
+        let url = format!("{}/lightning/invoice/check/{}", self.lightning_api_base, payment_hash);
+
+        let response = self
+            .authorized(self.client.get(&url), Some(token))
+            .send()
+            .await
+            .map_err(|e| DaznoError::ConnectionError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(DaznoError::LightningApiError(
+                "Failed to check payment status".to_string(),
+            ));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| DaznoError::LightningApiError(e.to_string()))
+    }
+
     pub async fn get_wallet_invoices(
         &self,
         token: &str,
