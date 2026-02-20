@@ -31,8 +31,17 @@ import {
 } from '../store/slices';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
+import { useNetwork } from '../contexts/NetworkContext';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
+import {
+  FALLBACK_METRICS,
+  FALLBACK_USER_METRICS,
+  FALLBACK_SERVICES,
+  FALLBACK_NOTIFICATIONS,
+  FALLBACK_USER_ABOUT,
+  FALLBACK_DASHBOARD_ACCESS,
+} from '../services/fallbackData';
 
 interface DashboardMetrics {
   usersCount: {
@@ -53,6 +62,7 @@ export interface IDashboard {
 const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
   const pendingTransactions = useAppSelector(selectPendingTransactions);
   const { user } = useAuth();
+  const { isOnline, apiAvailable, checkAPI } = useNetwork();
   const [transactionToUpdate, setTransactionToUpdate] =
     useState<PendingTransactionType | null>(null);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
@@ -60,32 +70,105 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const { data: metrics, isLoading: isLoadingMetrics } = useSwr<DashboardMetrics>(
-    `/metrics`,
-    apiFetcher
+  // Vérifier que l'utilisateur est connecté avant de faire les appels API
+  const shouldFetch = typeof window !== 'undefined' && user && user.id;
+
+  const { data: metrics = FALLBACK_METRICS, isLoading: isLoadingMetrics, error: metricsError } = useSwr<DashboardMetrics>(
+    shouldFetch ? `/api/metrics` : null,
+    apiFetcher,
+    {
+      fallbackData: FALLBACK_METRICS,
+      revalidateOnFocus: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      errorRetryInterval: 3000,
+    }
   );
-  const { data: userMetrics, isLoading: isLoadingUserMetrics } = useSwr<UserMetricsType>(
-    `/users/me/metrics`,
-    apiFetcher
+  const { data: userMetrics = FALLBACK_USER_METRICS, isLoading: isLoadingUserMetrics, error: userMetricsError } = useSwr<UserMetricsType>(
+    shouldFetch ? `/api/users/me/metrics` : null,
+    apiFetcher,
+    {
+      fallbackData: FALLBACK_USER_METRICS,
+      revalidateOnFocus: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      errorRetryInterval: 3000,
+    }
   );
-  const { data: services, isLoading: isLoadingServices } = useSwr<ReceiveServiceType[]>(
-    `/users/me/services`,
-    apiFetcher
+  const { data: services = FALLBACK_SERVICES, isLoading: isLoadingServices, error: servicesError } = useSwr<ReceiveServiceType[]>(
+    shouldFetch ? `/api/users/me/services` : null,
+    apiFetcher,
+    {
+      fallbackData: FALLBACK_SERVICES,
+      revalidateOnFocus: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      errorRetryInterval: 3000,
+    }
   );
-  const { data: notifications, isLoading: isLoadingNotifications } = useSwr<NotificationType[]>(
-    `/users/me/notifications`,
-    apiFetcher
+  const { data: notifications = FALLBACK_NOTIFICATIONS, isLoading: isLoadingNotifications, error: notificationsError } = useSwr<NotificationType[]>(
+    shouldFetch ? `/api/users/me/notifications` : null,
+    apiFetcher,
+    {
+      fallbackData: FALLBACK_NOTIFICATIONS,
+      revalidateOnFocus: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      errorRetryInterval: 3000,
+    }
   );
-  const { data: dashboardAccessCount } = useSwr<{ dashboardAccessCount: number }>(
-    `/users/${user.id}/disable-first-access`,
-    apiFetcher
+  const { data: dashboardAccessCount = FALLBACK_DASHBOARD_ACCESS, error: dashboardAccessError } = useSwr<{ dashboardAccessCount: number }>(
+    shouldFetch && user?.id ? `/api/users/${user.id}/disable-first-access` : null,
+    apiFetcher,
+    {
+      fallbackData: FALLBACK_DASHBOARD_ACCESS,
+      revalidateOnFocus: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      errorRetryInterval: 3000,
+    }
   );
-  const { data: userAbout, isLoading: isLoadingUserAbout } = useSwr<string>(
-    `/users/me/about`,
-    apiFetcher
+  const { data: userAbout = FALLBACK_USER_ABOUT, isLoading: isLoadingUserAbout, error: userAboutError } = useSwr<string>(
+    shouldFetch ? `/api/users/me/about` : null,
+    apiFetcher,
+    {
+      fallbackData: FALLBACK_USER_ABOUT,
+      revalidateOnFocus: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 2,
+      errorRetryInterval: 3000,
+    }
   );
 
+  // Afficher les erreurs dans la console pour debug
+  React.useEffect(() => {
+    if (metricsError) console.error('🔴 Dashboard - Metrics error:', metricsError);
+    if (userMetricsError) console.error('🔴 Dashboard - User metrics error:', userMetricsError);
+    if (servicesError) console.error('🔴 Dashboard - Services error:', servicesError);
+    if (notificationsError) console.error('🔴 Dashboard - Notifications error:', notificationsError);
+    if (dashboardAccessError) console.error('🔴 Dashboard - Dashboard access error:', dashboardAccessError);
+    if (userAboutError) console.error('🔴 Dashboard - User about error:', userAboutError);
+  }, [metricsError, userMetricsError, servicesError, notificationsError, dashboardAccessError, userAboutError]);
+
   const isLoading = isLoadingMetrics || isLoadingUserMetrics || isLoadingServices || isLoadingNotifications || isLoadingUserAbout;
+  
+  // Vérifier s'il y a des erreurs réseau critiques
+  const hasNetworkError = 
+    !isOnline || 
+    !apiAvailable ||
+    (metricsError && (metricsError as any)?.isNetworkError) ||
+    (userMetricsError && (userMetricsError as any)?.isNetworkError) ||
+    (servicesError && (servicesError as any)?.isNetworkError) ||
+    (notificationsError && (notificationsError as any)?.isNetworkError) ||
+    (userAboutError && (userAboutError as any)?.isNetworkError);
+
+  // Déterminer si on est en mode cache (données affichées mais API indispo)
+  const isUsingCache = hasNetworkError && (
+    metrics !== FALLBACK_METRICS || 
+    userMetrics !== FALLBACK_USER_METRICS || 
+    services?.length > 0 || 
+    notifications?.length > 0
+  );
 
   const handleTransactionModalOpen = (transaction: PendingTransactionType, type: 'CONFIRM' | 'CANCEL') => {
     setTransactionToUpdate(transaction);
@@ -156,6 +239,51 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
           <span className="c-icon--title u-margin--none">{Icons.dashboard}</span>
           {lang.page.dashboard.title}
         </h1>
+        
+        {/* Banner d'avertissement en mode offline/cache */}
+        {hasNetworkError && (
+          <div 
+            className="o-card u-d--flex u-flex-column u-align-items-center u-gap--m" 
+            style={{ 
+              backgroundColor: isUsingCache ? 'var(--color-warning-light, #fff3cd)' : 'var(--color-error-light, #ffebee)',
+              borderLeft: isUsingCache ? '4px solid var(--color-warning, #ff9800)' : '4px solid var(--color-error, #d32f2f)'
+            }}
+          >
+            <p className="u-margin--none u-text--center" style={{ fontWeight: 600 }}>
+              {isUsingCache 
+                ? '⚠️ Mode hors ligne : affichage des dernières données disponibles'
+                : '🔴 Impossible de se connecter au serveur'
+              }
+            </p>
+            {!isOnline && (
+              <p className="u-margin--none u-text--center" style={{ fontSize: '0.875rem' }}>
+                Votre appareil semble hors ligne. Vérifiez votre connexion Internet.
+              </p>
+            )}
+            {isOnline && !apiAvailable && (
+              <p className="u-margin--none u-text--center" style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)' }}>
+                Le serveur backend ({process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}) est inaccessible.
+              </p>
+            )}
+            <div className="u-d--flex u-gap--s u-width--fill">
+              <Button
+                className="flex-1"
+                variant={isUsingCache ? "secondary" : "primary"}
+                onClick={() => checkAPI().then(() => window.location.reload())}
+                label="Réessayer"
+              />
+              {!isUsingCache && (
+                <Button
+                  className="flex-1"
+                  variant="ghost"
+                  onClick={() => window.location.reload()}
+                  label="Actualiser"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <Spinner lang={lang} spinnerText={lang.utils.loading} size="lg" />
         ) : (
@@ -179,15 +307,37 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
               )}
 
               {userAbout === '' && (
-                <div className="o-card u-d--flex u-flex-column u-align-items-center u-gap--m">
-                  <Image alt={lang.utils.tokenAlt} src="/assets/images/png/token.png" width={32} height={32} priority />
-                  <p className="u-margin--none u-text--center">{lang.page.dashboard.completeProfile.text}</p>
-                  <Button
-                    className="u-width--fill"
-                    variant="primary"
-                    onClick={() => router.push(`/profile`)}
-                    label={lang.page.dashboard.completeProfile.button}
-                  />
+                <div
+                  className="o-card u-d--flex u-flex-column u-gap--m"
+                  style={{
+                    borderLeft: '4px solid var(--color-primary, #2563eb)',
+                    background: 'var(--color-primary-light, #eff6ff)',
+                  }}
+                >
+                  <div className="u-d--flex u-align-items-center u-gap--s">
+                    <Image alt={lang.utils.tokenAlt} src="/assets/images/png/token.png" width={28} height={28} priority />
+                    <p className="u-margin--none" style={{ fontWeight: 600 }}>
+                      {lang.page.dashboard.completeProfile.text}
+                    </p>
+                  </div>
+                  <p className="u-margin--none" style={{ fontSize: 13, color: 'var(--color-text-secondary, #64748b)' }}>
+                    Ajoutez une description pour aider la communauté à vous connaître et gagner en visibilité.
+                  </p>
+                  <div className="u-d--flex u-gap--s">
+                    <Button
+                      variant="primary"
+                      onClick={() => router.push(`/profile`)}
+                      label={lang.page.dashboard.completeProfile.button}
+                    />
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const el = document.querySelector('[data-dismiss-profile-prompt]') as HTMLElement;
+                        if (el) el.style.display = 'none';
+                      }}
+                      label="Plus tard"
+                    />
+                  </div>
                 </div>
               )}
 

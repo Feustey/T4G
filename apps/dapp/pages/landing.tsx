@@ -130,6 +130,7 @@ export default function LandingPage() {
       <Script src="/landing/js/webflow.841c1d07.73e2161a3279ba00.js" strategy="lazyOnload" />
 
       {/* Styles inline pour les variables CSS et thème dark */}
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx global>{`
         :root {
           --color-blue-50: #edefff;
@@ -419,6 +420,59 @@ export default function LandingPage() {
                     <div className="textbt go">GO !</div>
                   </Link>
                 </div>
+
+                {/* Témoignages - Ils ont rejoint Token for Good */}
+                <div className="divtestimony" style={{ marginTop: '3rem' }}>
+                  <h3 className="h3">Ils ont rejoint Token for Good</h3>
+                  
+                  <div className="testimony">
+                    <div className="quote">
+                      <p className="p">
+                        &quot;Je trouve l&apos;initiative Token for Good intéressante d&apos;utiliser des technologies 
+                        digitales pour permettre au plus grand nombre des acteurs du réseau lightning de 
+                        participer à la décentralisation et faciliter les paiements sans contrainte&quot;
+                      </p>
+                    </div>
+                    <div className="div-block-13">
+                      <img 
+                        src="/landing/images/64512a64fd42ab2ba9adecbb_about-hero.svg" 
+                        loading="lazy" 
+                        width="64" 
+                        height="64" 
+                        alt="Photo Edouard Minaget - Node owner" 
+                        className="image-9"
+                      />
+                      <div className="div-block-14">
+                        <p className="p name">Edouard Minaget</p>
+                        <p className="p firm">Node owner</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="testimony">
+                    <div className="quote">
+                      <p className="p">
+                        &quot;Le mentoring est un accélérateur de compétences. Cela permet de se connecter 
+                        par rapport à des besoins spécifiques et d&apos;aller chercher de manière plus directe 
+                        les expériences des autres.&quot;
+                      </p>
+                    </div>
+                    <div className="div-block-13">
+                      <img 
+                        src="/landing/images/646e02a7f657a4100bf90e58_femmelivre.webp" 
+                        loading="lazy" 
+                        width="64" 
+                        height="64" 
+                        alt="Photo Laeticia de Centralise - Network & Development Expert" 
+                        className="image-9"
+                      />
+                      <div className="div-block-14">
+                        <p className="p name">Laeticia de Centralise</p>
+                        <p className="p firm">Network &amp; Development Expert</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -438,66 +492,11 @@ export default function LandingPage() {
 
                 {/* Onglets interactifs - simplifié pour Next.js */}
                 <div className="div-block-7">
-                  <div className="w-layout-grid grid">
-                    <div className="div-block-11">
-                      <p className="p ptab">✓ Fédérer votre communauté d&apos;alumni</p>
-                      <p className="p ptab">✓ Permettre aux membres d&apos;interagir et de développer leurs compétences</p>
-                      <p className="p ptab">✓ Mesurer l&apos;impact positif des interactions de la communauté</p>
-                      <p className="p ptab">✓ Développer des outils contributifs et innovants avec la technologie blockchain</p>
-                    </div>
-
-                    {/* Témoignages */}
-                    <div id="w-node-c03912ae-06fb-6ef9-c226-4905b31cbc66-279b90b6" className="divtestimony">
-                      <h3 className="h3">Ils ont rejoint Token for Good</h3>
-                      
-                      <div className="testimony">
-                        <div className="quote">
-                          <p className="p">
-                            &quot;Je trouve l&apos;initiative Token for Good intéressante d&apos;utiliser des technologies 
-                            digitales pour permettre au plus grand nombre des acteurs du réseau lightning de 
-                            participer à la décentralisation et faciliter les paiements sans contrainte&quot;
-                          </p>
-                        </div>
-                        <div className="div-block-13">
-                          <img 
-                            src="/landing/images/64512a64fd42ab2ba9adecbb_about-hero.svg" 
-                            loading="lazy" 
-                            width="64" 
-                            height="64" 
-                            alt="Photo Edouard Minaget - Node owner" 
-                            className="image-9"
-                          />
-                          <div className="div-block-14">
-                            <p className="p name">Edouard Minaget</p>
-                            <p className="p firm">Node owner</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="testimony">
-                        <div className="quote">
-                          <p className="p">
-                            &quot;Le mentoring est un accélérateur de compétences. Cela permet de se connecter 
-                            par rapport à des besoins spécifiques et d&apos;aller chercher de manière plus directe 
-                            les expériences des autres.&quot;
-                          </p>
-                        </div>
-                        <div className="div-block-13">
-                          <img 
-                            src="/landing/images/646e02a7f657a4100bf90e58_femmelivre.webp" 
-                            loading="lazy" 
-                            width="64" 
-                            height="64" 
-                            alt="Photo Laeticia de Centralise - Network & Development Expert" 
-                            className="image-9"
-                          />
-                          <div className="div-block-14">
-                            <p className="p name">Laeticia de Centralise</p>
-                            <p className="p firm">Network &amp; Development Expert</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="div-block-11">
+                    <p className="p ptab">✓ Fédérer votre communauté d&apos;alumni</p>
+                    <p className="p ptab">✓ Permettre aux membres d&apos;interagir et de développer leurs compétences</p>
+                    <p className="p ptab">✓ Mesurer l&apos;impact positif des interactions de la communauté</p>
+                    <p className="p ptab">✓ Développer des outils contributifs et innovants avec la technologie blockchain</p>
                   </div>
                 </div>
               </div>
@@ -523,7 +522,7 @@ export default function LandingPage() {
                   avantages encore.
                 </p>
                 <div className="div-block">
-                  <Link href="/onboarding" className="bouton _2 w-inline-block">
+                  <Link href="/login" className="bouton _2 w-inline-block">
                     <div className="textbt go">S&apos;inscrire</div>
                   </Link>
                 </div>

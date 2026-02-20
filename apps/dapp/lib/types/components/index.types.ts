@@ -336,7 +336,7 @@ export namespace Services {
         lastName: string;
         email: string;
         avatar: string;
-        preferences: {};
+        preferences: Record<string, unknown>;
         proposedServices: string[];
       };
       services: Array<Service>;

@@ -71,18 +71,11 @@ export function Page({ lang }: IPage) {
 
   // Rediriger si déjà authentifié
   useEffect(() => {
-    console.log('🔵 useEffect redirection - isAuthenticated:', isAuthenticated, 'user:', user);
     if (isAuthenticated && user) {
-      console.log('🔵 Utilisateur authentifié, is_onboarded:', user.is_onboarded);
-      // Rediriger selon le statut d'onboarding
-      // Si is_onboarded est true, aller au dashboard
-      // Sinon (false ou undefined), aller vers onboarding-simple
       if (user.is_onboarded === true) {
-        console.log('🔵 Redirection vers dashboard');
-        router.push(`/${locale}/`); // Dashboard
+        router.push(`/${locale}/`);
       } else {
-        console.log('🔵 Redirection vers onboarding-simple (is_onboarded:', user.is_onboarded, ')');
-        router.push(`/${locale}/onboarding-simple`);
+        router.push(`/${locale}/onboarding`);
       }
     }
   }, [isAuthenticated, user, locale, router]);
@@ -204,27 +197,17 @@ export function Page({ lang }: IPage) {
                 label={'Login as student'}
                 variant="secondary"
                 onClick={async (e) => {
-                  alert('Bouton cliqué ! Vérifiez la console du navigateur (F12)');
-                  console.log('🔵 Bouton student cliqué');
                   e.preventDefault();
                   setIsLoggingIn(true);
                   try {
-                    console.log('🔵 Appel de login...');
                     const email = `test.student.${Date.now()}@token-for-good.com`;
-                    console.log('🔵 Email:', email);
                     await login('custom', {
                       email: email,
                       password: 'student',
                     });
-                    console.log('🔵 Login réussi !');
-                    console.log('🔵 Tentative de redirection manuelle vers onboarding-simple...');
-                    await router.push(`/${locale}/onboarding-simple`);
-                    console.log('🔵 Redirection manuelle effectuée');
-                    alert('Login réussi ! Redirection vers onboarding...');
+                    await router.push(`/${locale}/onboarding`);
                   } catch (error) {
-                    console.error('🔴 Erreur login student:', error);
-                    const message = error instanceof Error ? error.message : 'Erreur de connexion';
-                    alert('ERREUR: ' + message);
+                    console.error('Erreur login student:', error);
                     setIsLoggingIn(false);
                   }
                 }}

@@ -24,7 +24,7 @@ Créer/modifier le fichier `.env.local` à la racine du projet avec :
 # ============= BACKEND RUST =============
 # Par défaut : Railway (https://apirust-production.up.railway.app)
 # Pour développement local, décommenter :
-# NEXT_PUBLIC_API_URL=http://localhost:8080
+# NEXT_PUBLIC_API_URL=http://localhost:3000
 
 # ============= LINKEDIN OAUTH =============
 LINKEDIN_CLIENT_ID=votre_client_id_linkedin
@@ -66,7 +66,7 @@ Si vous voulez développer avec un backend local :
 
 1. Décommenter dans `.env.local` :
    ```bash
-   NEXT_PUBLIC_API_URL=http://localhost:8080
+   NEXT_PUBLIC_API_URL=http://localhost:3000
    ```
 
 2. Démarrer le backend Rust :
