@@ -194,7 +194,7 @@ const nextConfig = {
   
   // Configuration TypeScript
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === 'production',
   },
   
   // Configuration ESLint

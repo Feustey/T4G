@@ -2,4 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 #npm run format
-cd apps/dapp && npx next build
+cd apps/dapp && NODE_ENV=production npx next build
