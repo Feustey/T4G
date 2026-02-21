@@ -3,4 +3,5 @@ export type VariantType =
   | 'primary'
   | 'secondary'
   | 'tertiary'
-  | 'tertiary-no-outline';
+  | 'tertiary-no-outline'
+  | 'ghost';

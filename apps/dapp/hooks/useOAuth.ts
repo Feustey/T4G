@@ -208,9 +208,48 @@ export const useOAuth = () => {
   };
 
   /**
-   * Gérer le callback OAuth (LinkedIn ou t4g)
+   * Authentification avec GitHub OAuth
    */
-  const handleOAuthCallback = useCallback(async (provider: 'linkedin' | 't4g', code: string, state: string) => {
+  const loginWithGitHub = () => {
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+
+    if (!clientId) {
+      console.error('GITHUB_CLIENT_ID non configuré');
+      throw new Error('Configuration GitHub manquante');
+    }
+
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/github`);
+    const scope = encodeURIComponent('read:user user:email');
+    const state = Math.random().toString(36).substring(7);
+
+    sessionStorage.setItem('github_oauth_state', state);
+
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
+    window.location.href = authUrl;
+  };
+
+  /**
+   * Authentification Magic Link - envoie l'email
+   */
+  const sendMagicLink = async (email: string): Promise<{ success: boolean; dev_link?: string }> => {
+    const response = await fetch('/api/auth/magic-link/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Erreur lors de l'envoi");
+    }
+
+    return response.json();
+  };
+
+  /**
+   * Gérer le callback OAuth (LinkedIn, t4g ou GitHub)
+   */
+  const handleOAuthCallback = useCallback(async (provider: 'linkedin' | 't4g' | 'github', code: string, state: string) => {
     try {
       // Vérifier le state pour éviter les attaques CSRF
       const savedState = sessionStorage.getItem(`${provider}_oauth_state`);
@@ -252,6 +291,7 @@ export const useOAuth = () => {
           family_name: userData.family_name || userData.lastName,
           name: userData.name || `${userData.given_name || ''} ${userData.family_name || ''}`.trim(),
           sub: userData.sub || userData.id,
+          ...(provider === 'github' && { login: userData.login }),
         },
       });
 
@@ -288,12 +328,12 @@ export const useOAuth = () => {
   };
 
   return {
-    // loginWithOTP, // Désactivé - OAuth uniquement
     loginWithDazno,
     loginWithLinkedIn,
     loginWitht4g,
+    loginWithGitHub,
+    sendMagicLink,
     handleOAuthCallback,
-    // verifySupabaseSession, // Désactivé - OAuth uniquement
     checkExistingDaznoSession,
     initAuth,
   };

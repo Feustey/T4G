@@ -111,6 +111,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
           });
           break;
 
+        case 'github':
+          if (!credentials?.providerUserData) {
+            throw new Error('Données utilisateur GitHub manquantes');
+          }
+          response = await apiClient.login({
+            email: credentials.providerUserData.email,
+            provider: 'github',
+            provider_user_data: credentials.providerUserData,
+          });
+          break;
+
+        case 'magic_link':
+          if (!credentials?.providerUserData) {
+            throw new Error('Données utilisateur Magic Link manquantes');
+          }
+          response = await apiClient.login({
+            email: credentials.providerUserData.email,
+            provider: 'magic_link',
+            provider_user_data: credentials.providerUserData,
+          });
+          break;
+
+        case 'lnurl':
+          if (!credentials?.providerUserData) {
+            throw new Error('Données utilisateur LNURL-Auth manquantes');
+          }
+          response = await apiClient.login({
+            email: credentials.providerUserData.email || '',
+            provider: 'lnurl',
+            provider_user_data: credentials.providerUserData,
+          });
+          break;
+
         case 'credentials':
         case 'custom': {
           // Auth personnalisée pour tests - utilise provider t4g

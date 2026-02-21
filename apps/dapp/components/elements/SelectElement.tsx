@@ -1,6 +1,7 @@
 import React from "react";
 
 export interface SelectElementProps {
+  id?: string;
   inline?: boolean;
   zIndex?: string;
   listHeight?: string;
@@ -13,6 +14,7 @@ export interface SelectElementProps {
 }
 
 export const SelectElement = ({
+  id,
   label,
   value,
   options = [],
@@ -20,6 +22,7 @@ export const SelectElement = ({
 }: SelectElementProps): JSX.Element => {
   return (
     <select
+      id={id}
       value={value || ""}
       onChange={(e) => handleChange?.(e.target.value)}
       className="w-full px-3 py-2 border border-blue-003 rounded text-base text-blue-005"

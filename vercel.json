@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "cd apps/dapp && npm install --legacy-peer-deps && npm run build",
+  "buildCommand": "cd apps/dapp && NODE_ENV=production npm run build",
   "outputDirectory": "apps/dapp/.next",
   "installCommand": "cd apps/dapp && npm install --legacy-peer-deps",
-  "framework": "nextjs"
+  "framework": null
 }
