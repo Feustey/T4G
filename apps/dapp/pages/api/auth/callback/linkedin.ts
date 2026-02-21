@@ -23,11 +23,26 @@ export default async function handler(
     // Récupérer les credentials OAuth depuis les variables d'environnement
     const clientId = process.env.LINKEDIN_CLIENT_ID || process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID;
     const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/auth/callback/linkedin`;
+    const host = req.headers.host || '';
+    const proto = req.headers['x-forwarded-proto'] || (host.startsWith('localhost') ? 'http' : 'https');
+    const redirectUri = `${proto}://${host}/auth/callback/linkedin`;
+
+    // Logs de debug en développement
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔵 LinkedIn OAuth Callback - Configuration:');
+      console.log('  - clientId:', clientId ? '✅ Défini' : '❌ Manquant');
+      console.log('  - clientSecret:', clientSecret ? '✅ Défini' : '❌ Manquant');
+      console.log('  - redirectUri:', redirectUri);
+    }
 
     if (!clientId || !clientSecret) {
-      console.error('LINKEDIN_CLIENT_ID ou LINKEDIN_CLIENT_SECRET manquant');
-      return res.status(500).json({ error: 'Configuration OAuth incomplète' });
+      console.error('❌ LinkedIn OAuth - Configuration incomplète');
+      console.error('  - LINKEDIN_CLIENT_ID:', clientId ? '✅' : '❌');
+      console.error('  - LINKEDIN_CLIENT_SECRET:', clientSecret ? '✅' : '❌');
+      return res.status(500).json({ 
+        error: 'Configuration OAuth incomplète',
+        details: 'LINKEDIN_CLIENT_ID ou LINKEDIN_CLIENT_SECRET manquant. Vérifiez votre fichier .env.local'
+      });
     }
 
     // Étape 1 : Échanger le code contre un access token

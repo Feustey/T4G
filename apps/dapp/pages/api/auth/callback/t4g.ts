@@ -24,11 +24,28 @@ export default async function handler(
     const clientId = process.env.CLIENT_ID || process.env.NEXT_PUBLIC_T4G_CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const authUrl = process.env.AUTH_URL || process.env.NEXT_PUBLIC_T4G_AUTH_URL;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/auth/callback/t4g`;
+    const host = req.headers.host || '';
+    const proto = req.headers['x-forwarded-proto'] || (host.startsWith('localhost') ? 'http' : 'https');
+    const redirectUri = `${proto}://${host}/auth/callback/t4g`;
+
+    // Logs de debug en développement
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔵 T4G OAuth Callback - Configuration:');
+      console.log('  - clientId:', clientId ? '✅ Défini' : '❌ Manquant');
+      console.log('  - clientSecret:', clientSecret ? '✅ Défini' : '❌ Manquant');
+      console.log('  - authUrl:', authUrl || '❌ Manquant');
+      console.log('  - redirectUri:', redirectUri);
+    }
 
     if (!clientId || !clientSecret || !authUrl) {
-      console.error('Configuration OAuth t4g incomplète');
-      return res.status(500).json({ error: 'Configuration OAuth incomplète' });
+      console.error('❌ T4G OAuth - Configuration incomplète');
+      console.error('  - CLIENT_ID:', clientId ? '✅' : '❌');
+      console.error('  - CLIENT_SECRET:', clientSecret ? '✅' : '❌');
+      console.error('  - AUTH_URL:', authUrl ? '✅' : '❌');
+      return res.status(500).json({ 
+        error: 'Configuration OAuth incomplète',
+        details: 'CLIENT_ID, CLIENT_SECRET ou AUTH_URL manquant. Vérifiez votre fichier .env.local'
+      });
     }
 
     // Étape 1 : Échanger le code contre un access token

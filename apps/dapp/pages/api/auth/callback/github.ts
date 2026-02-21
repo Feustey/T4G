@@ -14,7 +14,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const clientId = process.env.GITHUB_CLIENT_ID || process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/auth/callback/github`;
+
+    // Dériver l'origine depuis le header Host de la requête pour que le redirect_uri
+    // corresponde exactement à l'URL depuis laquelle l'utilisateur a lancé le flow OAuth.
+    // NEXT_PUBLIC_APP_URL peut différer du domaine réel (ex: www. vs app.)
+    const host = req.headers.host || '';
+    const proto = req.headers['x-forwarded-proto'] || (host.startsWith('localhost') ? 'http' : 'https');
+    const origin = `${proto}://${host}`;
+    const redirectUri = `${origin}/auth/callback/github`;
 
     if (process.env.NODE_ENV === 'development') {
       console.log('🔵 GitHub OAuth Callback - Configuration:');

@@ -20,14 +20,13 @@ export const useOAuth = () => {
       const daznoToken = localStorage.getItem('dazno_token');
       if (!daznoToken) return null;
 
-      // Vérifier que le token est toujours valide
-      const verifyUrl = process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://dazno.de/api/auth/verify-session';
-      const response = await fetch(verifyUrl, {
+      // Utiliser le proxy API pour éviter les erreurs CORS
+      const response = await fetch('/api/auth/dazno-verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${daznoToken}`,
         },
+        body: JSON.stringify({ token: daznoToken }),
       });
 
       if (response.ok) {
@@ -122,14 +121,13 @@ export const useOAuth = () => {
       // Sauvegarder le token
       localStorage.setItem('dazno_token', token);
 
-      // Vérifier le token Dazno avec le backend
-      const verifyUrl = process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://dazno.de/api/auth/verify-session';
-      const response = await fetch(verifyUrl, {
+      // Utiliser le proxy API pour éviter les erreurs CORS
+      const response = await fetch('/api/auth/dazno-verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ token }),
       });
 
       if (!response.ok) {
