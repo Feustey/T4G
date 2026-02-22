@@ -9,3 +9,4 @@ export * from './useMutationObserver';
 export * from './useOAuth';
 export * from './usePagination';
 export * from './usePrevious';
+export * from './useApiWithFallback';

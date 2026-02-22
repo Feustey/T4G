@@ -51,6 +51,9 @@ pub struct CreateProofRequest {
     pub request_id: String,
     pub rating: u8,
     pub comment: String,
+    /// UTXO Bitcoin pour ancrer la preuve on-chain (format "txid:vout"), optionnel.
+    /// Si fourni, le seal RGB sera lié à cet UTXO.
+    pub utxo_seal: Option<String>,
 }
 
 impl std::str::FromStr for ProofStatus {

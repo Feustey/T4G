@@ -2,19 +2,41 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 
-// Stockage en mémoire des tokens magic link
-// Production : utiliser PostgreSQL ou Redis
-const magicLinkTokens = new Map<string, { email: string; expires: number }>();
+const EXPIRES_IN_MS = 15 * 60 * 1000; // 15 minutes
 
-// Nettoyage automatique des tokens expirés
-setInterval(() => {
-  const now = Date.now();
-  for (const [token, data] of magicLinkTokens.entries()) {
-    if (data.expires < now) {
-      magicLinkTokens.delete(token);
-    }
+/**
+ * Génère un token signé stateless (HMAC-SHA256).
+ * Format : base64url(payload).<signature>
+ * Pas de stockage nécessaire — fonctionne sur serverless/Vercel.
+ */
+export function createMagicToken(email: string): string {
+  const secret = process.env.MAGIC_LINK_SECRET || process.env.NEXTAUTH_SECRET || 'fallback-dev-secret';
+  const payload = Buffer.from(JSON.stringify({ email, exp: Date.now() + EXPIRES_IN_MS })).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+
+/**
+ * Vérifie un token signé et retourne l'email si valide.
+ * Retourne null si le token est invalide ou expiré.
+ */
+export function verifyMagicToken(token: string): string | null {
+  try {
+    const secret = process.env.MAGIC_LINK_SECRET || process.env.NEXTAUTH_SECRET || 'fallback-dev-secret';
+    const [payload, sig] = token.split('.');
+    if (!payload || !sig) return null;
+
+    const expectedSig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null;
+
+    const { email, exp } = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    if (!email || !exp || Date.now() > exp) return null;
+
+    return email as string;
+  } catch {
+    return null;
   }
-}, 60_000);
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -28,15 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const normalizedEmail = email.toLowerCase().trim();
-
-  // Générer un token sécurisé (32 octets = 64 chars hex)
-  const token = crypto.randomBytes(32).toString('hex');
-  const expiresIn = 15 * 60 * 1000; // 15 minutes
-
-  magicLinkTokens.set(token, {
-    email: normalizedEmail,
-    expires: Date.now() + expiresIn,
-  });
+  const token = createMagicToken(normalizedEmail);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:4200';
   const magicLink = `${appUrl}/auth/callback/magic-link?token=${token}`;
@@ -90,6 +104,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: "Erreur lors de l'envoi de l'email" });
   }
 }
-
-// Exporter la map pour la route verify
-export { magicLinkTokens };

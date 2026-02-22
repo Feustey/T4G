@@ -6,6 +6,7 @@
 class APIClient {
   private baseURL: string;
   private token: string | null = null;
+  private cacheExpiry = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
 
   constructor() {
     // URL du backend configurée via NEXT_PUBLIC_API_URL
@@ -45,11 +46,56 @@ class APIClient {
     }
   }
 
+  /**
+   * Sauvegarde une réponse dans le cache local
+   */
+  private saveToCache(key: string, data: any): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const cacheData = {
+        data,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(`api_cache_${key}`, JSON.stringify(cacheData));
+    } catch (error) {
+      console.warn('⚠️ Impossible de sauvegarder dans le cache:', error);
+    }
+  }
+
+  /**
+   * Récupère une réponse depuis le cache local
+   */
+  private getFromCache<T>(key: string): T | null {
+    if (typeof window === 'undefined') return null;
+
+    try {
+      const cached = localStorage.getItem(`api_cache_${key}`);
+      if (!cached) return null;
+
+      const { data, timestamp } = JSON.parse(cached);
+      
+      // Vérifier si le cache n'est pas expiré
+      if (Date.now() - timestamp < this.cacheExpiry) {
+        console.log(`✅ Utilisation du cache pour ${key}`);
+        return data;
+      }
+      
+      // Cache expiré, le supprimer
+      localStorage.removeItem(`api_cache_${key}`);
+      return null;
+    } catch (error) {
+      console.warn('⚠️ Impossible de lire le cache:', error);
+      return null;
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    const cacheKey = `${options.method || 'GET'}_${endpoint}`;
     const config: RequestInit = {
       ...options,
       headers: {
@@ -84,8 +130,24 @@ class APIClient {
         return {} as T;
       }
 
-      return response.json();
+      const data = await response.json();
+      
+      // Sauvegarder dans le cache uniquement pour les GET
+      if (!options.method || options.method === 'GET') {
+        this.saveToCache(cacheKey, data);
+      }
+      
+      return data;
     } catch (error) {
+      // En cas d'erreur réseau, essayer le cache pour les GET
+      if (!options.method || options.method === 'GET') {
+        const cachedData = this.getFromCache<T>(cacheKey);
+        if (cachedData) {
+          console.warn(`⚠️ Erreur réseau, utilisation du cache pour ${endpoint}`);
+          return cachedData;
+        }
+      }
+
       if (error instanceof Error) {
         throw error;
       }

@@ -3,7 +3,7 @@
  * Replaces MongoDB-based data access with REST API calls to Rust backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // ========== TYPES ==========
 
@@ -76,27 +76,124 @@ export interface BlockchainTransaction {
 
 // ========== HELPER FUNCTIONS ==========
 
+/**
+ * Sauvegarde une réponse dans le cache local
+ */
+function saveToCache(key: string, data: any): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const cacheData = {
+      data,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(`postgres_cache_${key}`, JSON.stringify(cacheData));
+  } catch (error) {
+    console.warn('⚠️ PostgresAPI - Impossible de sauvegarder dans le cache:', error);
+  }
+}
+
+/**
+ * Récupère une réponse depuis le cache local
+ */
+function getFromCache<T>(key: string, maxAge = 24 * 60 * 60 * 1000): T | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const cached = localStorage.getItem(`postgres_cache_${key}`);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    
+    // Vérifier si le cache n'est pas expiré
+    if (Date.now() - timestamp < maxAge) {
+      return data;
+    }
+    
+    // Cache expiré, le supprimer
+    localStorage.removeItem(`postgres_cache_${key}`);
+    return null;
+  } catch (error) {
+    console.warn('⚠️ PostgresAPI - Impossible de lire le cache:', error);
+    return null;
+  }
+}
+
+/**
+ * Attendre avec un délai (pour retry)
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function fetchAPI<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retries = 3
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  const cacheKey = `${options.method || 'GET'}_${endpoint}`;
 
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Pour les erreurs 4xx, ne pas retry
+        if (response.status >= 400 && response.status < 500) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+        
+        // Pour les erreurs 5xx, retry
+        if (attempt === retries - 1) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+        
+        await sleep(1000 * Math.pow(2, attempt));
+        continue;
+      }
+
+      const data = await response.json();
+      
+      // Sauvegarder dans le cache pour les GET
+      if (!options.method || options.method === 'GET') {
+        saveToCache(cacheKey, data);
+      }
+      
+      return data;
+    } catch (error) {
+      // Si c'est la dernière tentative et que c'est une erreur réseau
+      if (attempt === retries - 1) {
+        // Essayer le cache pour les GET
+        if (!options.method || options.method === 'GET') {
+          const cachedData = getFromCache<T>(cacheKey);
+          if (cachedData) {
+            console.warn(`⚠️ PostgresAPI - Erreur réseau, utilisation du cache pour ${endpoint}`);
+            return cachedData;
+          }
+        }
+        throw error;
+      }
+      
+      // Attendre avant de réessayer
+      console.log(`⏳ PostgresAPI - Retry ${attempt + 1}/${retries} pour ${endpoint}...`);
+      await sleep(1000 * Math.pow(2, attempt));
+    }
   }
-
-  return response.json();
+  
+  throw new Error('Unreachable code');
 }
 
 // ========== SERVICE CATEGORIES ==========

@@ -15,6 +15,7 @@ import store from '../store/store';
 import { AuthPageType, LocaleType, SessionType } from '../types';
 import { useRouter } from 'next/router';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { NetworkProvider } from '../contexts/NetworkContext';
 
 const squadaOne = localFont({
   src: '../fonts/squada_One/squadaOne.woff2',
@@ -41,6 +42,7 @@ function CustomApp({
         `
       }} />
       <AuthProvider>
+        <NetworkProvider>
           <Script
             strategy="afterInteractive"
             id="tag-manager"
@@ -61,7 +63,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               )}
             </Provider>
           </AppContextProvider>
-        </AuthProvider>
+        </NetworkProvider>
+      </AuthProvider>
     </>
   );
 }

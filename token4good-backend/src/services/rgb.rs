@@ -336,6 +336,9 @@ impl RGBService {
     /// Retourne `(contract_id, signature_hex)` où :
     /// - `contract_id` est le SHA-256 déterministe du contrat (hex 64 chars)
     /// - `signature_hex` est la signature ECDSA secp256k1 compacte (hex 128 chars)
+    ///
+    /// `utxo_seal` est un outpoint Bitcoin optionnel au format `"txid:vout"` pour
+    /// ancrer la preuve on-chain via un single-use seal RGB.
     pub async fn create_proof_contract(
         &self,
         mentor_id: &str,
@@ -343,6 +346,19 @@ impl RGBService {
         request_id: &str,
         rating: u8,
         comment: Option<String>,
+    ) -> Result<(String, String), RGBError> {
+        self.create_proof_contract_with_seal(mentor_id, mentee_id, request_id, rating, comment, None).await
+    }
+
+    /// Variante avec UTXO seal explicite.
+    pub async fn create_proof_contract_with_seal(
+        &self,
+        mentor_id: &str,
+        mentee_id: &str,
+        request_id: &str,
+        rating: u8,
+        comment: Option<String>,
+        utxo_seal: Option<&str>,
     ) -> Result<(String, String), RGBError> {
         if mentor_id.is_empty() || mentee_id.is_empty() || request_id.is_empty() {
             return Err(RGBError::ContractCreation(
@@ -376,12 +392,20 @@ impl RGBService {
 
         let signature = self.sign_bytes(&sign_data)?;
 
+        // Parser le seal UTXO optionnel
+        let seal = if let Some(outpoint_str) = utxo_seal {
+            let (txid, vout) = Self::parse_outpoint(outpoint_str)?;
+            Some(RgbSeal { txid, vout, blinding: Self::random_blinding() })
+        } else {
+            None
+        };
+
         let genesis = GenesisOp {
             contract_id: contract_id.clone(),
             schema: "token4good-mentoring-v1".to_string(),
             issuer_pubkey: self.issuer_pubkey_hex.clone(),
             content_hash,
-            seal: None,
+            seal: seal.clone(),
             issuer_sig: signature.clone(),
             timestamp,
         };
@@ -391,7 +415,7 @@ impl RGBService {
             metadata,
             genesis,
             transitions: vec![],
-            current_seal: None,
+            current_seal: seal,
         };
 
         {
@@ -632,7 +656,11 @@ impl RGBService {
 mod tests {
     use super::*;
 
+    /// Crée un service avec un répertoire temporaire isolé (évite les conflits entre tests parallèles)
     fn make_service() -> RGBService {
+        let dir = std::env::temp_dir().join(format!("rgb_test_{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::env::set_var("RGB_DATA_DIR", dir.to_str().unwrap());
         RGBService::new().expect("RGBService doit s'initialiser")
     }
 
@@ -774,5 +802,58 @@ mod tests {
 
         let list = svc.list_proofs().await.unwrap();
         assert!(list.len() >= 2);
+    }
+
+    #[tokio::test]
+    async fn test_create_proof_with_utxo_seal() {
+        let svc = make_service();
+        // UTXO valide en regtest (format txid:vout)
+        let seal = "0000000000000000000000000000000000000000000000000000000000000001:0";
+
+        let (contract_id, sig) = svc
+            .create_proof_contract_with_seal("m1", "m2", "r1", 5, None, Some(seal))
+            .await
+            .unwrap();
+
+        assert_eq!(contract_id.len(), 64);
+        assert_eq!(sig.len(), 128);
+
+        // L'historique doit mentionner le seal UTXO dans la destination
+        let history = svc.get_contract_history(&contract_id).await.unwrap();
+        assert_eq!(history[0].to, "0000000000000000000000000000000000000000000000000000000000000001:0");
+    }
+
+    #[tokio::test]
+    async fn test_create_proof_with_invalid_utxo_seal_rejected() {
+        let svc = make_service();
+        let result = svc
+            .create_proof_contract_with_seal("m1", "m2", "r1", 5, None, Some("not_a_txid:0"))
+            .await;
+        assert!(result.is_err(), "Un txid invalide doit être rejeté");
+    }
+
+    #[tokio::test]
+    async fn test_stash_persistence() {
+        // Répertoire isolé pour ce test
+        let data_dir = std::env::temp_dir()
+            .join(format!("rgb_persist_{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&data_dir).unwrap();
+
+        // Service 1 : créer la preuve
+        std::env::set_var("RGB_DATA_DIR", data_dir.to_str().unwrap());
+        let svc = RGBService::new().expect("Init should work");
+        let (contract_id, sig) = svc
+            .create_proof_contract("persist_mentor", "persist_mentee", "persist_req", 4, None)
+            .await
+            .unwrap();
+
+        // Forcer la sauvegarde sur disque
+        drop(svc);
+
+        // Service 2 : recharger depuis le même répertoire (simule un redémarrage)
+        std::env::set_var("RGB_DATA_DIR", data_dir.to_str().unwrap());
+        let svc2 = RGBService::new().expect("Reload should work");
+        let valid = svc2.verify_proof(&contract_id, &sig).await.unwrap();
+        assert!(valid, "La preuve doit être retrouvée après rechargement du stash");
     }
 }

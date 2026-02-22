@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { magicLinkTokens } from './send';
+import { verifyMagicToken } from './send';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -12,21 +12,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Token manquant' });
   }
 
-  const tokenData = magicLinkTokens.get(token);
+  const email = verifyMagicToken(token);
 
-  if (!tokenData) {
-    return res.status(401).json({ error: 'Token invalide ou déjà utilisé' });
+  if (!email) {
+    return res.status(401).json({ error: 'Token invalide ou expiré, veuillez demander un nouveau lien' });
   }
 
-  if (Date.now() > tokenData.expires) {
-    magicLinkTokens.delete(token);
-    return res.status(401).json({ error: 'Token expiré, veuillez demander un nouveau lien' });
-  }
-
-  // Consommer le token (usage unique)
-  magicLinkTokens.delete(token);
-
-  const email = tokenData.email;
   const name = email.split('@')[0];
 
   return res.status(200).json({

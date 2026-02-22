@@ -117,7 +117,7 @@ async function migrateTransactions() {
 
 async function main() {
   console.log('🚀 Starting MongoDB to PostgreSQL migration\n');
-  console.log('⚠️  Make sure the Rust backend is running on http://localhost:8080\n');
+  console.log('⚠️  Make sure the Rust backend is running on http://localhost:3000\n');
 
   await migrateCategories();
   await migrateServices();

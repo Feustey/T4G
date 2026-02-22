@@ -13,6 +13,7 @@ export * from './shared/NumberInput';
 export * from './shared/Message';
 export * from './shared/Toast';
 export * from './shared/UserNotifications';
+export * from './OfflineBanner';
 
 // Public components
 export * from './public/HeaderPublic';
