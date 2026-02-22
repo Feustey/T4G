@@ -53,6 +53,7 @@ pub async fn login(
         "dazeno" => handle_dazeno_login(state, payload).await,
         "t4g" => handle_t4g_login(state, payload).await,
         "linkedin" => handle_linkedin_login(state, payload).await,
+        "magic_link" | "github" | "lnurl" => handle_oauth_login(state, payload).await,
         _ => Err(StatusCode::BAD_REQUEST),
     }
 }
@@ -197,6 +198,76 @@ async fn handle_linkedin_login(
     .await?;
 
     // Générer JWT
+    let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let jwt_token = jwt_service
+        .create_token(&user.id.to_string(), &user.email, &user.role.to_string())
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let response = AuthResponse {
+        token: jwt_token,
+        user: UserSummary {
+            id: user.id.to_string(),
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            role: user.role,
+            lightning_address: user.lightning_address,
+        },
+        expires_at: chrono::Utc::now() + chrono::Duration::hours(24),
+    };
+
+    Ok(Json(response))
+}
+
+async fn handle_oauth_login(
+    state: AppState,
+    payload: LoginRequest,
+) -> Result<Json<AuthResponse>, StatusCode> {
+    let provider_data = payload.provider_user_data.ok_or(StatusCode::BAD_REQUEST)?;
+
+    let email = provider_data
+        .get("email")
+        .and_then(|v| v.as_str())
+        .ok_or(StatusCode::BAD_REQUEST)?
+        .to_string();
+
+    let given_name = provider_data
+        .get("given_name")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+
+    let family_name = provider_data
+        .get("family_name")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+
+    let name = if given_name.is_empty() {
+        provider_data
+            .get("name")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string()
+    } else {
+        format!("{} {}", given_name, family_name).trim().to_string()
+    };
+
+    let sub = provider_data
+        .get("sub")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    let provider_prefix = &payload.provider;
+
+    let user = get_or_create_user_from_oauth(
+        &state,
+        email,
+        name,
+        UserRole::Mentee,
+        format!("{}_{}", provider_prefix, sub),
+    )
+    .await?;
+
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let jwt_token = jwt_service
         .create_token(&user.id.to_string(), &user.email, &user.role.to_string())
