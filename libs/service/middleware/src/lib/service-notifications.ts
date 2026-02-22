@@ -7,7 +7,7 @@ import {
 } from "@t4g/service/data";
 import { Components } from "@t4g/types";
 import { Notification } from "@t4g/service/data";
-import { createTransport, SentMessageInfo } from "nodemailer";
+import { Resend } from "resend";
 import { HTMLEmail } from "./notification-email";
 import { logg } from "@t4g/service/middleware";
 
@@ -649,22 +649,27 @@ async function sendNotificationByEmail(
     process.env.NODE_ENV == "production"
       ? ""
       : `[${process.env.NODE_ENV?.toUpperCase()}] `;
-  const sendMailConfig = {
-    to: process.env.EMAIL_TO || to || process.env.EMAIL_ADMIN,
-    bcc:
-      "support@token-for-good.com" &&
-      (process.env.EMAIL_ADMIN || "stephane.courant@token-for-good.com"),
-    from: process.env.EMAIL_FROM,
-    subject: SUBJECT_PREFIX + subject,
-    text: msgTxt,
-    html: msgHtml,
-  };
-  console.log(`send mail to ${to} : ${subject}`);
-  return createTransport(process.env.EMAIL_SERVER)
-    .sendMail(sendMailConfig)
-    .then((res: SentMessageInfo) => {
+
+  const recipient = process.env.EMAIL_TO || to || process.env.EMAIL_ADMIN;
+  const bcc = process.env.EMAIL_ADMIN || "stephane.courant@token-for-good.com";
+  const from = process.env.EMAIL_FROM || "Token For Good <t4g@dazno.de>";
+
+  console.log(`send mail to ${recipient} : ${subject}`);
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  return resend.emails
+    .send({
+      from,
+      to: recipient as string,
+      bcc,
+      subject: SUBJECT_PREFIX + subject,
+      text: msgTxt,
+      html: msgHtml,
+    })
+    .then((res) => {
       console.log("sent message", res);
-      return res.accepted[0]?.ts || new Date();
+      return new Date();
     })
     .catch((e) => {
       console.error("error sending message", e);

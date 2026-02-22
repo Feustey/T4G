@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 // Stockage en mémoire des tokens magic link
 // Production : utiliser PostgreSQL ou Redis
@@ -42,26 +42,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const magicLink = `${appUrl}/auth/callback/magic-link?token=${token}`;
 
   try {
-    const emailServer = process.env.EMAIL_SERVER;
-    const emailFrom = process.env.EMAIL_FROM || 'Token For Good <noreply@token-for-good.com>';
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const emailFrom = process.env.EMAIL_FROM || 'Token For Good <t4g@dazno.de>';
 
-    if (!emailServer) {
-      // Mode développement : retourner le lien directement
+    if (!resendApiKey) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔗 Magic Link (dev mode):', magicLink);
+        console.log('Magic Link (dev mode):', magicLink);
         return res.status(200).json({
           success: true,
           message: 'Email envoyé',
-          // Uniquement en dev pour faciliter les tests
           dev_link: magicLink,
         });
       }
-      return res.status(500).json({ error: 'Configuration email manquante (EMAIL_SERVER)' });
+      return res.status(500).json({ error: 'Configuration email manquante (RESEND_API_KEY)' });
     }
 
-    const transporter = nodemailer.createTransport(emailServer);
+    const resend = new Resend(resendApiKey);
 
-    await transporter.sendMail({
+    await resend.emails.send({
       from: emailFrom,
       to: normalizedEmail,
       subject: 'Votre lien de connexion Token4Good',
