@@ -7,6 +7,7 @@ use axum::Router;
 use axum::http::Method;
 use std::{env, error::Error};
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::normalize_path::NormalizePathLayer;
 
 use services::{database::DatabaseService, dazno::DaznoService, rgb::RGBService};
 
@@ -191,4 +192,7 @@ pub fn build_router(state: AppState) -> Router {
         ))
         .layer(build_cors_layer())
         .with_state(state)
+        // Normalise les trailing slashes : /api/auth/login/ → /api/auth/login
+        // Nécessaire car Vercel (trailingSlash:true) redirige toutes les routes avec /
+        .layer(NormalizePathLayer::trim_trailing_slash())
 }
