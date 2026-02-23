@@ -10,9 +10,10 @@ class APIClient {
 
   constructor() {
     // URL du backend configurée via NEXT_PUBLIC_API_URL
-    // Développement local: http://localhost:3000
-    // Production: https://apirust-production.up.railway.app
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    // Développement local: http://localhost:3001 (backend Rust)
+    // Production: laisser vide → les requêtes passent par le proxy Vercel (vercel.json rewrites)
+    // Ne PAS pointer directement sur Railway en production pour éviter les problèmes CORS
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || '';
   }
 
   private getHeaders(): HeadersInit {

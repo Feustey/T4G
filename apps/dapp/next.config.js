@@ -177,17 +177,22 @@ const nextConfig = {
   },
   
   // Rewrites pour le backend Rust et landing page
+  // En développement local : proxifie /api/* vers le backend Rust sur localhost:3001
+  // En production Vercel : les rewrites de vercel.json prennent le relais (ignorés ici)
   async rewrites() {
-    const backendApiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+    // NEXT_PUBLIC_API_URL pointe sur la BASE du backend (sans /api)
+    // Exemples : http://localhost:3001 ou https://apirust-production.up.railway.app
+    const backendBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
     return [
       // Servir les fichiers statiques de la landing page
       {
         source: '/landing/:path*',
         destination: '/landing/:path*',
       },
+      // Proxy vers le backend Rust (développement local uniquement)
       {
         source: '/api/:path*',
-        destination: `${backendApiBase}/:path*`,
+        destination: `${backendBase}/api/:path*`,
       },
     ];
   },
