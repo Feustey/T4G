@@ -64,12 +64,16 @@ pub async fn build_state() -> Result<AppState, Box<dyn Error>> {
 fn build_cors_layer() -> CorsLayer {
     // Liste des origines autorisées
     let allowed_origins = vec![
-        "http://localhost:4200".parse().unwrap(),           // Dev frontend
-        "http://localhost:3000".parse().unwrap(),           // Dev backend
-        "https://token4good.vercel.app".parse().unwrap(),   // Production
-        "https://t4g.dazno.de".parse().unwrap(),            // Production alternative
+        "http://localhost:4200".parse().unwrap(),                       // Dev frontend Nx
+        "http://localhost:3000".parse().unwrap(),                       // Dev Next.js
+        "http://localhost:3001".parse().unwrap(),                       // Dev backend Rust
+        "https://token4good.vercel.app".parse().unwrap(),               // Production Vercel
+        "https://t4g.dazno.de".parse().unwrap(),                        // Production custom
+        "https://apirust-production.up.railway.app".parse().unwrap(),   // Railway self
     ];
 
+    // Note: allow_credentials(true) est incompatible avec allow_headers(Any).
+    // On liste explicitement les headers autorisés.
     CorsLayer::new()
         .allow_origin(allowed_origins)
         .allow_methods([
@@ -80,7 +84,13 @@ fn build_cors_layer() -> CorsLayer {
             Method::PATCH,
             Method::OPTIONS,
         ])
-        .allow_headers(Any)
+        .allow_headers([
+            axum::http::header::AUTHORIZATION,
+            axum::http::header::CONTENT_TYPE,
+            axum::http::header::ACCEPT,
+            axum::http::header::ORIGIN,
+            axum::http::header::HeaderName::from_static("x-requested-with"),
+        ])
         .allow_credentials(true)
 }
 
