@@ -22,6 +22,11 @@ ENV RUST_BACKTRACE=1
 
 # Copier les fichiers Cargo depuis le sous-répertoire backend
 COPY token4good-backend/Cargo.toml token4good-backend/Cargo.lock ./
+# sqlx-data.json permet la compilation offline sans connexion à la DB
+COPY token4good-backend/sqlx-data.json ./sqlx-data.json
+
+# Mode offline SQLx : utilise sqlx-data.json sans connexion DB
+ENV SQLX_OFFLINE=true
 
 # Build des dépendances uniquement (couche cachée)
 RUN mkdir src && echo "fn main() {}" > src/main.rs

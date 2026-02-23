@@ -355,8 +355,13 @@ async fn get_or_create_user_from_dazno(
     dazno_user: DaznoUser,
 ) -> Result<User, StatusCode> {
     // Essayer de récupérer l'utilisateur existant
-    if let Ok(Some(existing_user)) = state.db.get_user_by_email(&dazno_user.email).await {
-        return Ok(existing_user);
+    match state.db.get_user_by_email(&dazno_user.email).await {
+        Ok(Some(existing_user)) => return Ok(existing_user),
+        Ok(None) => {} // Nouvel utilisateur, on continue
+        Err(e) => {
+            tracing::error!("DB error looking up user by email (dazno): {}", e);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
     }
 
     // Créer un nouvel utilisateur
@@ -399,8 +404,13 @@ async fn get_or_create_user_from_oauth(
     username_prefix: String,
 ) -> Result<User, StatusCode> {
     // Essayer de récupérer l'utilisateur existant
-    if let Ok(Some(existing_user)) = state.db.get_user_by_email(&email).await {
-        return Ok(existing_user);
+    match state.db.get_user_by_email(&email).await {
+        Ok(Some(existing_user)) => return Ok(existing_user),
+        Ok(None) => {} // Nouvel utilisateur, on continue
+        Err(e) => {
+            tracing::error!("DB error looking up user by email (oauth): {}", e);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
     }
 
     // Extraire prénom et nom du nom complet

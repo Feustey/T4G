@@ -9,11 +9,12 @@ class APIClient {
   private cacheExpiry = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
 
   constructor() {
-    // URL du backend configurée via NEXT_PUBLIC_API_URL
-    // Développement local: http://localhost:3001 (backend Rust)
-    // Production: laisser vide → les requêtes passent par le proxy Vercel (vercel.json rewrites)
-    // Ne PAS pointer directement sur Railway en production pour éviter les problèmes CORS
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || '';
+    // URL du backend Rust configurée via NEXT_PUBLIC_API_URL
+    // Développement local: http://localhost:3001
+    // Production Railway: https://apirust-production.up.railway.app
+    // Note: le proxy Vercel (vercel.json) est bloqué par la protection SSRF de Vercel
+    // → les appels vont directement au backend Railway (CORS configuré côté Rust)
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
   }
 
   private getHeaders(): HeadersInit {
