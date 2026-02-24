@@ -1,6 +1,7 @@
 import moment from 'moment';
 import Image from 'next/image';
-import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import React, { useState, useMemo, useCallback } from 'react';
 import Head from 'next/head';
 import { useAppDispatch, useAppSelector, useIndexing } from '../hooks';
 import ConnectedLayout from '../layouts/ConnectedLayout';
@@ -59,6 +60,16 @@ export interface IDashboard {
   lang: LangType;
 }
 
+const NOTIFICATION_TYPE_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
+  SERVICE_BOOKED_BY_STUDENT: { icon: '📅', color: 'var(--color-info, #2563eb)', label: 'Réservation' },
+  SERVICE_DELIVERY_CONFIRMED_BY_STUDENT: { icon: '✅', color: 'var(--color-success, #16a34a)', label: 'Confirmé' },
+  SERVICE_DELIVERY_CANCELED_BY_STUDENT: { icon: '❌', color: 'var(--color-error, #d32f2f)', label: 'Annulé' },
+  WELCOME_BONUS: { icon: '🎉', color: 'var(--color-primary, #7c3aed)', label: 'Bienvenue' },
+};
+
+const getNotificationConfig = (type: string) =>
+  NOTIFICATION_TYPE_CONFIG[type] ?? { icon: '🔔', color: 'var(--app-color-text-disabled)', label: '' };
+
 const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
   const pendingTransactions = useAppSelector(selectPendingTransactions);
   const { user } = useAuth();
@@ -67,6 +78,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
     useState<PendingTransactionType | null>(null);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const [dismissedProfilePrompt, setDismissedProfilePrompt] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -195,8 +207,10 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
     if (!notifications) return [];
     return [...notifications]
       .sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
-      .slice(0, 3);
+      .slice(0, 5);
   }, [notifications]);
+
+  const totalNotificationsCount = notifications?.length ?? 0;
 
   const topServices = useMemo(() => {
     if (!services) return [];
@@ -306,7 +320,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                 </>
               )}
 
-              {userAbout === '' && (
+              {userAbout === '' && !dismissedProfilePrompt && (
                 <div
                   className="o-card u-d--flex u-flex-column u-gap--m"
                   style={{
@@ -331,10 +345,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                     />
                     <Button
                       variant="ghost"
-                      onClick={() => {
-                        const el = document.querySelector('[data-dismiss-profile-prompt]') as HTMLElement;
-                        if (el) el.style.display = 'none';
-                      }}
+                      onClick={() => setDismissedProfilePrompt(true)}
                       label="Plus tard"
                     />
                   </div>
@@ -342,20 +353,65 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
               )}
 
               {sortedNotifications.length > 0 && (
-                <div className="o-card">
-                  <div className="u-d--flex u-justify-content-between u-width--fill">
-                    <h2 className="subtitle-1">{lang.page.dashboard.notifications.title}</h2>
-                    <CustomLink href={'/notifications'} label={lang.utils.seeAll} iconName={'arrowRight'} external={false} className="c-link--icon" />
-                  </div>
-                  <ul role="list" className="c-notifications">
-                    {sortedNotifications.map((notification) => (
-                      <li key={notification.id}>
-                        <span>{moment(notification.ts).fromNow()}</span>
-                        <p>{notification.message}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <Link href="/notifications" passHref>
+                  <a className="c-metrics__section-link">
+                    <div className="u-d--flex u-justify-content-between u-align-items-center u-width--fill">
+                      <div className="u-d--flex u-align-items-center u-gap--s">
+                        <h2 className="subtitle-1">{lang.page.dashboard.notifications.title}</h2>
+                        {totalNotificationsCount > 5 && (
+                          <span className="c-metrics__metric__number" style={{
+                            fontSize: '18px',
+                            lineHeight: 1,
+                            color: 'var(--app-token-color)',
+                          }}>
+                            {totalNotificationsCount}
+                          </span>
+                        )}
+                      </div>
+                      <span className="c-link--icon" style={{ fontSize: '13px', color: 'var(--app-comunity-color)' }}>
+                        {lang.utils.seeAll} →
+                      </span>
+                    </div>
+                    <ul role="list" className="c-notifications" style={{ width: '100%' }}>
+                      {sortedNotifications.map((notification) => {
+                        const config = getNotificationConfig(notification.type);
+                        return (
+                          <li key={notification.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                            {notification.amount > 0 && (
+                              <div className="c-metrics__metric--token" style={{ minWidth: '56px' }}>
+                                <p className="c-metrics__metric__number" style={{ fontSize: '24px', lineHeight: '28px' }}>
+                                  +{notification.amount}
+                                </p>
+                                <p style={{ fontSize: '11px', margin: 0 }}>T4G</p>
+                              </div>
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <div className="u-d--flex u-align-items-center u-gap--s" style={{ marginBottom: '2px' }}>
+                                <span style={{ fontSize: '15px', lineHeight: 1 }} aria-hidden="true">{config.icon}</span>
+                                <span style={{ color: 'var(--app-color-text-disabled)', fontSize: '12px' }}>
+                                  {moment(notification.ts).fromNow()}
+                                </span>
+                                {config.label && (
+                                  <span style={{
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    color: config.color,
+                                    backgroundColor: `${config.color}1a`,
+                                    borderRadius: '4px',
+                                    padding: '1px 6px',
+                                  }}>
+                                    {config.label}
+                                  </span>
+                                )}
+                              </div>
+                              <p style={{ margin: 0, fontSize: '14px' }}>{notification.message}</p>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </a>
+                </Link>
               )}
 
               <div className="u-d--flex flex-wrap u-gap--s">
@@ -384,6 +440,35 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                   </div>
                 )}
               </div>
+
+              <Link href="/community" passHref>
+                <a className="c-metrics__section-link">
+                  <h2 className="subtitle-1">My Community</h2>
+                  <div
+                    className="o-layout--grid--auto u-width--fill"
+                    style={{ '--grid-min-size': '120px', '--grid-gap': '32px' } as React.CSSProperties}
+                  >
+                    <div className="c-metrics__metric--community">
+                      <p className="c-metrics__metric__number">
+                        {(metrics?.usersCount?.alumnis ?? 0) + (metrics?.usersCount?.students ?? 0)}
+                      </p>
+                      <p>Members</p>
+                    </div>
+                    <div className="c-metrics__metric--community">
+                      <p className="c-metrics__metric__number">
+                        {metrics?.interactionsCount ?? 0}
+                      </p>
+                      <p>Transactions</p>
+                    </div>
+                    <div className="c-metrics__metric--community">
+                      <p className="c-metrics__metric__number">
+                        {metrics?.tokensExchanged ?? 0}
+                      </p>
+                      <p>Tokens échangés</p>
+                    </div>
+                  </div>
+                </a>
+              </Link>
 
               {topServices.length > 0 && (
                 <div>

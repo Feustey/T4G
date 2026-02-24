@@ -33,6 +33,29 @@
   }
 }
 
+.c-metrics__section-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: map.get(base.$concrete-sizes, 'l');
+  background-color: var(--app-color-background-secondary);
+  border: 1px solid var(--app-border-color-ternary, transparent);
+  gap: base.$lg-unit;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--app-comunity-color);
+    text-decoration: none;
+  }
+
+  h2 {
+    margin: 0;
+  }
+}
+
 .c-metrics__wallet-container {
   position: relative;
   width: 100%;
