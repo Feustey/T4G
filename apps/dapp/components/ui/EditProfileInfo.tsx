@@ -2,7 +2,7 @@ import React, { useState, useCallback, useReducer, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { LangType } from '../../lib/shared-types';
 import { Avatar, AddStudies, AddExperiences } from '..';
-import { TextInput, Button } from '../shared';
+import { TextInput, Button } from '..';
 import {
   setUserCV,
   setUserAvatar,
