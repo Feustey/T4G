@@ -583,6 +583,28 @@
     "profile": {
       "head": {
         "title": "Profile - T4G"
+      },
+      "saveButton": "Save changes",
+      "savingButton": "Saving...",
+      "saveSuccess": "Profile saved successfully!",
+      "saveError": "An error occurred while saving. Please try again.",
+      "sections": {
+        "avatar": {
+          "title": "Profile photo"
+        },
+        "personalInfo": {
+          "title": "Personal information",
+          "firstname": "First name",
+          "lastname": "Last name",
+          "bio": "Bio",
+          "bioPlaceholder": "Tell us about yourself, your skills, your passions..."
+        },
+        "education": {
+          "title": "Education"
+        },
+        "experience": {
+          "title": "Professional experience"
+        }
       }
     },
     "wallet": {

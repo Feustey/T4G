@@ -4,7 +4,7 @@ import { Components } from '../lib/types';
 import Head from 'next/head';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import { useIndexing } from '../hooks';
-import { AuthPageType, SessionType } from '../types';
+import { AuthPageType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components';
 import { useAppContext } from '../contexts/AppContext';
@@ -16,6 +16,7 @@ const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
 }: Components.Profile.Page.Props) => {
   const { user } = useAuth();
   const { setModal } = useAppContext();
+
   return (
     <>
       <Head>
@@ -32,27 +33,23 @@ const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
             },
             { text: lang.components.breadcrumb.profile.label },
           ]}
-      />
-        <h2 className='u-d--flex u-align-items-center u-gap--s u-margin-lg--none u-margin--auto heading-2'>
-          {user.firstname} {user.lastname.toUpperCase()}{' '}
-        </h2>
+        />
         <div className="Profile">
-          <main className="Profile__main lg:col-span-12 col-span-12">
+          <main className="Profile__main">
             <EditProfileInfo lang={lang} />
           </main>
-        </div>
+          <aside className="Profile__aside">
             <p
-              className="cursor-pointer absolute bottom-0"
+              className="Profile__delete-account"
               onClick={async (e) => {
                 e.preventDefault();
-                setModal({
-                  component: <DeleteUser/>,
-                });
+                setModal({ component: <DeleteUser /> });
               }}
             >
-              <span className="u-text--bold">Delete</span> your account 🙁
-              
+              <span className="u-text--bold">Delete</span> your account
             </p>
+          </aside>
+        </div>
         <RightPanel />
         <AppModal />
       </ConnectedLayout>
