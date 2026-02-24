@@ -1,12 +1,17 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
-import ConnectedLayout from '../../../components/ConnectedLayout';
-import { useAuth } from '../../../lib/hooks/useAuth';
+import ConnectedLayout from '../../../layouts/ConnectedLayout';
+import { useAuth } from '../../../contexts/AuthContext';
+import { AuthPageType, LangType } from '../../../types';
 import { apiClient, MentoringBooking, MentoringOffer } from '../../../services/apiClient';
 
 // ── Types locaux ────────────────────────────────────────────────────────────
+
+interface IPage {
+  lang: LangType;
+}
 
 interface SessionData {
   booking: MentoringBooking;
@@ -77,7 +82,7 @@ function StarRating({
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function SessionDetailPage() {
+const SessionDetailPage: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useAuth();
@@ -159,7 +164,7 @@ export default function SessionDetailPage() {
 
   if (!user) return null;
   if (loading) return (
-    <ConnectedLayout>
+    <ConnectedLayout user={user} lang={lang}>
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500" />
       </div>
@@ -167,7 +172,7 @@ export default function SessionDetailPage() {
   );
 
   if (error && !session) return (
-    <ConnectedLayout>
+    <ConnectedLayout user={user} lang={lang}>
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <p className="text-red-600 font-medium">{error}</p>
         <button
@@ -223,7 +228,7 @@ export default function SessionDetailPage() {
       <Head>
         <title>Session de mentoring — Token4Good</title>
       </Head>
-      <ConnectedLayout>
+      <ConnectedLayout user={user} lang={lang}>
         <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
           {/* Navigation */}
@@ -527,3 +532,5 @@ export default function SessionDetailPage() {
 }
 
 SessionDetailPage.role = ['alumni', 'mentee', 'mentor', 'service_provider', 'admin'];
+
+export default SessionDetailPage;
