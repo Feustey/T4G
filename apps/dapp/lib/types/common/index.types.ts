@@ -12,10 +12,11 @@ export enum MODULE_NAMES {
   SERVICE = "Service",
 }
 
+// Valeurs alignées sur les rôles sérialisés par le backend Rust
 export enum PROVIDER_TYPES {
-  ALU = "ALUMNI",
-  STU = "STUDENT",
-  SP = "SERVICE_PROVIDER",
+  ALU = "alumni",
+  STU = "mentee",
+  SP = "service_provider",
 }
 
-export type ROLE_TYPE = "SERVICE_PROVIDER" | "ALUMNI" | "STUDENT";
+export type ROLE_TYPE = "alumni" | "mentee" | "mentor" | "service_provider" | "admin";

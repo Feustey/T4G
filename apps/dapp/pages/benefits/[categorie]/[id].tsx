@@ -61,10 +61,10 @@ export function BenefitPage({
           ]}
         />
         <div className="u-d--flex u-r-gap--md u-c-gap--md u-flex-wrap">
-          {user.role === 'ALUMNI' && (
+          {(user.role === 'alumni' || user.role === 'mentor') && (
             <AlumniBenefitPage lang={lang} benefit={benefit} />
           )}
-          {user.role === 'STUDENT' && (
+          {user.role === 'mentee' && (
             <StudentBenefitPage lang={lang} benefit={benefit} />
           )}
         </div>

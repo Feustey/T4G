@@ -237,7 +237,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
         />
       )}
 
-      {user.role === 'STUDENT' && isConfirming && transactionToUpdate && (
+      {user.role === 'mentee' && isConfirming && transactionToUpdate && (
         <ConfirmingTransactionModal
           transaction={transactionToUpdate}
           handleModalClose={handleTransactionModalClose}
@@ -426,7 +426,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                     label={lang.page.dashboard.discoverBenefits.button}
                   />
                 </div>
-                {user.role === 'ALUMNI' && (
+                {(user.role === 'alumni' || user.role === 'mentor') && (
                   <div className="o-card flex-1 u-d--flex u-flex-column">
                     <span className="c-icon--title--services u-margin--none u-d--flex">{Icons.sparkles}</span>
                     <p className="u-margin--none">{lang.page.dashboard.discoverServices.text}</p>
@@ -436,6 +436,42 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                       theme="SERVICES"
                       onClick={() => router.push(`/services`)}
                       label={lang.page.dashboard.discoverServices.button}
+                    />
+                  </div>
+                )}
+                {/* Bloc mentor : proposer une session */}
+                {user.is_mentor_active && (
+                  <div className="o-card flex-1 u-d--flex u-flex-column">
+                    <span className="c-icon--title--services u-margin--none u-d--flex">{Icons.sparkles}</span>
+                    <p className="u-margin--none">Partage ton expertise en proposant une session de mentoring.</p>
+                    {user.mentor_topics && user.mentor_topics.length > 0 ? (
+                      <Button
+                        className="u-width--fill u-margin-t--auto"
+                        variant="primary"
+                        onClick={() => router.push('/mentoring/offer/new')}
+                        label="Proposer une session"
+                      />
+                    ) : (
+                      <Button
+                        className="u-width--fill u-margin-t--auto"
+                        variant="secondary"
+                        onClick={() => router.push('/profile#mentor')}
+                        label="Configurer mon profil mentor"
+                      />
+                    )}
+                  </div>
+                )}
+                {/* Bloc mentee : trouver un mentor */}
+                {(user.role === 'mentee' || (user.learning_topics && user.learning_topics.length > 0)) && (
+                  <div className="o-card flex-1 u-d--flex u-flex-column">
+                    <span className="c-icon--title--benefits u-margin--none u-d--flex">{Icons.gift}</span>
+                    <p className="u-margin--none">Trouve un mentor pour progresser sur un thème qui t&apos;intéresse.</p>
+                    <Button
+                      className="u-width--fill u-margin-t--auto"
+                      variant="primary"
+                      theme="BENEFITS"
+                      onClick={() => router.push('/mentoring/find')}
+                      label="Trouver un mentor"
                     />
                   </div>
                 )}
@@ -501,4 +537,4 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
 export default Page;
 
 Page.auth = true;
-Page.role = ['ALUMNI', 'STUDENT'];
+Page.role = ['alumni', 'mentee', 'mentor', 'service_provider'];

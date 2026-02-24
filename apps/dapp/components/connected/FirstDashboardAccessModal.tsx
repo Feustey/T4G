@@ -14,7 +14,7 @@ export const FirstDashboardAccessModal: React.FC<IFirstDashboardAccessModal> = (
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
 
-  const tokensGifted = userRole === 'ALUMNI' ? 20 : 100;
+  const tokensGifted = userRole === 'alumni' ? 20 : 100;
 
   return (
     <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -54,9 +54,9 @@ export const FirstDashboardAccessModal: React.FC<IFirstDashboardAccessModal> = (
                 href: '/profile',
               },
               {
-                icon: userRole === 'ALUMNI' ? '✨' : '🎓',
-                label: userRole === 'ALUMNI' ? 'Voir mes services' : 'Trouver un mentor',
-                href: userRole === 'ALUMNI' ? '/services' : '/benefits',
+                icon: userRole === 'alumni' ? '✨' : '🎓',
+                label: userRole === 'alumni' ? 'Voir mes services' : 'Trouver un mentor',
+                href: userRole === 'alumni' ? '/services' : '/benefits',
               },
             ].map((item) => (
               <button

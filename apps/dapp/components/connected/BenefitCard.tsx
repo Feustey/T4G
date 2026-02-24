@@ -25,7 +25,7 @@ export const BenefitCard: React.FC<IBenefitCard> = ({
   isLink,
 }) => {
   const cardContent = () => {
-    if (userRole === 'ALUMNI') {
+    if (userRole === 'alumni') {
       return (
         <>
           <p className="c-benefit-card__pricing">

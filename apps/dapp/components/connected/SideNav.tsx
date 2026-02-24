@@ -48,8 +48,8 @@ export const SideNav: React.FC<ISideNav> = ({ lang, user }) => {
           width={243}
         />
         <ul role="menubar">
-          {user.role === 'ALUMNI' && renderMenuItems(lang.navigation.alumni)}
-          {user.role === 'STUDENT' && renderMenuItems(lang.navigation.student)}
+          {user.role === 'alumni' && renderMenuItems(lang.navigation.alumni)}
+          {user.role === 'mentee' && renderMenuItems(lang.navigation.student)}
         </ul>
       </div>
       

@@ -1,0 +1,139 @@
+---
+description: Workflow mentoring Token4Good — rôles, dashboard, flux mentor/mentee, référentiel des apprentissages
+alwaysApply: true
+---
+
+# Workflow Mentoring Token4Good
+
+> Specs détaillées : [docs/MENTORING_WORKFLOW_SPECS.md](mdc:docs/MENTORING_WORKFLOW_SPECS.md)
+
+## Modèle de Rôle
+
+Un user peut être **mentor ET mentee simultanément**. Le rôle n'est pas figé — c'est `is_mentor_active` qui conditionne les CTA, pas `role`.
+
+**Champs à ajouter sur `User`** (migration SQL + modèle Rust) :
+```rust
+pub mentor_topics: Vec<String>,          // slugs depuis learning_topics
+pub learning_topics: Vec<String>,        // slugs depuis learning_topics
+pub is_mentor_active: bool,
+pub mentor_bio: Option<String>,
+pub mentor_tokens_per_hour: Option<i32>,
+```
+
+## Alignement Rôles — Règle Stricte
+
+```typescript
+// ❌ INTERDIT — valeurs legacy frontend
+user.role === 'ALUMNI'
+user.role === 'STUDENT'
+
+// ✅ OBLIGATOIRE — aligner sur les valeurs sérialisées Rust
+user.role === 'alumni'
+user.role === 'mentee'
+user.is_mentor_active === true  // pour les CTA mentoring
+```
+
+## Référentiel des Apprentissages
+
+Tables : `learning_categories` + `learning_topics` (slug, name, level, category_id).
+Endpoints publics (pas d'auth) :
+- `GET /api/learning-categories`
+- `GET /api/learning-topics?category=<slug>`
+
+Ne jamais hardcoder les thèmes/catégories dans le frontend — toujours fetch depuis l'API.
+
+## Dashboard — Blocs CTA Mentoring
+
+```typescript
+// Logique d'affichage dans apps/dapp/pages/dashboard.tsx
+const showMentorBlock = user.is_mentor_active === true;
+const showMenteeBlock = user.role === 'mentee' || user.learning_topics?.length > 0;
+```
+
+- **Bloc mentor** → "Proposer une session" → `/mentoring/offer/new`
+  - Si `mentor_topics` vide : afficher prompt "Configure ton profil mentor" → `/profile#mentor`
+- **Bloc mentee** → "Trouver un mentor" + dropdown catégories → `/mentoring/find?category=<slug>`
+
+## Nouveaux Modèles Backend (Rust)
+
+```rust
+// MentoringOffer — offre publiée par un mentor
+pub struct MentoringOffer {
+    pub id: String,
+    pub mentor_id: String,
+    pub topic_slug: String,       // FK → learning_topics.slug
+    pub target_level: String,     // "beginner" | "intermediate" | "advanced"
+    pub duration_minutes: i32,
+    pub format: String,           // "video" | "text" | "async"
+    pub token_cost: i32,
+    pub status: OfferStatus,      // Open | Booked | Completed | Cancelled
+}
+
+// MentoringBooking — réservation par un mentee
+pub struct MentoringBooking {
+    pub id: String,
+    pub offer_id: String,
+    pub mentee_id: String,
+    pub scheduled_at: DateTime<Utc>,
+    pub status: BookingStatus,    // Pending | Confirmed | PendingCompletion | Completed | AutoCompleted | Disputed | Cancelled
+    pub mentee_confirmed: bool,
+    pub mentor_confirmed: bool,
+    pub tokens_escrowed: i32,     // T4G bloqués jusqu'à confirmation
+}
+```
+
+## Endpoints à Implémenter
+
+```
+# Offres mentor
+POST   /api/mentoring/offers
+GET    /api/mentoring/offers          (filtres: topic_slug, level, format, max_cost)
+GET    /api/mentoring/offers/:id
+PUT    /api/mentoring/offers/:id
+GET    /api/users/me/mentoring-offers
+
+# Réservations
+POST   /api/mentoring/bookings
+POST   /api/mentoring/bookings/:id/confirm
+POST   /api/mentoring/bookings/:id/dispute
+GET    /api/users/me/mentoring-bookings
+
+# Profil mentor
+PUT    /api/users/me/mentor-profile
+GET    /api/users/:id/mentor-profile
+```
+
+## Pages à Créer
+
+| Route | Description |
+|-------|-------------|
+| `/mentoring` | Hub (deux chemins : mentor / mentee) |
+| `/mentoring/find` | Catalogue offres avec filtres |
+| `/mentoring/offer/new` | Formulaire 3 étapes (mentor) |
+| `/mentoring/my-sessions` | Historique toutes sessions |
+| `/mentoring/session/:id` | Détail + CTA complétion/évaluation |
+
+## Séquestre T4G et Complétion
+
+- À la réservation : T4G **bloqués en séquestre** (pas transférés)
+- Libération : double confirmation mentor + mentee après la session
+- Auto-complétion si mentee ne répond pas sous **48h**
+- À la complétion : génération automatique d'une `MentoringProof` RGB
+
+## Attribution des T4G
+
+```
+T4G mentor = tokens_escrowed × (mentee_rating × level_multiplier)
+  contributeur (0-500 T4G)   → ×1.0
+  mentor       (500-1500 T4G) → ×1.1
+  expert       (1500+ T4G)    → ×1.2
+T4G mentee = +5 T4G (bonus apprentissage fixe)
+```
+
+## Ordre d'Implémentation
+
+1. **Phase 1** : Migrations SQL + endpoints référentiel + fix rôles frontend
+2. **Phase 2** : Blocs CTA dashboard + hub `/mentoring` + page `/mentoring/find`
+3. **Phase 3** : `MentoringOffer` backend + formulaire `/mentoring/offer/new`
+4. **Phase 4** : `MentoringBooking` + séquestre + confirmation + proof RGB
+5. **Phase 5** : Profil mentor, enrichissement `/directory`, notifications

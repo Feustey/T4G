@@ -99,7 +99,7 @@ export const AddStudies: React.FC<IAddStudies> = ({
         id={'graduatedYear'}
         lang={lang}
         labelText={
-          user.role === 'ALUMNI'
+          user.role === 'alumni'
             ? lang.components.addStudies.graduatedYear.alumni
             : lang.components.addStudies.graduatedYear.student
         }

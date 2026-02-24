@@ -1,3 +1,4 @@
 import { ROLE_TYPE } from '../lib/types';
 
-export type UserRoleType = ROLE_TYPE; // = 'ALUMNI' | 'SERVICE_PROVIDER' | 'STUDENT' | 'SP';
+// Valeurs alignées sur les rôles sérialisés par le backend Rust
+export type UserRoleType = ROLE_TYPE; // = 'alumni' | 'mentee' | 'mentor' | 'service_provider' | 'admin'

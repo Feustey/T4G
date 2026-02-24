@@ -1,6 +1,7 @@
 pub mod database_services;
 pub mod database_simplified;
 pub mod dazno;
+pub mod mentoring_completion;
 pub mod rgb;
 pub mod rgb_native;
 

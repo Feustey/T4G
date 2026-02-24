@@ -34,7 +34,7 @@ export const PendingTransactionCard: React.FC<IPendingTransactionCard> = ({
           {pendingTransaction?.provider?.lastname}.
         </p>
       </div>
-      {userRole === 'STUDENT' && (
+      {userRole === 'mentee' && (
         <ul className="u-margin--none u-width--fill">
           <li className="u-width--fill u-margin-b--m">
             Once your session is completed, you need to update it for your
@@ -56,7 +56,7 @@ export const PendingTransactionCard: React.FC<IPendingTransactionCard> = ({
           iconStart="close"
           className="u-margin--none"
         />
-        {userRole === 'STUDENT' && (
+        {userRole === 'mentee' && (
           <BookingButton
             cssClassName={''}
             serviceId={`${pendingTransaction?.dealId}`}

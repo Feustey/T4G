@@ -83,7 +83,7 @@ export const MobileMenu: React.FC<IMobileMenu> = ({ lang, user }) => {
             iconName={'close'}
           />
           <ul role="menubar" className="c-mobile-menu__menubar__menu-container">
-            {user.role === 'ALUMNI' &&
+            {user.role === 'alumni' &&
               lang.navigation.alumni.map((link, i) => (
                 <li role="none" key={i}>
                   <MenuItem
@@ -96,7 +96,7 @@ export const MobileMenu: React.FC<IMobileMenu> = ({ lang, user }) => {
                   />
                 </li>
               ))}
-            {user.role === 'STUDENT' &&
+            {user.role === 'mentee' &&
               lang.navigation.student.map((link, i) => (
                 <li key={i}>
                   <MenuItem

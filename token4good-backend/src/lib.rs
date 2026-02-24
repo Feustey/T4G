@@ -114,6 +114,15 @@ pub fn build_router(state: AppState) -> Router {
             )),
         )
         .nest(
+            "/api/mentoring",
+            routes::mentoring_offers::mentoring_offer_routes().layer(
+                axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    crate::middleware::auth::auth_middleware,
+                ),
+            ),
+        )
+        .nest(
             "/api/users",
             routes::users::user_routes()
                 .layer(axum::middleware::from_fn(
@@ -138,6 +147,8 @@ pub fn build_router(state: AppState) -> Router {
                 crate::middleware::auth::auth_middleware,
             )),
         )
+        // Référentiel apprentissages — public, pas d'auth
+        .nest("/api/learning", routes::learning::learning_routes())
         .nest(
             "/service-categories",
             routes::service_categories::service_category_routes(),

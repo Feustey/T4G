@@ -39,7 +39,7 @@ export default function ConnectedLayout({
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (!proposedServices && user.role === 'ALUMNI') {
+    if (!proposedServices && user.role === 'alumni') {
       dispatch(fetchProposedServicesState());
     }
     if (!userBalance) {

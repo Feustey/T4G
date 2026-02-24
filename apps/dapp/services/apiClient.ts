@@ -363,6 +363,97 @@ class APIClient {
   async healthCheck() {
     return this.request<HealthCheckResponse>('/health');
   }
+
+  // ============= RÉFÉRENTIEL APPRENTISSAGES (public) =============
+
+  async getLearningCategories() {
+    return this.request<LearningCategory[]>('/api/learning/categories');
+  }
+
+  async getLearningTopics(params?: { category?: string; level?: string }) {
+    const query = params
+      ? '?' + new URLSearchParams(
+          Object.entries(params)
+            .filter(([, v]) => v !== undefined)
+            .map(([k, v]) => [k, String(v)])
+        ).toString()
+      : '';
+    return this.request<LearningTopic[]>(`/api/learning/topics${query}`);
+  }
+
+  // ============= OFFRES MENTORING =============
+
+  async getMentoringOffers(filters?: MentoringOffersFilter) {
+    const query = filters
+      ? '?' + new URLSearchParams(
+          Object.entries(filters)
+            .filter(([, v]) => v !== undefined)
+            .map(([k, v]) => [k, String(v)])
+        ).toString()
+      : '';
+    return this.request<MentoringOffer[]>(`/api/mentoring/offers${query}`);
+  }
+
+  async getMentoringOffer(offerId: string) {
+    return this.request<MentoringOffer>(`/api/mentoring/offers/${offerId}`);
+  }
+
+  async createMentoringOffer(data: CreateMentoringOfferRequest) {
+    return this.request<MentoringOffer>('/api/mentoring/offers', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateMentoringOffer(offerId: string, data: Partial<CreateMentoringOfferRequest>) {
+    return this.request<MentoringOffer>(`/api/mentoring/offers/${offerId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getMyMentoringOffers() {
+    return this.request<MentoringOffer[]>('/api/users/me/mentoring-offers');
+  }
+
+  async getMyMentoringBookings() {
+    return this.request<MentoringBooking[]>('/api/users/me/mentoring-bookings');
+  }
+
+  async getMentoringBooking(bookingId: string) {
+    return this.request<MentoringBooking>(`/api/mentoring/bookings/${bookingId}`);
+  }
+
+  async createMentoringBooking(data: {
+    offer_id: string;
+    scheduled_at: string;
+    notes?: string;
+  }) {
+    return this.request<MentoringBooking>('/api/mentoring/bookings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async confirmMentoringBooking(
+    bookingId: string,
+    data: { rating?: number; comment?: string; learned_skills?: string[] }
+  ) {
+    return this.request<MentoringBooking>(`/api/mentoring/bookings/${bookingId}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async disputeMentoringBooking(bookingId: string) {
+    return this.request<void>(`/api/mentoring/bookings/${bookingId}/dispute`, {
+      method: 'POST',
+    });
+  }
+
+  async getSessionFull(bookingId: string) {
+    return this.request<SessionFull>(`/api/mentoring/sessions/${bookingId}`);
+  }
 }
 
 // Singleton instance
@@ -373,19 +464,128 @@ export const apiClient = new APIClient();
 export interface User {
   id: string;
   email: string;
-  firstname: string; // Backend utilise "firstname" sans underscore
-  lastname: string;  // Backend utilise "lastname" sans underscore
-  first_name?: string; // Rétrocompatibilité
-  last_name?: string;  // Rétrocompatibilité
-  role: string; // Backend renvoie "mentee", "mentor", etc.
+  firstname: string;
+  lastname: string;
+  first_name?: string;
+  last_name?: string;
+  role: string;
   program?: string;
   graduated_year?: number;
   avatar_url?: string;
   bio?: string;
   created_at?: string;
   updated_at?: string;
-  is_onboarded?: boolean; // Optionnel car le backend ne le renvoie pas toujours
-  lightning_address?: string; // Ajouté car le backend le renvoie
+  is_onboarded?: boolean;
+  lightning_address?: string;
+  // Champs mentoring
+  is_mentor_active?: boolean;
+  mentor_topics?: string[];
+  learning_topics?: string[];
+  mentor_bio?: string;
+  mentor_tokens_per_hour?: number;
+  score?: number;
+}
+
+// ============= Types Référentiel Apprentissages =============
+
+export interface LearningCategory {
+  id: string;
+  slug: string;
+  name: string;
+  color?: string;
+  icon_key?: string;
+  sort_order: number;
+}
+
+export interface LearningTopic {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  tags: string[];
+  icon_key?: string;
+  sort_order: number;
+  category?: LearningCategory;
+}
+
+// ============= Types Offres Mentoring =============
+
+export interface MentoringOffer {
+  id: string;
+  mentor_id: string;
+  mentor?: Pick<User, 'id' | 'firstname' | 'lastname' | 'avatar_url' | 'score' | 'mentor_bio'>;
+  topic_slug: string;
+  topic?: LearningTopic;
+  target_level: 'beginner' | 'intermediate' | 'advanced';
+  description?: string;
+  duration_minutes: number;
+  format: 'video' | 'text' | 'async';
+  token_cost: number;
+  availability: TimeSlot[];
+  status: 'open' | 'booked' | 'completed' | 'cancelled';
+  average_rating?: number;
+  sessions_count?: number;
+  created_at: string;
+}
+
+export interface TimeSlot {
+  date: string;       // ISO8601
+  duration_minutes: number;
+}
+
+export interface CreateMentoringOfferRequest {
+  topic_slug: string;
+  target_level: 'beginner' | 'intermediate' | 'advanced';
+  description?: string;
+  duration_minutes: number;
+  format: 'video' | 'text' | 'async';
+  token_cost: number;
+  availability: TimeSlot[];
+}
+
+export interface MentoringOffersFilter {
+  topic_slug?: string;
+  category?: string;
+  level?: string;
+  format?: string;
+  max_cost?: number;
+}
+
+export interface MentoringBooking {
+  id: string;
+  offer_id: string;
+  mentee_id: string;
+  scheduled_at: string;
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'pending_completion'
+    | 'completed'
+    | 'auto_completed'
+    | 'disputed'
+    | 'cancelled';
+  mentee_confirmed: boolean;
+  mentor_confirmed: boolean;
+  tokens_escrowed: number;
+  tokens_awarded_mentor?: number;
+  tokens_awarded_mentee?: number;
+  mentee_rating?: number;
+  mentor_rating?: number;
+  mentee_comment?: string;
+  mentor_comment?: string;
+  learned_skills: string[];
+  rgb_contract_id?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Vue enrichie d'une session (booking + offre + utilisateurs) */
+export interface SessionFull extends MentoringBooking {
+  offer: MentoringOffer;
+  mentor: Pick<User, 'id' | 'firstname' | 'lastname' | 'avatar_url' | 'mentor_bio'>;
+  mentee: Pick<User, 'id' | 'firstname' | 'lastname' | 'avatar_url'>;
 }
 
 export interface CreateUserRequest {

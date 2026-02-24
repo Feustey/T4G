@@ -80,22 +80,8 @@ export function Onboarding({
   const locale = router.locale as LocaleType;
   const dispatchRedux = useAppDispatch();
   
-  // Utiliser l'utilisateur depuis AuthContext (priorité) ou props (fallback)
   const { user: authUser } = useAuth();
-  let user = authUser || userProp;
-  
-  // Conversion des rôles backend vers format frontend
-  if (user && user.role) {
-    const roleMap = {
-      'mentee': 'STUDENT',
-      'mentor': 'ALUMNI',
-      'admin': 'ADMIN',
-    };
-    user = {
-      ...user,
-      role: roleMap[user.role.toLowerCase()] || user.role.toUpperCase(),
-    } as any;
-  }
+  const user = authUser || userProp;
   
   const baseExperience = baseExperiences?.[0] || {};
 
@@ -124,7 +110,12 @@ export function Onboarding({
   const [walletStep, setWalletStep] = useState<'idle' | 'creating' | 'done'>('idle');
   const noIndex = useIndexing(false);
 
-  const totalSteps = user?.role === 'ALUMNI' ? 3 : 2;
+  // Étape 0 = sélection rôle (toujours affichée avant les autres étapes)
+  const [mentorMode, setMentorMode] = useState<'none' | 'mentee' | 'mentor' | 'both'>('none');
+  const [selectedMentorTopics, setSelectedMentorTopics] = useState<string[]>([]);
+  const [selectedLearningTopics, setSelectedLearningTopics] = useState<string[]>([]);
+
+  const totalSteps = user?.role === 'alumni' ? 4 : 3; // +1 pour l'étape rôle mentoring
 
   // 4. Simplifier la fonction handleChange
   const handleChange = (value: string | boolean | number, id: keyof State) => {
@@ -148,7 +139,7 @@ export function Onboarding({
     return isStudentFormValid && experienceComplete && !state.dateError;
   }, [isStudentFormValid, state]);
 
-  const isFormValid = user?.role === 'STUDENT' ? isStudentFormValid : isAlumniFormValid;
+  const isFormValid = user?.role === 'alumni' ? isAlumniFormValid : isStudentFormValid;
 
   async function finishUserOnboarding(e: React.MouseEvent<HTMLElement>) {
     e.preventDefault();
@@ -165,8 +156,13 @@ export function Onboarding({
           school: state.school,
         }),
         setUserAvatar(state.avatar, user.id),
-        apiClient.updateUser(user.id, { is_onboarded: true }),
-        ...(user.role === 'ALUMNI'
+        apiClient.updateUser(user.id, {
+          is_onboarded: true,
+          is_mentor_active: mentorMode === 'mentor' || mentorMode === 'both',
+          mentor_topics: selectedMentorTopics,
+          learning_topics: selectedLearningTopics,
+        } as any),
+        ...(user.role === 'alumni'
           ? [
               setUserExperience({
                 title: state.title,
@@ -272,9 +268,9 @@ export function Onboarding({
     );
   }
 
-  const stepTitles = user.role === 'ALUMNI'
-    ? ['Photo', lang.page.onboarding.main.studies.title, lang.page.onboarding.main.experience.title]
-    : ['Photo', lang.page.onboarding.main.studies.title];
+  const stepTitles = user.role === 'alumni'
+    ? ['Rôle', 'Photo', lang.page.onboarding.main.studies.title, lang.page.onboarding.main.experience.title]
+    : ['Rôle', 'Photo', lang.page.onboarding.main.studies.title];
 
   const isLastStep = currentStep === totalSteps;
 
@@ -334,8 +330,43 @@ export function Onboarding({
 
           <form action="" className="u-d--flex u-flex-column u-gap--6">
 
-            {/* Étape 1 : Photo */}
+            {/* Étape 1 : Sélection du rôle mentoring */}
             {currentStep === 1 && (
+              <div className="u-d--flex u-flex-column u-gap--6">
+                <h2 className="u-text--center heading-3">Comment veux-tu participer ?</h2>
+                <p className="u-text--center" style={{ color: 'var(--color-text-secondary, #666)', margin: 0 }}>
+                  Tu pourras modifier ce choix depuis ton profil.
+                </p>
+                <div className="u-d--flex u-flex-column u-gap--s">
+                  {([
+                    { key: 'mentee', label: 'Je veux apprendre', desc: 'Trouver un mentor sur un sujet précis' },
+                    { key: 'mentor', label: 'Je veux transmettre', desc: 'Proposer des sessions de mentoring' },
+                    { key: 'both',   label: 'Les deux à la fois', desc: 'Apprendre et enseigner selon les sujets' },
+                  ] as const).map(({ key, label, desc }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setMentorMode(key)}
+                      style={{
+                        padding: '1rem',
+                        borderRadius: '0.5rem',
+                        border: `2px solid ${mentorMode === key ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                        background: mentorMode === key ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <p style={{ fontWeight: 600, margin: 0 }}>{label}</p>
+                      <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-secondary, #666)' }}>{desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Étape 2 : Photo */}
+            {currentStep === 2 && (
               <div className="u-d--flex u-flex-column u-align-items-center u-gap--6">
                 <Message variant={'info'}>
                   <p>
@@ -366,8 +397,8 @@ export function Onboarding({
               </div>
             )}
 
-            {/* Étape 2 : Formation */}
-            {currentStep === 2 && (
+            {/* Étape 3 : Formation */}
+            {currentStep === 3 && (
               <div className="u-d--flex u-flex-column u-gap--6">
                 <h2 className="u-text--center heading-3">{lang.page.onboarding.main.studies.title}</h2>
                 <AddStudies
@@ -383,8 +414,8 @@ export function Onboarding({
               </div>
             )}
 
-            {/* Étape 3 : Expérience (ALUMNI uniquement) */}
-            {currentStep === 3 && user.role === 'ALUMNI' && (
+            {/* Étape 4 : Expérience (alumni uniquement) */}
+            {currentStep === 4 && user.role === 'alumni' && (
               <div className="u-d--flex u-flex-column u-gap--6">
                 <h2 className="u-text--center heading-3">{lang.page.onboarding.main.experience.title}</h2>
                 <AddExperiences
@@ -437,7 +468,10 @@ export function Onboarding({
                   <Button
                     type="button"
                     variant="primary"
-                    disabled={currentStep === 2 && !isStudentFormValid}
+                    disabled={
+                      (currentStep === 1 && mentorMode === 'none') ||
+                      (currentStep === 3 && !isStudentFormValid)
+                    }
                     label="Continuer"
                     lang={lang}
                     onClick={(e: React.MouseEvent<HTMLElement>) => {
@@ -470,7 +504,7 @@ export function Onboarding({
 export default Onboarding;
 
 Onboarding.auth = true;
-Onboarding.role = ['ALUMNI', 'STUDENT'];
+Onboarding.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export const getServerSideProps: GetServerSideProps = async function (context) {
   // Authentification gérée côté client avec AuthContext JWT
@@ -485,7 +519,7 @@ export const getServerSideProps: GetServerSideProps = async function (context) {
         email: '',
         firstname: '',
         lastname: '',
-        role: 'STUDENT',
+        role: 'mentee',
       },
     },
   };

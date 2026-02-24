@@ -84,7 +84,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
           className="o-layout--grid--auto"
           style={{ '--grid-min-size': `300px` } as React.CSSProperties}
         >
-          {user.role === 'ALUMNI' ? (
+          {user.role === 'alumni' ? (
             <>
               {categorieList && categorieList.map((categorie: CategoryType, index: number) => (
                 <ServicesList

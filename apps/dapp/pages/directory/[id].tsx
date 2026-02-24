@@ -92,7 +92,7 @@ export function ProfilePage({
                 )}
 
                 <div className="u-d--flex flex-wrap">
-                  {profile.role === "ALUMNI" && (
+                  {(profile.role === "alumni" || profile.role === "mentor") && (
                     <>
                       <div className="w-full lg:w-1/2 lg:pr-14">
                         <h2 className="subtitle heading-4 u-d--flex u-align-items-center u-gap--s u-margin-b--m">
