@@ -71,6 +71,9 @@ fn build_cors_layer() -> CorsLayer {
         "https://token4good.vercel.app".parse().unwrap(),               // Production Vercel
         "https://t4g.dazno.de".parse().unwrap(),                        // Production custom
         "https://apirust-production.up.railway.app".parse().unwrap(),   // Railway self
+        "https://www.token-for-good.com".parse().unwrap(),              // Production token-for-good
+        "https://token-for-good.com".parse().unwrap(),                  // Production token-for-good (sans www)
+        "https://app.token-for-good.com".parse().unwrap(),              // Production app token-for-good
     ];
 
     // Note: allow_credentials(true) est incompatible avec allow_headers(Any).
