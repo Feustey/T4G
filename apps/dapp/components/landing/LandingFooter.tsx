@@ -51,7 +51,7 @@ export function LandingFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.name}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="landing-social-icon inline-flex items-center justify-center w-10 h-10 text-gray-400 hover:text-white transition-colors"
                 >
                   {socialIcons[s.icon]}
                 </a>

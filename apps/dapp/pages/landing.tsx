@@ -130,6 +130,8 @@ export default function LandingPage() {
           .landing-page .landing-icon-sm svg,
           .landing-page .landing-icon-md svg { flex-shrink: 0; width: 1.25rem !important; height: 1.25rem !important; max-width: 2.5rem; max-height: 2.5rem; }
           .landing-page .landing-icon-md svg { width: 1.5rem !important; height: 1.5rem !important; }
+          .landing-page .landing-social-icon svg { flex-shrink: 0; width: 1.25rem !important; height: 1.25rem !important; max-width: 1.5rem; max-height: 1.5rem; }
+          .landing-page .landing-nav-icon svg { flex-shrink: 0; width: 1.25rem !important; height: 1.25rem !important; max-width: 1.5rem; max-height: 1.5rem; }
           .landing-page .landing-partner-img { max-width: 180px; max-height: 100px; object-fit: contain; }
           .landing-page .landing-community-img { max-width: 100%; max-height: 300px; }
         `,

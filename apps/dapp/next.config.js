@@ -173,7 +173,12 @@ const nextConfig = {
   
   // Redirections
   async redirects() {
-    return [];
+    return [
+      // Ancienne landing statique Webflow → landing React
+      { source: '/landing/index.html', destination: '/', permanent: true },
+      { source: '/fr/landing/index.html', destination: '/fr', permanent: true },
+      { source: '/en/landing/index.html', destination: '/en', permanent: true },
+    ];
   },
   
   // Rewrites pour le backend Rust et landing page
