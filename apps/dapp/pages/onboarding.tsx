@@ -83,7 +83,8 @@ export function Onboarding({
   const { user: authUser } = useAuth();
   const user = authUser || userProp;
   
-  const baseExperience = baseExperiences?.[0] || {};
+  type ExpShape = { title?: string; company?: string; city?: string; country?: string; industry?: string; from?: string | Date; to?: string | Date; isCurrent?: boolean };
+  const baseExperience: ExpShape = baseExperiences?.[0] ?? {};
 
   // 3. Initialiser l'état avec useReducer
   const initialState: State = {
@@ -221,7 +222,7 @@ export function Onboarding({
           <title>{lang.page.onboarding.head.title}</title>
           {noIndex}
         </Head>
-        <Spinner lang={lang} spinnerText={lang?.utils?.redirecting || 'Redirection...'} />
+        <Spinner lang={lang} spinnerText={(lang?.utils as { redirecting?: string })?.redirecting || 'Redirection...'} />
       </>
     );
   }

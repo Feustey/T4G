@@ -111,9 +111,10 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
         const experiencesValue =
           experiences.status === 'fulfilled' ? experiences.value : [];
 
-        const exp = experiencesValue?.[0] || {};
-        const fromDate = exp?.from ? new Date(exp.from) : null;
-        const toDate = exp?.to ? new Date(exp.to) : null;
+        type ExpShape = { from?: string | Date; to?: string | Date; title?: string; company?: string; city?: string; country?: string; industry?: string; isCurrent?: boolean };
+        const exp: ExpShape = experiencesValue?.[0] ?? {};
+        const fromDate = exp.from ? new Date(exp.from) : null;
+        const toDate = exp.to ? new Date(exp.to) : null;
 
         dispatch({
           type: 'RESET',

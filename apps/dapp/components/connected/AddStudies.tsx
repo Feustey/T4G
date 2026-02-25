@@ -28,7 +28,7 @@ export interface IAddStudies {
   topic: UserCVType['topic'];
   graduatedYear: UserCVType['graduatedYear'];
   school: UserCVType['school'];
-  user: UserType;
+  user: UserType | { role: string };
 }
 
 export const AddStudies: React.FC<IAddStudies> = ({

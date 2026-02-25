@@ -1,7 +1,7 @@
 import { CategoryType, LangType } from '../../types';
+import type { User } from '../../services/apiClient';
 import { ButtonIcon, CustomLink, Icons, MenuItem } from '../';
 import { useRouter } from 'next/router';
-import { UserType } from '../../lib/shared-types';
 import { useRef, useState, useEffect } from 'react';
 import { trapFocus } from 'apps/dapp/services';
 import { apiFetcher } from 'apps/dapp/services/config';
@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export interface IMobileMenu {
   lang: LangType;
-  user: UserType;
+  user: User;
 }
 
 export const MobileMenu: React.FC<IMobileMenu> = ({ lang, user }) => {  

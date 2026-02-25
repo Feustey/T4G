@@ -245,7 +245,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
         />
       )}
       {dashboardAccessCount?.dashboardAccessCount === 1 && (
-        <FirstDashboardAccessModal userRole={user.role} lang={lang} />
+        <FirstDashboardAccessModal userRole={user.role} />
       )}
 
       <ConnectedLayout user={user} lang={lang}>
@@ -369,7 +369,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                         )}
                       </div>
                       <span className="c-link--icon" style={{ fontSize: '13px', color: 'var(--app-comunity-color)' }}>
-                        {lang.utils.seeAll} →
+                        {(lang.utils as { seeAll?: string }).seeAll ?? 'Voir tout'} →
                       </span>
                     </div>
                     <ul role="list" className="c-notifications" style={{ width: '100%' }}>

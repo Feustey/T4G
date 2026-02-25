@@ -6,7 +6,7 @@ import { UserRoleType } from '../../types';
 import { useLanguage } from 'apps/dapp/hooks';
 
 export interface IFirstDashboardAccessModal {
-  userRole: UserRoleType;
+  userRole: UserRoleType | string;
 }
 
 export const FirstDashboardAccessModal: React.FC<IFirstDashboardAccessModal> = ({ userRole }) => {

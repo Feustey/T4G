@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { LangType, UserType } from '../../types';
+import { LangType } from '../../types';
+import type { User } from '../../services/apiClient';
 import { useMediaQuery } from 'apps/dapp/hooks';
 import Image from 'next/image';
 import { Avatar, MobileMenu } from '../';
@@ -10,7 +11,7 @@ import { useRouter } from 'next/router';
 export interface IHeaderConnected {
   lang: LangType;
   userBalance: number;
-  user: UserType;
+  user: User;
 }
 
 export const HeaderConnected: React.FC<IHeaderConnected> = ({

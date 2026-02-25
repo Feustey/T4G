@@ -35,7 +35,7 @@ const Page: React.FC<Components.Admin.ServiceDeliveryPage.Props> &
       services?.sort(function (a, b) {
         return new Date(b.ts).getTime() - new Date(a.ts).getTime();
       });
-      const dealIds = [...new Set(services?.map((objet) => objet.dealId))];
+      const dealIds = Array.from(new Set(services?.map((objet) => objet.dealId) ?? []));
 
       for (let i = 0; i < dealIds.length; i++) {
         const dealId = dealIds[i];

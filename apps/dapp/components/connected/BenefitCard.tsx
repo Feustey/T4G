@@ -8,7 +8,7 @@ import { capitalise } from 'apps/dapp/services';
 export interface IBenefitCard {
   service: ReceiveServiceType;
   type: 'SERVICES' | 'BENEFITS';
-  userRole: UserRoleType;
+  userRole: UserRoleType | string;
   lang: LangType; // Ajout de la prop lang pour l'i18n
   categorieName?: string;
   parent?: string;

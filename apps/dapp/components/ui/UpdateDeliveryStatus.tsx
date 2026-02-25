@@ -3,6 +3,7 @@ import React from "react";
 export interface UpdateDeliveryStatusProps {
   transaction?: any;
   mutate?: () => void;
+  onUpdate?: () => void;
 }
 
 export const UpdateDeliveryStatus: React.FC<UpdateDeliveryStatusProps> = () => {

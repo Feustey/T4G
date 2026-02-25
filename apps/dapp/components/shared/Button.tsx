@@ -5,7 +5,7 @@ import { Icons, IconsT4G } from './Icons';
 import { Spinner } from '../index';
 import { LangType } from '../../lib/shared-types';
 
-export interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement>, 'lang'> {
   variant?: VariantType;
   size?: SizeType;
   label: string;

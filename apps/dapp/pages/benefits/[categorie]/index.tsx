@@ -339,6 +339,7 @@ export function BenefitPage({
                   service={filteredService}
                   type={'BENEFITS'}
                   userRole={user.role}
+                  lang={lang}
                   isLink={true}
                 />
               )

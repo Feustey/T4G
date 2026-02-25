@@ -21,7 +21,15 @@ module.exports = {
   ],
   darkMode: 'media',
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        t4g: {
+          blue: { 400: '#7e7bff', 500: '#6a5bf9', 600: '#5b3dee' },
+          green: { 400: '#52b580', 500: '#36ae72' },
+          orange: { 500: '#ff8924' },
+        },
+      },
+    },
   },
   variants: {
     extend: {},

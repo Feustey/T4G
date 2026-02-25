@@ -7,7 +7,7 @@ export interface IPendingTransactionCard {
   pendingTransaction: PendingTransactionType;
   lang: LangType;
   onClick: (type: 'CONFIRM' | 'CANCEL') => void;
-  userRole: UserType['role'];
+  userRole: UserType['role'] | string;
 }
 
 export const PendingTransactionCard: React.FC<IPendingTransactionCard> = ({

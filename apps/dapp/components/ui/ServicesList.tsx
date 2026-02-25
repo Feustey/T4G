@@ -2,6 +2,13 @@ import React from "react";
 
 export interface ServicesListProps {
   services?: any[];
+  serviceId?: string;
+  serviceCategory?: string;
+  desc?: string;
+  list?: any[];
+  title?: string;
+  icon?: string;
+  annotations?: Array<{ name: string; price: number; unit: string }>;
 }
 
 export const ServicesList: React.FC<ServicesListProps> = ({ services = [] }) => {

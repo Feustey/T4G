@@ -56,7 +56,7 @@ export const StudentBenefitPage: React.FC<IStudentBenefitPage> = ({
         <BenefitCard
           service={benefit}
           type="BENEFITS"
-          userRole="STUDENT"
+          userRole="mentee"
           lang={lang}
           isLink={false}
         />

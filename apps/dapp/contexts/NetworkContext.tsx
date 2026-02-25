@@ -32,11 +32,14 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({ children }) =>
 
   const checkAPI = async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       const response = await fetch(`${API_BASE_URL}/health`, {
         method: 'HEAD',
         cache: 'no-cache',
-        signal: AbortSignal.timeout(5000), // Timeout 5s
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       setApiAvailable(response.ok);
       console.log(`✅ API disponible: ${response.ok}`);
     } catch (error) {

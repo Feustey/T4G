@@ -132,14 +132,8 @@ export default Page;
 Page.auth = true;
 Page.role = ['SERVICE_PROVIDER'];
 
-export const getServerSideProps: GetServerSideProps = async function (context) {
-  const { props } = await getPageProps(context);
-
+export const getServerSideProps: GetServerSideProps = async function () {
   return {
-    props: {
-      user: {
-        ...(props.user ?? {}),
-      },
-    },
+    props: {},
   };
 };

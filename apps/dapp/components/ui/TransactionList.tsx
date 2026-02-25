@@ -2,6 +2,7 @@ import React from "react";
 
 export interface TransactionListProps {
   transactions?: any[];
+  isLoading?: boolean;
 }
 
 export const TransactionList: React.FC<TransactionListProps> = ({ transactions = [] }) => {

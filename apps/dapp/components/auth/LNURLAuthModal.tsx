@@ -7,7 +7,7 @@ interface LNURLAuthModalProps {
 
 type ModalStatus = 'loading' | 'waiting' | 'scanning' | 'error' | 'expired';
 
-export default function LNURLAuthModal({ onSuccess, onClose }: LNURLAuthModalProps) {
+const LNURLAuthModal: React.FC<LNURLAuthModalProps> = ({ onSuccess, onClose }) => {
   const [status, setStatus] = useState<ModalStatus>('loading');
   const [lnurl, setLnurl] = useState<string | null>(null);
   const [k1, setK1] = useState<string | null>(null);
@@ -215,4 +215,6 @@ export default function LNURLAuthModal({ onSuccess, onClose }: LNURLAuthModalPro
       </div>
     </div>
   );
-}
+};
+
+export default LNURLAuthModal;

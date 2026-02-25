@@ -9,5 +9,8 @@ export async function getCVServerSide(): Promise<UserCVType> {
     startDate: '',
     endDate: '',
     experiences: [],
+    program: '',
+    topic: '',
+    graduatedYear: '',
   } as UserCVType;
 }

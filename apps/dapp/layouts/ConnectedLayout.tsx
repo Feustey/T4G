@@ -1,4 +1,8 @@
-import { LangType, UserType } from '../types';
+import { LangType } from '../types';
+import type { User } from '../services/apiClient';
+
+/** User avec champs optionnels legacy (wallet) pour ConnectedLayout */
+type LayoutUser = User & { wallet?: string };
 import GlobalLayout from './GlobalLayout';
 import { useAppDispatch, useAppSelector, useMediaQuery } from '../hooks';
 import {
@@ -22,7 +26,7 @@ import {
 export interface IConnectedLayout {
   lang: LangType;
   children: React.ReactNode;
-  user: UserType;
+  user: LayoutUser | User;
   classNameCSS?: string;
 }
 
@@ -56,7 +60,7 @@ export default function ConnectedLayout({
   const isMobile = useMediaQuery(992);
 
   const WS_URL = getConfig().publicRuntimeConfig.updatesUrl;
-  useWebSocket(user.wallet ? `${WS_URL}/wallet/${user.wallet}` : null, {
+  useWebSocket((user as LayoutUser).wallet ? `${WS_URL}/wallet/${(user as LayoutUser).wallet}` : null, {
     onOpen: () => {
       console.log('connected to updates');
     },

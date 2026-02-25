@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { CategoryType, LangType, SessionType } from '../../types';
+import type { User } from '../../services/apiClient';
 import { CustomLink, Icons, IconsT4G, MenuItem } from '../';
 import { useRouter } from 'next/router';
-import { UserType } from '../../lib/shared-types';
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export interface ISideNav {
   lang: LangType;
-  user: UserType;
+  user: User;
 }
 
 export const SideNav: React.FC<ISideNav> = ({ lang, user }) => {

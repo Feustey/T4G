@@ -2,6 +2,9 @@ import React from "react";
 
 export interface ServiceCreateFormProps {
   onSubmit?: (data: any) => void;
+  serviceCategories?: unknown[];
+  provider?: string;
+  onServiceCreated?: () => void;
 }
 
 export const ServiceCreateForm: React.FC<ServiceCreateFormProps> = () => {

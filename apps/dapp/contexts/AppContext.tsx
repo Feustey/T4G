@@ -14,6 +14,7 @@ export type INotification = {
 export type IModal = {
   name?: string;
   component?: React.ReactNode;
+  widthClass?: string;
 } | null;
 
 export type IRightPanel = {

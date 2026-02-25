@@ -13,11 +13,11 @@ export const lnurlChallenges = new Map<string, {
 // Nettoyage des challenges expirés
 setInterval(() => {
   const now = Date.now();
-  for (const [k1, data] of lnurlChallenges.entries()) {
+  Array.from(lnurlChallenges.entries()).forEach(([k1, data]) => {
     if (data.expires < now) {
       lnurlChallenges.delete(k1);
     }
-  }
+  });
 }, 30_000);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

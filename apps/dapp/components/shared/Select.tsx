@@ -8,7 +8,7 @@ export interface ISelectOption {
   disabled?: boolean;
 }
 
-export interface ISelect extends HTMLAttributes<HTMLSelectElement> {
+export interface ISelect extends Omit<HTMLAttributes<HTMLSelectElement>, 'lang'> {
   isDisabled?: boolean;
   isErrored?: boolean;
   errorText?: string;

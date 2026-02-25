@@ -2,6 +2,9 @@ import React from "react";
 
 export interface ServiceCatalogueListProps {
   services?: any[];
+  serviceCategories?: unknown[];
+  provider?: string;
+  lang?: unknown;
 }
 
 export const ServiceCatalogueList: React.FC<ServiceCatalogueListProps> = ({ services = [] }) => {

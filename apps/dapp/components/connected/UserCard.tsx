@@ -2,14 +2,17 @@ import { UserCVType, UserRoleType } from 'apps/dapp/types';
 import { Avatar } from './Avatar';
 import Link from 'next/link';
 import { capitalise } from 'apps/dapp/services';
-import { User } from '../../lib/types';
+import type { User } from 'apps/dapp/services/apiClient';
+
+/** User shape for directory/cards - API may return avatar (legacy) or avatar_url */
+type UserCardUser = User & { avatar?: string; about?: string };
 import useSwr from 'swr';
 import { apiFetcher } from 'apps/dapp/services/config';
 import { Skeleton } from '../shared/Skeleton'; // Supposant que vous avez un composant Skeleton
 
 export interface IUserCard {
   userId: string;
-  userRole: UserRoleType;
+  userRole: UserRoleType | string;
   categorieName?: string;
   parent?: string;
   isLink: boolean;
@@ -26,7 +29,7 @@ export const UserCard: React.FC<IUserCard> = ({
     userId ? `/users/${userId}/cv` : null,
     apiFetcher
   );
-  const { data: user, error: userError, isLoading: isUserLoading } = useSwr<User>(
+  const { data: user, error: userError, isLoading: isUserLoading } = useSwr<UserCardUser>(
     userId ? `/users/${userId}` : null,
     apiFetcher
   );
@@ -77,7 +80,7 @@ export const UserCard: React.FC<IUserCard> = ({
           firstname={user.firstname}
           lastname={user.lastname}
           isLoading={false}
-          avatar={user.avatar}
+          avatar={user.avatar ?? user.avatar_url}
           size="lg"
         />
         <p className="c-benefit-card__avatar-container__program">
@@ -114,8 +117,8 @@ export const UserCard: React.FC<IUserCard> = ({
 UserCard.displayName = 'UserCard';
 
 export interface IUserCardLink {
-  user: User;
-  userRole: UserRoleType;
+  user: UserCardUser;
+  userRole: UserRoleType | string;
   categorieName?: string; // Rendu optionnel car non utilisé dans l'URL
   parent: string;
   isLink: boolean;

@@ -325,6 +325,9 @@ export const useOAuth = () => {
     return false;
   };
 
+  /** Désactivé - Supabase remplacé par OAuth (t4g, LinkedIn, Dazno). Retourne false pour rediriger vers login. */
+  const verifySupabaseSession = async () => false;
+
   return {
     loginWithDazno,
     loginWithLinkedIn,
@@ -334,5 +337,6 @@ export const useOAuth = () => {
     handleOAuthCallback,
     checkExistingDaznoSession,
     initAuth,
+    verifySupabaseSession,
   };
 };

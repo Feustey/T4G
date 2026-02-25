@@ -1,6 +1,5 @@
-import { UserRoleType } from './userRoleType';
-
 export type AuthPageType = {
   auth?: boolean;
-  role?: UserRoleType[];
+  /** Rôles autorisés - format attendu par Auth: STUDENT, ALUMNI, ADMIN, SERVICE_PROVIDER ou lowercase */
+  role?: string[];
 };

@@ -10,4 +10,4 @@ export * as Providers from "./providers/index.types";
 export * as BlockchainExport from "./service/types.blockchain";
 export type { ROLE_TYPE } from "./common/index.types";
 export type { BlockchainMethod } from "./service/types.blockchain";
-export type { User, UserWallet } from "./entities/index.types";
+export type { User, UserWallet } from "./api/index.types";

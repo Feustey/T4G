@@ -8,7 +8,7 @@ export function useLanguage(): LangType {
   let language: LangType;
   switch (locale) {
     case 'fr':
-      language = fr;
+      language = fr as LangType;
       break;
     case 'en':
       language = en;
