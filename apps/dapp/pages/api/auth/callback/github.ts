@@ -15,12 +15,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const clientId = process.env.GITHUB_CLIENT_ID || process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
-    // Dériver l'origine depuis le header Host de la requête pour que le redirect_uri
-    // corresponde exactement à l'URL depuis laquelle l'utilisateur a lancé le flow OAuth.
-    // NEXT_PUBLIC_APP_URL peut différer du domaine réel (ex: www. vs app.)
+    // redirect_uri doit correspondre EXACTEMENT à l'URL configurée dans l'app GitHub OAuth.
+    // Priorité : NEXT_PUBLIC_APP_URL (pour proxy) > Host header
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || '').replace(/\/$/, '');
     const host = req.headers.host || '';
     const proto = req.headers['x-forwarded-proto'] || (host.startsWith('localhost') ? 'http' : 'https');
-    const origin = `${proto}://${host}`;
+    const origin = appUrl || `${proto}://${host}`;
     const redirectUri = `${origin}/auth/callback/github`;
 
     if (process.env.NODE_ENV === 'development') {
@@ -52,14 +52,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }),
     });
 
-    if (!tokenResponse.ok) {
-      return res.status(401).json({ error: 'Échec échange token GitHub' });
-    }
-
     const tokenData = await tokenResponse.json();
 
-    if (tokenData.error) {
-      return res.status(401).json({ error: tokenData.error_description || 'Token GitHub invalide' });
+    if (!tokenResponse.ok || tokenData.error) {
+      const msg = tokenData.error_description || tokenData.error || 'Échec échange token GitHub';
+      console.error('GitHub token exchange failed:', { redirectUri, error: tokenData.error, description: tokenData.error_description });
+      return res.status(401).json({ error: msg, details: tokenData.error });
     }
 
     const accessToken = tokenData.access_token;

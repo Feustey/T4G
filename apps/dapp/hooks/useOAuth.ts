@@ -266,7 +266,9 @@ export const useOAuth = () => {
       }
 
       // Échanger le code contre les données utilisateur via notre API
-      const response = await fetch(`/api/auth/callback/${provider}`, {
+      // Pas de trailing slash : évite les redirects avec trailingSlash: true
+      const apiPath = `/api/auth/callback/${provider}`.replace(/\/+$/, '');
+      const response = await fetch(apiPath, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
