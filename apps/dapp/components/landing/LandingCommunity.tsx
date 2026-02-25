@@ -3,8 +3,8 @@ import Image from 'next/image';
 
 export function LandingCommunity() {
   return (
-    <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800/50">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-800/50">
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div>
             <div className="flex items-center gap-3 mb-6">
@@ -25,18 +25,18 @@ export function LandingCommunity() {
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-gradient-to-r from-t4g-blue-400 to-t4g-green-500 text-white font-semibold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-gradient-to-r from-t4g-blue-400 to-t4g-green-500 text-white font-semibold hover:opacity-90 transition-all duration-300"
             >
               S&apos;inscrire
             </Link>
           </div>
-          <div>
+          <div className="flex justify-center">
             <Image
               src="/landing/images/64498a90b962341386fd1430_new-home-hero2.webp"
               alt="Communauté Token for Good"
               width={600}
               height={400}
-              className="rounded-xl shadow-lg w-full"
+              className="landing-community-img rounded-xl shadow-lg w-full max-w-lg max-h-[300px] object-contain"
             />
           </div>
         </div>

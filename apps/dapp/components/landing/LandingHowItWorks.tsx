@@ -18,8 +18,8 @@ export function LandingHowItWorks() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800/50">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-800/50">
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
           Comment ça marche ?
         </h2>
@@ -30,7 +30,7 @@ export function LandingHowItWorks() {
           {steps.map((step) => (
             <div
               key={step.num}
-              className="relative p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm"
+              className="relative p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md"
             >
               <div className="absolute -top-4 left-6 w-10 h-10 rounded-full bg-gradient-to-r from-t4g-blue-400 to-t4g-green-500 flex items-center justify-center text-white font-bold">
                 {step.num}

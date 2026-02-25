@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export function LandingNavbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-8 py-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
       <Link href="/" className="flex-shrink-0" aria-label="Token for Good - Accueil">
         <Image
           src="/landing/images/64497bb83dee18517f47a10c_T4G.webp"

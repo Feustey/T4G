@@ -17,8 +17,8 @@ const testimonials = [
 
 export function LandingTestimonials() {
   return (
-    <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800/50">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-800/50">
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
           Ils ont rejoint Token for Good
         </h2>
@@ -26,7 +26,7 @@ export function LandingTestimonials() {
           {testimonials.map((t) => (
             <div
               key={t.name}
-              className="p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm"
+              className="p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md"
             >
               <blockquote className="border-l-4 border-t4g-blue-500 pl-4 py-2 text-gray-600 dark:text-gray-300 italic">
                 &quot;{t.quote}&quot;

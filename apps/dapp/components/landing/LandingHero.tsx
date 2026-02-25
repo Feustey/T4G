@@ -4,17 +4,17 @@ import Image from 'next/image';
 export function LandingHero() {
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
-          {/* Visuel */}
-          <div className="relative order-2 md:order-1">
+          {/* Visuel — taille contrainte pour éviter overflow full-screen sur mobile */}
+          <div className="relative order-2 md:order-1 flex justify-center">
             <Image
               src="/landing/images/64493f2065a2a70b35c533b1_svgviewer-png-output(1).webp"
               alt="Token for Good - Plateforme collaborative Web3"
               width={400}
               height={400}
               priority
-              className="w-full max-w-md mx-auto object-contain"
+              className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-md mx-auto object-contain"
             />
             <Image
               src="/landing/images/64498a85b962348a8ffd1367_spinner-animation.webp"
@@ -27,7 +27,7 @@ export function LandingHero() {
 
           {/* Contenu */}
           <div className="order-1 md:order-2">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4">
               Célébrer l&apos;engagement !
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-xl">
@@ -40,13 +40,13 @@ export function LandingHero() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-gradient-to-r from-t4g-blue-400 via-t4g-green-500 to-t4g-orange-500 text-white font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-gradient-to-r from-t4g-blue-400 via-t4g-green-500 to-t4g-orange-500 text-white font-semibold hover:opacity-90 transition-all duration-300"
               >
                 GO !
               </Link>
               <Link
                 href="#pourquoi"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-lg border-2 border-t4g-blue-500 text-t4g-blue-500 dark:border-t4g-blue-400 dark:text-t4g-blue-400 font-semibold hover:bg-t4g-blue-500/10 transition-colors"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-lg border-2 border-t4g-blue-500 text-t4g-blue-500 dark:border-t4g-blue-400 dark:text-t4g-blue-400 font-semibold hover:bg-t4g-blue-500/10 transition-all duration-300"
               >
                 En savoir plus
               </Link>

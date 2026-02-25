@@ -9,8 +9,8 @@ const partners = [
 
 export function LandingPartners() {
   return (
-    <section className="py-16 md:py-24">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-20 md:py-28">
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="flex items-center gap-3 mb-12">
           <div className="landing-icon-sm shrink-0 w-10 h-10 rounded-full bg-t4g-blue-500/20 flex items-center justify-center text-t4g-blue-500">
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +28,7 @@ export function LandingPartners() {
               href={p.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+              className="opacity-80 hover:opacity-100 transition-all duration-300 grayscale hover:grayscale-0"
             >
               <Image
                 src={p.src}

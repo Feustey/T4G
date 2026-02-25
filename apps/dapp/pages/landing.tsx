@@ -124,13 +124,14 @@ export default function LandingPage() {
         }}
       />
 
-      {/* Correctif affichage : pictogrammes et images contraints (évite overflow full-screen) — ciblé sur les icônes uniquement, pas les CTA */}
+      {/* Correctif affichage : pictogrammes et images contraints (évite overflow full-screen) */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .landing-page .landing-icon-sm svg,
           .landing-page .landing-icon-md svg { flex-shrink: 0; width: 1.25rem !important; height: 1.25rem !important; max-width: 2.5rem; max-height: 2.5rem; }
           .landing-page .landing-icon-md svg { width: 1.5rem !important; height: 1.5rem !important; }
           .landing-page .landing-partner-img { max-width: 180px; max-height: 100px; object-fit: contain; }
+          .landing-page .landing-community-img { max-width: 100%; max-height: 300px; }
         `,
       }} />
       {/* Contenu principal */}
