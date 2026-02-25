@@ -189,10 +189,22 @@ const nextConfig = {
         source: '/landing/:path*',
         destination: '/landing/:path*',
       },
-      // Magic Link : garder sur Next.js (send + verify)
+      // Auth Next.js : magic-link, OAuth callbacks, dazno-verify, lnurl
       {
         source: '/api/auth/magic-link/:path*',
         destination: '/api/auth/magic-link/:path*',
+      },
+      {
+        source: '/api/auth/callback/:path*',
+        destination: '/api/auth/callback/:path*',
+      },
+      {
+        source: '/api/auth/dazno-verify',
+        destination: '/api/auth/dazno-verify',
+      },
+      {
+        source: '/api/auth/lnurl/:path*',
+        destination: '/api/auth/lnurl/:path*',
       },
       // Proxy vers le backend Rust (développement local uniquement)
       {

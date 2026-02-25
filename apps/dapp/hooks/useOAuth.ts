@@ -275,8 +275,8 @@ export const useOAuth = () => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Échec authentification OAuth');
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || err.error || 'Échec authentification OAuth');
       }
 
       const userData = await response.json();
@@ -296,8 +296,8 @@ export const useOAuth = () => {
       // Nettoyer le state seulement après succès complet
       sessionStorage.removeItem(`${provider}_oauth_state`);
 
-      // Rediriger vers le dashboard
-      router.push('/dashboard');
+      // Rediriger vers le dashboard (avec locale pour i18n)
+      router.push('/dashboard', '/dashboard', { locale: router.locale || 'fr' });
     } catch (error) {
       console.error(`Erreur callback ${provider}:`, error);
       throw error;
