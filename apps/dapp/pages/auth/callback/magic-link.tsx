@@ -50,12 +50,19 @@ export default function MagicLinkCallback() {
 
         setStatus('success');
         const locale = router.locale || 'fr';
-        setTimeout(() => router.push('/dashboard', '/dashboard', { locale }), 1000);
+        const dashboardUrl = `/${locale}/dashboard/`;
+        setTimeout(() => {
+          // window.location pour éviter les blocages de redirection (liens ouverts depuis email)
+          window.location.href = dashboardUrl;
+        }, 1000);
       } catch (err) {
         setStatus('error');
         setErrorMessage(err instanceof Error ? err.message : 'Erreur inconnue');
         const locale = router.locale || 'fr';
-        setTimeout(() => router.push('/login?error=magic_link_failed', '/login', { locale }), 2500);
+        const loginUrl = `/${locale}/login/?error=magic_link_failed`;
+        setTimeout(() => {
+          window.location.href = loginUrl;
+        }, 2500);
       }
     };
 
@@ -84,7 +91,13 @@ export default function MagicLinkCallback() {
             <>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
               <h2 style={{ color: '#1a1a2e', marginBottom: 8 }}>Connexion réussie</h2>
-              <p style={{ color: '#999' }}>Redirection vers le tableau de bord...</p>
+              <p style={{ color: '#999', marginBottom: 16 }}>Redirection vers le tableau de bord...</p>
+              <p style={{ fontSize: 14, color: '#666' }}>
+                Si la redirection ne fonctionne pas,{' '}
+                <a href={`/${router.locale || 'fr'}/dashboard/`} style={{ color: '#f7931a', fontWeight: 600 }}>
+                  cliquez ici
+                </a>
+              </p>
             </>
           )}
           {status === 'error' && (
@@ -92,7 +105,10 @@ export default function MagicLinkCallback() {
               <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
               <h2 style={{ color: '#e53e3e', marginBottom: 8 }}>Lien invalide</h2>
               <p style={{ color: '#666', marginBottom: 8 }}>{errorMessage}</p>
-              <p style={{ color: '#999', fontSize: 14 }}>Redirection vers la page de connexion...</p>
+              <p style={{ color: '#999', fontSize: 14, marginBottom: 12 }}>Redirection vers la page de connexion...</p>
+              <a href={`/${router.locale || 'fr'}/login/?error=magic_link_failed`} style={{ color: '#f7931a', fontWeight: 600, fontSize: 14 }}>
+                Retour à la connexion
+              </a>
             </>
           )}
         </div>
