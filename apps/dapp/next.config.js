@@ -189,6 +189,11 @@ const nextConfig = {
         source: '/landing/:path*',
         destination: '/landing/:path*',
       },
+      // Magic Link : garder sur Next.js (send + verify)
+      {
+        source: '/api/auth/magic-link/:path*',
+        destination: '/api/auth/magic-link/:path*',
+      },
       // Proxy vers le backend Rust (développement local uniquement)
       {
         source: '/api/:path*',
