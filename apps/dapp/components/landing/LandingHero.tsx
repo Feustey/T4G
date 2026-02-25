@@ -14,7 +14,7 @@ export function LandingHero() {
               width={400}
               height={400}
               priority
-              className="w-full max-w-md mx-auto"
+              className="w-full max-w-md mx-auto object-contain"
             />
             <Image
               src="/landing/images/64498a85b962348a8ffd1367_spinner-animation.webp"

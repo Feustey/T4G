@@ -37,7 +37,7 @@ export function LandingTestimonials() {
                   alt={t.name}
                   width={64}
                   height={64}
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover w-16 h-16 shrink-0"
                 />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">{t.name}</p>

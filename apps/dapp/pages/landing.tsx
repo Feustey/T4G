@@ -124,8 +124,17 @@ export default function LandingPage() {
         }}
       />
 
+      {/* Correctif affichage : pictogrammes et images contraints (évite overflow full-screen) — ciblé sur les icônes uniquement, pas les CTA */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .landing-page .landing-icon-sm svg,
+          .landing-page .landing-icon-md svg { flex-shrink: 0; width: 1.25rem !important; height: 1.25rem !important; max-width: 2.5rem; max-height: 2.5rem; }
+          .landing-page .landing-icon-md svg { width: 1.5rem !important; height: 1.5rem !important; }
+          .landing-page .landing-partner-img { max-width: 180px; max-height: 100px; object-fit: contain; }
+        `,
+      }} />
       {/* Contenu principal */}
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+      <div className="landing-page min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
         <LandingNavbar />
         <main>
           <LandingHero />
