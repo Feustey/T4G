@@ -94,22 +94,14 @@ function Auth({ children, lang, role }) {
     return children;
   }
 
-  // Conversion des rôles backend vers format frontend
-  const roleMap = {
-    'mentee': 'STUDENT',
-    'mentor': 'ALUMNI',
-    'admin': 'ADMIN',
-  };
-  
-  const userRole = currentUser?.role ? (roleMap[currentUser.role.toLowerCase()] || currentUser.role.toUpperCase()) : null;
-  
-  console.log('🔵 Auth - userRole:', userRole, 'expected roles:', role);
+  // Page.role utilise les noms backend (mentee, alumni, mentor, service_provider, admin)
+  const userRoleBackend = currentUser?.role?.toLowerCase();
+  const isAuthorized = currentUser && userRoleBackend && role.includes(userRoleBackend);
 
-  // Vérifier le rôle
-  if (currentUser && userRole && role.includes(userRole)) {
+  if (isAuthorized) {
     return children;
   } else {
-    console.log('🔴 Auth - Rôle non autorisé, redirection vers 404');
+    console.log('🔴 Auth - Rôle non autorisé:', userRoleBackend, 'attendu:', role);
     router.push('/404', '/404', { locale: locale });
     return null;
   }

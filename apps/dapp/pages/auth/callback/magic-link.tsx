@@ -49,11 +49,13 @@ export default function MagicLinkCallback() {
         });
 
         setStatus('success');
-        setTimeout(() => router.push('/dashboard'), 1000);
+        const locale = router.locale || 'fr';
+        setTimeout(() => router.push('/dashboard', '/dashboard', { locale }), 1000);
       } catch (err) {
         setStatus('error');
         setErrorMessage(err instanceof Error ? err.message : 'Erreur inconnue');
-        setTimeout(() => router.push('/login?error=magic_link_failed'), 2500);
+        const locale = router.locale || 'fr';
+        setTimeout(() => router.push('/login?error=magic_link_failed', '/login', { locale }), 2500);
       }
     };
 
