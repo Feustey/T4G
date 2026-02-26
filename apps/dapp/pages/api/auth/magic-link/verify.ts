@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { verifyMagicToken } from './send';
 
+// Force Node.js runtime (crypto natif requis pour HMAC)
+export const config = { runtime: 'nodejs' };
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method !== 'POST') {
@@ -30,7 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       picture: '',
     });
   } catch (error) {
-    console.error('[magic-link/verify] Erreur inattendue:', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStack = error instanceof Error ? error.stack : undefined;
+    console.error('[magic-link/verify] Erreur inattendue:', errMsg, errStack);
     return res.status(500).json({
       error: 'Erreur serveur lors de la vérification. Veuillez réessayer ou demander un nouveau lien.',
     });

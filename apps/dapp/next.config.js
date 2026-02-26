@@ -37,12 +37,14 @@ const nextConfig = {
     const libsPath = path.resolve(__dirname, '../../libs');
     
     // Fix pour les modules Node.js
+    // IMPORTANT: Ne pas appliquer crypto:false côté serveur — les routes API
+    // (magic-link verify, etc.) ont besoin du module crypto natif Node.js
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
       net: false,
       tls: false,
-      crypto: false,
+      ...(isServer ? {} : { crypto: false }), // crypto uniquement côté client
     };
     
     // Résolution des alias pour les librairies locales

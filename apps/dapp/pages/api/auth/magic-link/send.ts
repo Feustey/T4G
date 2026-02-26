@@ -2,6 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 
+// Force Node.js runtime (crypto natif requis pour HMAC)
+export const config = { runtime: 'nodejs' };
+
 const EXPIRES_IN_MS = 15 * 60 * 1000; // 15 minutes
 
 /**
