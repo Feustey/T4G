@@ -84,7 +84,7 @@ impl DatabaseService {
 
     pub async fn find_user_by_id(&self, id: &str) -> Result<Option<User>, Box<dyn Error>> {
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE id = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour FROM users WHERE id = $1"
         )
         .bind(id)
         .fetch_optional(&self.pool)
@@ -110,6 +110,11 @@ impl DatabaseService {
                 email_verified: row.try_get("email_verified").unwrap_or(false),
                 last_login: row.try_get("last_login").ok(),
                 is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
             };
             Ok(Some(user))
         } else {
@@ -118,33 +123,38 @@ impl DatabaseService {
     }
 
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<User>, Box<dyn Error>> {
-        let row = sqlx::query!(
-            "SELECT * FROM users WHERE email = $1",
-            email
+        let row = sqlx::query(
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour FROM users WHERE email = $1"
         )
+        .bind(email)
         .fetch_optional(&self.pool)
         .await?;
 
         if let Some(row) = row {
             let user = User {
-                id: row.id,
-                email: row.email,
-                firstname: row.firstname,
-                lastname: row.lastname,
-                lightning_address: row.lightning_address,
-                role: row.role.parse().unwrap_or(crate::models::user::UserRole::Alumni),
-                username: row.username,
-                bio: row.bio,
-                score: row.score as u32,
-                avatar: row.avatar,
-                created_at: row.created_at,
-                updated_at: row.updated_at,
-                is_active: row.is_active,
-                wallet_address: row.wallet_address,
-                preferences: row.preferences,
-                email_verified: row.email_verified.unwrap_or(false),
-                last_login: row.last_login,
-                is_onboarded: row.is_onboarded.unwrap_or(false),
+                id: row.try_get("id")?,
+                email: row.try_get("email")?,
+                firstname: row.try_get("firstname")?,
+                lastname: row.try_get("lastname")?,
+                lightning_address: row.try_get("lightning_address")?,
+                role: row.try_get::<String, _>("role")?.parse().unwrap_or(crate::models::user::UserRole::Alumni),
+                username: row.try_get("username")?,
+                bio: row.try_get("bio").ok(),
+                score: row.try_get::<i32, _>("score")? as u32,
+                avatar: row.try_get("avatar").ok(),
+                created_at: row.try_get("created_at")?,
+                updated_at: row.try_get("updated_at")?,
+                is_active: row.try_get("is_active")?,
+                wallet_address: row.try_get("wallet_address").ok(),
+                preferences: row.try_get("preferences")?,
+                email_verified: row.try_get("email_verified").unwrap_or(false),
+                last_login: row.try_get("last_login").ok(),
+                is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
             };
             Ok(Some(user))
         } else {
@@ -586,6 +596,12 @@ impl DatabaseService {
             preferences: row.get("preferences"),
             email_verified: row.get::<Option<bool>, _>("email_verified").unwrap_or(false),
             last_login: row.get("last_login"),
+            is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+            is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+            mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+            learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+            mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+            mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
         }).collect();
 
         Ok(users)
@@ -661,8 +677,48 @@ impl DatabaseService {
         }
 
         if let Some(avatar) = &payload.avatar {
-            sqlx::query(&format!("UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2"))
+            sqlx::query("UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2")
                 .bind(avatar)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(is_mentor_active) = payload.is_mentor_active {
+            sqlx::query("UPDATE users SET is_mentor_active = $1, updated_at = NOW() WHERE id = $2")
+                .bind(is_mentor_active)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(ref mentor_topics) = payload.mentor_topics {
+            sqlx::query("UPDATE users SET mentor_topics = $1, updated_at = NOW() WHERE id = $2")
+                .bind(mentor_topics)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(ref learning_topics) = payload.learning_topics {
+            sqlx::query("UPDATE users SET learning_topics = $1, updated_at = NOW() WHERE id = $2")
+                .bind(learning_topics)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(ref mentor_bio) = payload.mentor_bio {
+            sqlx::query("UPDATE users SET mentor_bio = $1, updated_at = NOW() WHERE id = $2")
+                .bind(mentor_bio)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(mentor_tokens_per_hour) = payload.mentor_tokens_per_hour {
+            sqlx::query("UPDATE users SET mentor_tokens_per_hour = $1, updated_at = NOW() WHERE id = $2")
+                .bind(mentor_tokens_per_hour)
                 .bind(id)
                 .execute(&self.pool)
                 .await?;

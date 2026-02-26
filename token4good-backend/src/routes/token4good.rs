@@ -191,6 +191,11 @@ pub async fn create_user(
         email_verified: false,
         last_login: None,
         is_onboarded: false,
+        is_mentor_active: false,
+        mentor_topics: vec![],
+        learning_topics: vec![],
+        mentor_bio: None,
+        mentor_tokens_per_hour: None,
     };
 
     state.db.create_user(&new_user).await.map_err(|e| {

@@ -65,6 +65,12 @@ pub struct User {
     pub email_verified: bool,
     pub last_login: Option<chrono::DateTime<chrono::Utc>>,
     pub is_onboarded: bool,
+    // Champs mentoring (migration 007)
+    pub is_mentor_active: bool,
+    pub mentor_topics: Vec<String>,
+    pub learning_topics: Vec<String>,
+    pub mentor_bio: Option<String>,
+    pub mentor_tokens_per_hour: Option<i32>,
 }
 
 impl User {
@@ -96,6 +102,11 @@ impl User {
             email_verified: false,
             last_login: None,
             is_onboarded: false,
+            is_mentor_active: false,
+            mentor_topics: vec![],
+            learning_topics: vec![],
+            mentor_bio: None,
+            mentor_tokens_per_hour: None,
         }
     }
 }
@@ -119,6 +130,11 @@ pub struct UpdateUserRequest {
     pub avatar: Option<String>,
     pub preferences: Option<serde_json::Value>,
     pub is_onboarded: Option<bool>,
+    pub is_mentor_active: Option<bool>,
+    pub mentor_topics: Option<Vec<String>>,
+    pub learning_topics: Option<Vec<String>>,
+    pub mentor_bio: Option<String>,
+    pub mentor_tokens_per_hour: Option<i32>,
 }
 
 #[cfg(test)]
@@ -273,6 +289,11 @@ mod tests {
             avatar: None,
             preferences: None,
             is_onboarded: None,
+            is_mentor_active: None,
+            mentor_topics: None,
+            learning_topics: None,
+            mentor_bio: None,
+            mentor_tokens_per_hour: None,
         };
         let json = serde_json::to_string(&req).unwrap();
         // Tous les champs sont Option<>, le JSON doit être valide

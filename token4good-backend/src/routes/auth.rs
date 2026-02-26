@@ -387,6 +387,11 @@ async fn get_or_create_user_from_dazno(
         email_verified: true, // Utilisateurs Dazno sont pré-vérifiés
         last_login: Some(chrono::Utc::now()),
         is_onboarded: false,
+        is_mentor_active: false,
+        mentor_topics: vec![],
+        learning_topics: vec![],
+        mentor_bio: None,
+        mentor_tokens_per_hour: None,
     };
 
     state
@@ -444,6 +449,11 @@ async fn get_or_create_user_from_oauth(
         email_verified: true, // Les utilisateurs OAuth sont pré-vérifiés
         last_login: Some(chrono::Utc::now()),
         is_onboarded: false,
+        is_mentor_active: false,
+        mentor_topics: vec![],
+        learning_topics: vec![],
+        mentor_bio: None,
+        mentor_tokens_per_hour: None,
     };
 
     // Créer l'utilisateur dans la base de données

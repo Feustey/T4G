@@ -63,7 +63,7 @@ impl DatabaseService {
 
     pub async fn find_user_by_id(&self, id: &str) -> Result<Option<User>, Box<dyn Error>> {
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE id = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour FROM users WHERE id = $1"
         )
         .bind(id)
         .fetch_optional(&self.pool)
@@ -92,6 +92,11 @@ impl DatabaseService {
                 email_verified: row.try_get("email_verified").unwrap_or(false),
                 last_login: row.try_get("last_login").ok(),
                 is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
             };
             Ok(Some(user))
         } else {
