@@ -169,14 +169,14 @@ configure_domain() {
     echo "🌐 Configuration du domaine personnalisé"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     
-    read -p "Voulez-vous configurer t4g.dazno.de maintenant? (y/n) " -n 1 -r
+    read -p "Voulez-vous configurer app.token-for-good.com maintenant? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        vercel domains add t4g.dazno.de
+        vercel domains add app.token-for-good.com
         echo ""
         echo "📝 N'oubliez pas de configurer le CNAME dans votre DNS:"
         echo "   Type: CNAME"
-        echo "   Name: t4g"
+        echo "   Name: app"
         echo "   Value: cname.vercel-dns.com"
     fi
 }

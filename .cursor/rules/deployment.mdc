@@ -12,7 +12,7 @@ description: Standards de déploiement production Token4Good
 ```
 Serveur Hostinger VPS (147.79.101.32)
 ────────────────────────────────────
-t4g.dazno.de
+app.token-for-good.com
   ↓
 Nginx (80/443) → Backend Rust (3001) → PostgreSQL (5432)
                       ↓
@@ -24,7 +24,7 @@ Frontend (Static)
 - **Provider**: Hostinger VPS
 - **IP**: 147.79.101.32
 - **Accès SSH**: root@147.79.101.32
-- **Domaine**: t4g.dazno.de
+- **Domaine**: app.token-for-good.com
 
 ## Déploiement Hostinger (Production)
 
@@ -116,7 +116,7 @@ Fichier : [vercel.json](mdc:vercel.json)
 curl https://api.token4good.com/health
 
 # Frontend
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 ```
 
 ### Logs

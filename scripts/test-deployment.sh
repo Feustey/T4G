@@ -20,8 +20,8 @@ if [ "$MODE" = "local" ]; then
     BASE_URL="http://localhost:3001"
     FRONTEND_URL="http://localhost:3000"
 else
-    BASE_URL="https://t4g.dazno.de"
-    FRONTEND_URL="https://t4g.dazno.de"
+    BASE_URL="https://app.token-for-good.com"
+    FRONTEND_URL="https://app.token-for-good.com"
 fi
 
 SSH_HOST="147.79.101.32"
@@ -124,13 +124,13 @@ if [ "$MODE" = "production" ]; then
     echo ""
 
     test_command "HTTPS Accessible" \
-        "curl -f -s https://t4g.dazno.de/health"
+        "curl -f -s https://app.token-for-good.com/health"
 
     test_command "SSL Certificate Valid" \
-        "echo | openssl s_client -connect t4g.dazno.de:443 -servername t4g.dazno.de 2>/dev/null | grep -q 'Verify return code: 0'"
+        "echo | openssl s_client -connect app.token-for-good.com:443 -servername app.token-for-good.com 2>/dev/null | grep -q 'Verify return code: 0'"
 
     test_command "HTTP Redirect to HTTPS" \
-        "[ \$(curl -s -o /dev/null -w '%{redirect_url}' http://t4g.dazno.de) = 'https://t4g.dazno.de/' ]"
+        "[ \$(curl -s -o /dev/null -w '%{redirect_url}' http://app.token-for-good.com) = 'https://app.token-for-good.com/' ]"
 fi
 
 # Section 4: Tests Services (production seulement)
@@ -232,11 +232,11 @@ echo ""
 
 if [ "$MODE" = "production" ]; then
     test_command "HTTPS Enforced" \
-        "[ \$(curl -s -o /dev/null -w '%{http_code}' -L http://t4g.dazno.de/health) = '200' ]"
+        "[ \$(curl -s -o /dev/null -w '%{http_code}' -L http://app.token-for-good.com/health) = '200' ]"
 
     ((TESTS_TOTAL++))
     echo -n "Test $TESTS_TOTAL: Security Headers Present... "
-    HEADERS=$(curl -s -I https://t4g.dazno.de)
+    HEADERS=$(curl -s -I https://app.token-for-good.com)
     if echo "$HEADERS" | grep -q "Strict-Transport-Security" && \
        echo "$HEADERS" | grep -q "X-Frame-Options"; then
         log_success "PASS"

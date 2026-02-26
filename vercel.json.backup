@@ -29,7 +29,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://t4g.dazno.de"
+          "value": "https://app.token-for-good.com"
         },
         {
           "key": "Access-Control-Allow-Methods",

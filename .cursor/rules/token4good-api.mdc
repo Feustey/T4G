@@ -1,11 +1,11 @@
 ---
 alwaysApply: true
-description: API Token4Good (T4G) pour t4g.dazno.de - Documentation complète et endpoints
+description: API Token4Good (T4G) pour token-for-good.com - Documentation complète et endpoints
 ---
 
 # 📘 API Token4Good (T4G) - Standards d'Implémentation
 
-**Base URL**: `https://t4g.dazno.de` ou `https://api.dazno.de/api/v1/token4good`  
+**Base URL**: `https://app.token-for-good.com` ou `https://api.dazno.de/api/v1/token4good`  
 **Version**: 1.0  
 **Dernière mise à jour**: 7 janvier 2025
 

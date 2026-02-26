@@ -177,7 +177,7 @@ pub async fn create_user(
         email: payload.email.clone(),
         firstname: payload.username.clone(),
         lastname: String::new(),
-        lightning_address: format!("{}@t4g.dazno.de", payload.user_id),
+        lightning_address: format!("{}@token-for-good.com", payload.user_id),
         role: crate::models::user::UserRole::Alumni,
         username: payload.username.clone(),
         bio: None,

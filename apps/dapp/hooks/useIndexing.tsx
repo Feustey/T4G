@@ -1,7 +1,8 @@
 export function useIndexing(isIndexable: boolean) {
   if (typeof window !== 'undefined') {
     let isProduction: boolean;
-    if (window.location.host !== 'token-for-good.com') {
+    const prodHosts = ['token-for-good.com', 'www.token-for-good.com', 'app.token-for-good.com'];
+    if (!prodHosts.includes(window.location.host)) {
       isProduction = false;
     } else {
       isProduction = true;

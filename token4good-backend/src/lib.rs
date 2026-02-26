@@ -69,7 +69,6 @@ fn build_cors_layer() -> CorsLayer {
         "http://localhost:3000".parse().unwrap(), // Dev Next.js
         "http://localhost:3001".parse().unwrap(), // Dev backend Rust
         "https://token4good.vercel.app".parse().unwrap(), // Production Vercel
-        "https://t4g.dazno.de".parse().unwrap(),  // Production custom
         "https://apirust-production.up.railway.app".parse().unwrap(), // Railway self
         "https://www.token-for-good.com".parse().unwrap(), // Production token-for-good
         "https://token-for-good.com".parse().unwrap(), // Production token-for-good (sans www)

@@ -66,7 +66,8 @@ export function Page({ lang }: IPage) {
   const [showLNURL, setShowLNURL] = useState(false);
 
   useEffect(() => {
-    if (process.env.NEXTAUTH_URL !== 'token-for-good.com') {
+    const isProduction = process.env.NEXTAUTH_URL?.includes('token-for-good.com') ?? false;
+    if (!isProduction) {
       setDebugButtonsVisible(
         process.env.NODE_ENV === 'development' || router.query.debug != undefined
       );
