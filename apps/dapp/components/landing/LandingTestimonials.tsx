@@ -18,7 +18,7 @@ const testimonials = [
 export function LandingTestimonials() {
   return (
     <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-800/50">
-      <div className="max-w-7xl mx-auto px-6 md:px-8">
+      <div className="max-w-6xl mx-auto px-6 md:px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
           Ils ont rejoint Token for Good
         </h2>

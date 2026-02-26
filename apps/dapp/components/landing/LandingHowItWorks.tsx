@@ -19,20 +19,22 @@ export function LandingHowItWorks() {
 
   return (
     <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-800/50">
-      <div className="max-w-7xl mx-auto px-6 md:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
-          Comment ça marche ?
-        </h2>
-        <p className="text-center text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-          Une plateforme collaborative qui célèbre l&apos;engagement.
-        </p>
+      <div className="max-w-6xl mx-auto px-6 md:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Comment ça marche ?
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Une plateforme collaborative qui célèbre l&apos;engagement.
+          </p>
+        </div>
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step) => (
             <div
               key={step.num}
-              className="relative p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md"
+              className="relative p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md text-center"
             >
-              <div className="absolute -top-4 left-6 w-10 h-10 rounded-full bg-gradient-to-r from-t4g-blue-400 to-t4g-green-500 flex items-center justify-center text-white font-bold">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-gradient-to-r from-t4g-blue-400 to-t4g-green-500 flex items-center justify-center text-white font-bold">
                 {step.num}
               </div>
               <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">

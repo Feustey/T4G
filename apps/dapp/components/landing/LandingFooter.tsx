@@ -39,11 +39,11 @@ const socialIcons: Record<string, JSX.Element> = {
 export function LandingFooter() {
   return (
     <footer className="py-12 bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-6 md:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
+          <div className="text-center md:text-left">
             <p className="font-semibold text-white mb-3">We are social!</p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 justify-center md:justify-start">
               {socials.map((s) => (
                 <a
                   key={s.name}
@@ -58,11 +58,17 @@ export function LandingFooter() {
               ))}
             </div>
           </div>
-          <nav className="flex flex-wrap gap-6 justify-center">
-            <Link href="/login" className="hover:text-white transition-colors">
+          <nav className="flex flex-wrap gap-4 justify-center items-center">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl border-2 border-gray-500 text-gray-300 hover:border-white hover:text-white font-medium transition-all duration-300"
+            >
               Se connecter
             </Link>
-            <Link href="/login" className="hover:text-white transition-colors">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-gradient-to-r from-t4g-blue-500 to-t4g-green-500 text-white font-semibold shadow-lg shadow-t4g-green-500/20 hover:shadow-xl hover:shadow-t4g-green-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+            >
               S&apos;inscrire
             </Link>
           </nav>

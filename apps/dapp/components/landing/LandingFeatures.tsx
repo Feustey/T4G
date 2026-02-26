@@ -38,9 +38,9 @@ const features = [
 export function LandingFeatures() {
   return (
     <section id="pourquoi" className="py-20 md:py-28">
-      <div className="max-w-7xl mx-auto px-6 md:px-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="landing-icon-sm shrink-0 w-10 h-10 rounded-full bg-t4g-blue-500/20 flex items-center justify-center text-t4g-blue-500">
+      <div className="max-w-6xl mx-auto px-6 md:px-8">
+        <div className="flex flex-col items-center text-center mb-12">
+          <div className="landing-icon-sm shrink-0 w-10 h-10 rounded-full bg-t4g-blue-500/20 flex items-center justify-center text-t4g-blue-500 mb-3">
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -53,19 +53,19 @@ export function LandingFeatures() {
           {features.map((f) => (
             <div
               key={f.title}
-              className="flex items-start gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:border-t4g-green-500/30"
+              className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:border-t4g-green-500/30 text-center sm:text-left"
             >
               <div className="landing-icon-md shrink-0 w-10 h-10 rounded-lg bg-t4g-green-500/20 text-t4g-green-500 flex items-center justify-center">
                 {f.icon}
               </div>
-              <p className="text-gray-700 dark:text-gray-300 font-medium">{f.title}</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium flex-1">{f.title}</p>
             </div>
           ))}
         </div>
-        <div className="mt-8 text-center">
+        <div className="mt-12 flex justify-center">
           <Link
             href="/login"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-t4g-blue-500 hover:bg-t4g-blue-600 text-white font-semibold transition-all duration-300"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-t4g-blue-500 hover:bg-t4g-blue-600 text-white font-semibold shadow-lg shadow-t4g-blue-500/25 hover:shadow-xl hover:shadow-t4g-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
           >
             S&apos;inscrire
           </Link>
