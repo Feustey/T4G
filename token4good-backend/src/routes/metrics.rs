@@ -15,7 +15,7 @@ pub async fn get_metrics(
 
     // Count alumnis and students
     let alumnis_count = sqlx::query_scalar::<_, Option<i64>>(
-        "SELECT COUNT(*) FROM users WHERE role IN ('ALUMNI', 'mentor')"
+        "SELECT COUNT(*) FROM users WHERE role IN ('ALUMNI', 'mentor')",
     )
     .fetch_one(state.db.pool())
     .await
@@ -23,7 +23,7 @@ pub async fn get_metrics(
     .unwrap_or(0) as u64;
 
     let students_count = sqlx::query_scalar::<_, Option<i64>>(
-        "SELECT COUNT(*) FROM users WHERE role IN ('STUDENT', 'mentee')"
+        "SELECT COUNT(*) FROM users WHERE role IN ('STUDENT', 'mentee')",
     )
     .fetch_one(state.db.pool())
     .await
@@ -31,17 +31,15 @@ pub async fn get_metrics(
     .unwrap_or(0) as u64;
 
     // Count total transactions
-    let txs_count = sqlx::query_scalar::<_, Option<i64>>(
-        "SELECT COUNT(*) FROM transactions"
-    )
-    .fetch_one(state.db.pool())
-    .await
-    .unwrap_or(Some(0))
-    .unwrap_or(0) as u64;
+    let txs_count = sqlx::query_scalar::<_, Option<i64>>("SELECT COUNT(*) FROM transactions")
+        .fetch_one(state.db.pool())
+        .await
+        .unwrap_or(Some(0))
+        .unwrap_or(0) as u64;
 
     // Count mentoring sessions as interactions
     let interactions_count = sqlx::query_scalar::<_, Option<i64>>(
-        "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE status = 'completed'"
+        "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE status = 'completed'",
     )
     .fetch_one(state.db.pool())
     .await

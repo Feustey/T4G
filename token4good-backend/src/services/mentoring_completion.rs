@@ -40,11 +40,7 @@ pub struct CompletionResult {
 // ── Vérification du solde ──────────────────────────────────────────────────
 
 /// Retourne le solde disponible du `user_id` ou une erreur si `< required`.
-pub async fn check_balance(
-    pool: &PgPool,
-    user_id: &str,
-    required: i64,
-) -> Result<i64, String> {
+pub async fn check_balance(pool: &PgPool, user_id: &str, required: i64) -> Result<i64, String> {
     let earned: i64 = sqlx::query_scalar(
         "SELECT COALESCE(SUM(tokens), 0) FROM t4g_token_transactions WHERE user_id = $1 AND tokens > 0"
     )
@@ -97,7 +93,10 @@ pub async fn debit_escrow(
     .execute(pool)
     .await?;
 
-    info!("Escrow debit: {} T4G from {} for booking {}", amount, mentee_id, booking_id);
+    info!(
+        "Escrow debit: {} T4G from {} for booking {}",
+        amount, mentee_id, booking_id
+    );
     Ok(())
 }
 
@@ -108,6 +107,7 @@ pub async fn debit_escrow(
 ///
 /// Retourne toujours `Ok(_)` pour ne pas bloquer la réponse HTTP ;
 /// les erreurs partielles (RGB, DB) sont loguées.
+#[allow(clippy::too_many_arguments)]
 pub async fn complete_and_award(
     pool: &PgPool,
     rgb: &RGBService,
@@ -168,7 +168,10 @@ pub async fn complete_and_award(
     if let Err(e) = award_result {
         error!("Failed to award tokens to mentor {}: {}", mentor_id, e);
     } else {
-        info!("{} T4G awarded to mentor {} (impact={:.2})", tokens_to_mentor, mentor_id, impact_score);
+        info!(
+            "{} T4G awarded to mentor {} (impact={:.2})",
+            tokens_to_mentor, mentor_id, impact_score
+        );
     }
 
     // 4. Bonus apprentissage → mentee
@@ -187,14 +190,26 @@ pub async fn complete_and_award(
     .await;
 
     if let Err(e) = bonus_result {
-        error!("Failed to award learning bonus to mentee {}: {}", mentee_id, e);
+        error!(
+            "Failed to award learning bonus to mentee {}: {}",
+            mentee_id, e
+        );
     } else {
-        info!("{} T4G learning bonus to mentee {}", MENTEE_LEARNING_BONUS, mentee_id);
+        info!(
+            "{} T4G learning bonus to mentee {}",
+            MENTEE_LEARNING_BONUS, mentee_id
+        );
     }
 
     // 5. Proof RGB (non-bloquant)
     let (rgb_contract_id, rgb_signature) = match rgb
-        .create_proof_contract(mentor_id, mentee_id, booking_id, rating_value as u8, comment)
+        .create_proof_contract(
+            mentor_id,
+            mentee_id,
+            booking_id,
+            rating_value as u8,
+            comment,
+        )
         .await
     {
         Ok((contract_id, signature)) => {
@@ -261,13 +276,13 @@ pub async fn run_auto_completion(pool: &PgPool, rgb: &RGBService) -> u64 {
 
     for row in rows {
         use sqlx::Row;
-        let booking_id: String    = row.try_get("id").unwrap_or_default();
-        let mentor_id: String     = row.try_get("mentor_id").unwrap_or_default();
-        let mentee_id: String     = row.try_get("mentee_id").unwrap_or_default();
-        let escrow: i32           = row.try_get("tokens_escrowed").unwrap_or(0);
-        let topic_slug: String    = row.try_get("topic_slug").unwrap_or_default();
-        let duration: i32         = row.try_get("duration_minutes").unwrap_or(60);
-        let rating: Option<i32>   = row.try_get("mentee_rating").ok();
+        let booking_id: String = row.try_get("id").unwrap_or_default();
+        let mentor_id: String = row.try_get("mentor_id").unwrap_or_default();
+        let mentee_id: String = row.try_get("mentee_id").unwrap_or_default();
+        let escrow: i32 = row.try_get("tokens_escrowed").unwrap_or(0);
+        let topic_slug: String = row.try_get("topic_slug").unwrap_or_default();
+        let duration: i32 = row.try_get("duration_minutes").unwrap_or(60);
+        let rating: Option<i32> = row.try_get("mentee_rating").ok();
         let comment: Option<String> = row.try_get("mentee_comment").ok();
 
         let update = sqlx::query(
@@ -283,10 +298,18 @@ pub async fn run_auto_completion(pool: &PgPool, rgb: &RGBService) -> u64 {
         }
 
         let result = complete_and_award(
-            pool, rgb,
-            &booking_id, &mentor_id, &mentee_id, &topic_slug,
-            escrow as i64, duration, rating, comment,
-        ).await;
+            pool,
+            rgb,
+            &booking_id,
+            &mentor_id,
+            &mentee_id,
+            &topic_slug,
+            escrow as i64,
+            duration,
+            rating,
+            comment,
+        )
+        .await;
 
         warn!(
             "Auto-completed booking {}: {} T4G → mentor, {} T4G → mentee",

@@ -89,10 +89,22 @@ mod tests {
 
     #[test]
     fn test_proof_status_from_str_valides() {
-        assert_eq!(ProofStatus::from_str("pending").unwrap(), ProofStatus::Pending);
-        assert_eq!(ProofStatus::from_str("validated").unwrap(), ProofStatus::Validated);
-        assert_eq!(ProofStatus::from_str("rejected").unwrap(), ProofStatus::Rejected);
-        assert_eq!(ProofStatus::from_str("created").unwrap(), ProofStatus::Created);
+        assert_eq!(
+            ProofStatus::from_str("pending").unwrap(),
+            ProofStatus::Pending
+        );
+        assert_eq!(
+            ProofStatus::from_str("validated").unwrap(),
+            ProofStatus::Validated
+        );
+        assert_eq!(
+            ProofStatus::from_str("rejected").unwrap(),
+            ProofStatus::Rejected
+        );
+        assert_eq!(
+            ProofStatus::from_str("created").unwrap(),
+            ProofStatus::Created
+        );
     }
 
     #[test]
@@ -107,10 +119,22 @@ mod tests {
 
     #[test]
     fn test_proof_status_serialize() {
-        assert_eq!(serde_json::to_string(&ProofStatus::Pending).unwrap(), "\"pending\"");
-        assert_eq!(serde_json::to_string(&ProofStatus::Validated).unwrap(), "\"validated\"");
-        assert_eq!(serde_json::to_string(&ProofStatus::Rejected).unwrap(), "\"rejected\"");
-        assert_eq!(serde_json::to_string(&ProofStatus::Created).unwrap(), "\"created\"");
+        assert_eq!(
+            serde_json::to_string(&ProofStatus::Pending).unwrap(),
+            "\"pending\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ProofStatus::Validated).unwrap(),
+            "\"validated\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ProofStatus::Rejected).unwrap(),
+            "\"rejected\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ProofStatus::Created).unwrap(),
+            "\"created\""
+        );
     }
 
     #[test]

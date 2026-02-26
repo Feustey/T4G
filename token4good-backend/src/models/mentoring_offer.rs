@@ -21,8 +21,8 @@ pub enum OfferStatus {
 impl std::fmt::Display for OfferStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            OfferStatus::Open      => write!(f, "open"),
-            OfferStatus::Booked    => write!(f, "booked"),
+            OfferStatus::Open => write!(f, "open"),
+            OfferStatus::Booked => write!(f, "booked"),
             OfferStatus::Completed => write!(f, "completed"),
             OfferStatus::Cancelled => write!(f, "cancelled"),
         }
@@ -51,13 +51,13 @@ pub enum BookingStatus {
 impl std::fmt::Display for BookingStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            BookingStatus::Pending           => write!(f, "pending"),
-            BookingStatus::Confirmed         => write!(f, "confirmed"),
+            BookingStatus::Pending => write!(f, "pending"),
+            BookingStatus::Confirmed => write!(f, "confirmed"),
             BookingStatus::PendingCompletion => write!(f, "pending_completion"),
-            BookingStatus::Completed         => write!(f, "completed"),
-            BookingStatus::AutoCompleted     => write!(f, "auto_completed"),
-            BookingStatus::Disputed          => write!(f, "disputed"),
-            BookingStatus::Cancelled         => write!(f, "cancelled"),
+            BookingStatus::Completed => write!(f, "completed"),
+            BookingStatus::AutoCompleted => write!(f, "auto_completed"),
+            BookingStatus::Disputed => write!(f, "disputed"),
+            BookingStatus::Cancelled => write!(f, "cancelled"),
         }
     }
 }
@@ -155,17 +155,38 @@ mod tests {
 
     #[test]
     fn test_offer_status_serialize() {
-        assert_eq!(serde_json::to_string(&OfferStatus::Open).unwrap(), "\"open\"");
-        assert_eq!(serde_json::to_string(&OfferStatus::Booked).unwrap(), "\"booked\"");
-        assert_eq!(serde_json::to_string(&OfferStatus::Completed).unwrap(), "\"completed\"");
-        assert_eq!(serde_json::to_string(&OfferStatus::Cancelled).unwrap(), "\"cancelled\"");
+        assert_eq!(
+            serde_json::to_string(&OfferStatus::Open).unwrap(),
+            "\"open\""
+        );
+        assert_eq!(
+            serde_json::to_string(&OfferStatus::Booked).unwrap(),
+            "\"booked\""
+        );
+        assert_eq!(
+            serde_json::to_string(&OfferStatus::Completed).unwrap(),
+            "\"completed\""
+        );
+        assert_eq!(
+            serde_json::to_string(&OfferStatus::Cancelled).unwrap(),
+            "\"cancelled\""
+        );
     }
 
     #[test]
     fn test_booking_status_serialize() {
-        assert_eq!(serde_json::to_string(&BookingStatus::Pending).unwrap(), "\"pending\"");
-        assert_eq!(serde_json::to_string(&BookingStatus::PendingCompletion).unwrap(), "\"pending_completion\"");
-        assert_eq!(serde_json::to_string(&BookingStatus::AutoCompleted).unwrap(), "\"auto_completed\"");
+        assert_eq!(
+            serde_json::to_string(&BookingStatus::Pending).unwrap(),
+            "\"pending\""
+        );
+        assert_eq!(
+            serde_json::to_string(&BookingStatus::PendingCompletion).unwrap(),
+            "\"pending_completion\""
+        );
+        assert_eq!(
+            serde_json::to_string(&BookingStatus::AutoCompleted).unwrap(),
+            "\"auto_completed\""
+        );
     }
 
     #[test]
@@ -176,7 +197,10 @@ mod tests {
 
     #[test]
     fn test_booking_status_display() {
-        assert_eq!(BookingStatus::PendingCompletion.to_string(), "pending_completion");
+        assert_eq!(
+            BookingStatus::PendingCompletion.to_string(),
+            "pending_completion"
+        );
         assert_eq!(BookingStatus::AutoCompleted.to_string(), "auto_completed");
     }
 }

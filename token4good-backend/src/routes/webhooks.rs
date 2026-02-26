@@ -180,7 +180,7 @@ async fn process_webhook_event(
 // ============= HANDLERS PAR TYPE D'ÉVÉNEMENT =============
 
 async fn handle_user_created(
-    state: &AppState,
+    _state: &AppState,
     user_id: &str,
     email: &str,
 ) -> Result<(), StatusCode> {
@@ -193,7 +193,7 @@ async fn handle_user_created(
     Ok(())
 }
 
-async fn handle_user_updated(state: &AppState, user_id: &str) -> Result<(), StatusCode> {
+async fn handle_user_updated(_state: &AppState, user_id: &str) -> Result<(), StatusCode> {
     tracing::info!("Utilisateur Dazno mis à jour: {}", user_id);
 
     // TODO: Mettre à jour les infos utilisateur
@@ -202,7 +202,7 @@ async fn handle_user_updated(state: &AppState, user_id: &str) -> Result<(), Stat
 }
 
 async fn handle_lightning_payment_received(
-    state: &AppState,
+    _state: &AppState,
     user_id: &str,
     amount_msat: u64,
     payment_hash: &str,
@@ -222,7 +222,7 @@ async fn handle_lightning_payment_received(
 }
 
 async fn handle_lightning_payment_sent(
-    state: &AppState,
+    _state: &AppState,
     user_id: &str,
     amount_msat: u64,
     payment_hash: &str,
@@ -240,7 +240,7 @@ async fn handle_lightning_payment_sent(
 }
 
 async fn handle_t4g_balance_updated(
-    state: &AppState,
+    _state: &AppState,
     user_id: &str,
     new_balance: u64,
 ) -> Result<(), StatusCode> {
@@ -256,7 +256,7 @@ async fn handle_t4g_balance_updated(
 }
 
 async fn handle_gamification_level_up(
-    state: &AppState,
+    _state: &AppState,
     user_id: &str,
     new_level: u32,
     points: u64,

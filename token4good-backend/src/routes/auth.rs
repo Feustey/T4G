@@ -312,7 +312,7 @@ pub async fn refresh_token(
 ) -> Result<Json<AuthResponse>, StatusCode> {
     // Vérifier le token actuel
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
+
     let claims = jwt_service
         .verify_token(&payload.token)
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
@@ -324,7 +324,9 @@ pub async fn refresh_token(
     }
 
     // Récupérer l'utilisateur depuis la DB
-    let user = state.db.find_user_by_id(&claims.sub)
+    let user = state
+        .db
+        .find_user_by_id(&claims.sub)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::UNAUTHORIZED)?;
@@ -443,14 +445,12 @@ async fn get_or_create_user_from_oauth(
         last_login: Some(chrono::Utc::now()),
         is_onboarded: false,
     };
-    
+
     // Créer l'utilisateur dans la base de données
-    state.db.create_user(&new_user)
-        .await
-        .map_err(|e| {
-            tracing::error!("Error creating user from OAuth: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    state.db.create_user(&new_user).await.map_err(|e| {
+        tracing::error!("Error creating user from OAuth: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
 
     tracing::info!(
         "Created new user from OAuth: {} ({})",

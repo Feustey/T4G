@@ -85,13 +85,10 @@ async fn get_topics(
         query = query.bind(lvl);
     }
 
-    let rows = query
-        .fetch_all(state.db.pool())
-        .await
-        .map_err(|e| {
-            tracing::error!("Error fetching learning topics: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    let rows = query.fetch_all(state.db.pool()).await.map_err(|e| {
+        tracing::error!("Error fetching learning topics: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
 
     let topics: Vec<LearningTopicWithCategory> = rows
         .into_iter()

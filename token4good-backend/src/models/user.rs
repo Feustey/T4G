@@ -142,7 +142,10 @@ mod tests {
         assert_eq!(UserRole::from_str("mentor").unwrap(), UserRole::Mentor);
         assert_eq!(UserRole::from_str("mentee").unwrap(), UserRole::Mentee);
         assert_eq!(UserRole::from_str("alumni").unwrap(), UserRole::Alumni);
-        assert_eq!(UserRole::from_str("service_provider").unwrap(), UserRole::ServiceProvider);
+        assert_eq!(
+            UserRole::from_str("service_provider").unwrap(),
+            UserRole::ServiceProvider
+        );
         assert_eq!(UserRole::from_str("admin").unwrap(), UserRole::Admin);
     }
 
@@ -203,10 +206,22 @@ mod tests {
 
     #[test]
     fn test_user_new_id_unique() {
-        let u1 = User::new("a@t.com".to_string(), "A".to_string(), "B".to_string(),
-            "".to_string(), UserRole::Mentee, "ab".to_string());
-        let u2 = User::new("b@t.com".to_string(), "C".to_string(), "D".to_string(),
-            "".to_string(), UserRole::Mentor, "cd".to_string());
+        let u1 = User::new(
+            "a@t.com".to_string(),
+            "A".to_string(),
+            "B".to_string(),
+            "".to_string(),
+            UserRole::Mentee,
+            "ab".to_string(),
+        );
+        let u2 = User::new(
+            "b@t.com".to_string(),
+            "C".to_string(),
+            "D".to_string(),
+            "".to_string(),
+            UserRole::Mentor,
+            "cd".to_string(),
+        );
         assert_ne!(u1.id, u2.id);
     }
 

@@ -46,7 +46,7 @@ pub async fn get_all_wallets(
 
         // Obtenir le nombre de transactions T4G
         let num_t4g_transactions = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_token_transactions WHERE user_id = $1"
+            "SELECT COUNT(*) FROM t4g_token_transactions WHERE user_id = $1",
         )
         .bind(user.id.to_string())
         .fetch_one(state.db.pool())
@@ -56,7 +56,7 @@ pub async fn get_all_wallets(
 
         // Obtenir la dernière transaction T4G
         let last_t4g_transaction = sqlx::query_scalar::<_, Option<chrono::DateTime<chrono::Utc>>>(
-            "SELECT MAX(created_at) FROM t4g_token_transactions WHERE user_id = $1"
+            "SELECT MAX(created_at) FROM t4g_token_transactions WHERE user_id = $1",
         )
         .bind(user.id.to_string())
         .fetch_one(state.db.pool())

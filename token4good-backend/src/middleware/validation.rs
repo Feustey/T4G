@@ -135,7 +135,7 @@ mod tests {
         assert!(validate_username("valid_user123"));
         assert!(validate_username("user-name"));
         assert!(validate_username("abc")); // 3 chars (minimum)
-        // 50 chars (maximum)
+                                           // 50 chars (maximum)
         assert!(validate_username("a".repeat(50).as_str()));
     }
 
@@ -145,7 +145,7 @@ mod tests {
         assert!(!validate_username("user with spaces"));
         assert!(!validate_username("user@domain"));
         assert!(!validate_username("")); // vide
-        // 51 chars (trop long)
+                                         // 51 chars (trop long)
         assert!(!validate_username("a".repeat(51).as_str()));
     }
 

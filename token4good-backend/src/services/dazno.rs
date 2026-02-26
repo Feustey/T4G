@@ -314,7 +314,10 @@ impl DaznoService {
         token: &str,
         user_id: &str,
     ) -> Result<LightningBalance, DaznoError> {
-        let url = format!("{}/api/v1/wallet/balance/{}", self.lightning_api_base, user_id);
+        let url = format!(
+            "{}/api/v1/wallet/balance/{}",
+            self.lightning_api_base, user_id
+        );
 
         let response = self
             .authorized(self.client.get(&url), Some(token))
@@ -340,7 +343,10 @@ impl DaznoService {
         user_id: &str,
         limit: Option<u32>,
     ) -> Result<Vec<LightningTransaction>, DaznoError> {
-        let mut url = format!("{}/api/v1/wallet/payments/{}", self.lightning_api_base, user_id);
+        let mut url = format!(
+            "{}/api/v1/wallet/payments/{}",
+            self.lightning_api_base, user_id
+        );
         if let Some(limit) = limit {
             url.push_str(&format!("?limit={}", limit));
         }
@@ -394,7 +400,10 @@ impl DaznoService {
         token: &str,
         channel_id: &str,
     ) -> Result<ChannelInfo, DaznoError> {
-        let url = format!("{}/api/v1/channels/{}/detail", self.lightning_api_base, channel_id);
+        let url = format!(
+            "{}/api/v1/channels/{}/detail",
+            self.lightning_api_base, channel_id
+        );
 
         let response = self
             .authorized(self.client.get(&url), Some(token))
@@ -455,7 +464,10 @@ impl DaznoService {
         channel_id: &str,
         force: Option<bool>,
     ) -> Result<ChannelCloseInfo, DaznoError> {
-        let mut url = format!("{}/api/v1/channels/{}/close", self.lightning_api_base, channel_id);
+        let mut url = format!(
+            "{}/api/v1/channels/{}/close",
+            self.lightning_api_base, channel_id
+        );
         if let Some(force) = force {
             url.push_str(&format!("?force={}", force));
         }
@@ -654,11 +666,7 @@ impl DaznoService {
             .map_err(|e| DaznoError::LightningApiError(e.to_string()))
     }
 
-    pub async fn delete_webhook(
-        &self,
-        token: &str,
-        webhook_id: &str,
-    ) -> Result<(), DaznoError> {
+    pub async fn delete_webhook(&self, token: &str, webhook_id: &str) -> Result<(), DaznoError> {
         let url = format!("{}/api/v1/webhook/{}", self.lightning_api_base, webhook_id);
 
         let response = self
@@ -874,11 +882,7 @@ impl DaznoService {
             .map_err(|e| DaznoError::LightningApiError(e.to_string()))
     }
 
-    pub async fn delete_wallet(
-        &self,
-        token: &str,
-        wallet_id: &str,
-    ) -> Result<(), DaznoError> {
+    pub async fn delete_wallet(&self, token: &str, wallet_id: &str) -> Result<(), DaznoError> {
         let url = format!("{}/api/v1/wallet/{}", self.lightning_api_base, wallet_id);
 
         let response = self
@@ -901,7 +905,10 @@ impl DaznoService {
         token: &str,
         payment_hash: &str,
     ) -> Result<DaznoLightningPayment, DaznoError> {
-        let url = format!("{}/lightning/invoice/check/{}", self.lightning_api_base, payment_hash);
+        let url = format!(
+            "{}/lightning/invoice/check/{}",
+            self.lightning_api_base, payment_hash
+        );
 
         let response = self
             .authorized(self.client.get(&url), Some(token))
@@ -927,7 +934,10 @@ impl DaznoService {
         wallet_id: &str,
         limit: Option<u32>,
     ) -> Result<Vec<DaznoLightningInvoice>, DaznoError> {
-        let mut url = format!("{}/api/v1/wallet/{}/invoices", self.lightning_api_base, wallet_id);
+        let mut url = format!(
+            "{}/api/v1/wallet/{}/invoices",
+            self.lightning_api_base, wallet_id
+        );
         if let Some(limit) = limit {
             url.push_str(&format!("?limit={}", limit));
         }
@@ -956,7 +966,10 @@ impl DaznoService {
         wallet_id: &str,
         limit: Option<u32>,
     ) -> Result<Vec<DaznoLightningPayment>, DaznoError> {
-        let mut url = format!("{}/api/v1/wallet/{}/payments", self.lightning_api_base, wallet_id);
+        let mut url = format!(
+            "{}/api/v1/wallet/{}/payments",
+            self.lightning_api_base, wallet_id
+        );
         if let Some(limit) = limit {
             url.push_str(&format!("?limit={}", limit));
         }

@@ -122,7 +122,7 @@ async fn create_proof(
     let (contract_id, signature) = state
         .rgb
         .create_proof_contract(
-            &request.mentor_id.as_ref().unwrap_or(&String::new()),
+            request.mentor_id.as_ref().unwrap_or(&String::new()),
             &request.mentee_id,
             &request.id,
             payload.rating,

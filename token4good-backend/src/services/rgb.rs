@@ -10,10 +10,10 @@
 //! Pour l'intégration AluVM/Contractum complète (Codex RGB 0.12+), une mise à
 //! jour sera nécessaire une fois le compilateur `contractum` stable.
 
-use std::{collections::HashMap, error::Error, path::PathBuf, str::FromStr, sync::Arc};
+use std::{collections::HashMap, error::Error, path::Path, path::PathBuf, str::FromStr, sync::Arc};
 
-use bitcoin::secp256k1::{All, Message, Secp256k1, SecretKey};
 use bitcoin::secp256k1::ecdsa::Signature;
+use bitcoin::secp256k1::{All, Message, Secp256k1, SecretKey};
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -181,8 +181,7 @@ impl RGBService {
         let data_dir = PathBuf::from(
             std::env::var("RGB_DATA_DIR").unwrap_or_else(|_| "/tmp/rgb_data".to_string()),
         );
-        let network =
-            std::env::var("BITCOIN_NETWORK").unwrap_or_else(|_| "regtest".to_string());
+        let network = std::env::var("BITCOIN_NETWORK").unwrap_or_else(|_| "regtest".to_string());
         let esplora_url = std::env::var("ESPLORA_URL").ok();
 
         std::fs::create_dir_all(&data_dir)?;
@@ -220,7 +219,7 @@ impl RGBService {
     // ─── Clé émetteur ─────────────────────────────────────────────────────────
 
     fn load_or_create_issuer_key(
-        data_dir: &PathBuf,
+        data_dir: &Path,
         secp: &Secp256k1<All>,
     ) -> Result<SecretKey, Box<dyn Error>> {
         let key_path = data_dir.join("issuer.key");
@@ -254,9 +253,7 @@ impl RGBService {
 
     // ─── Stash persistant ─────────────────────────────────────────────────────
 
-    fn load_stash(
-        data_dir: &PathBuf,
-    ) -> Result<HashMap<String, StoredContract>, Box<dyn Error>> {
+    fn load_stash(data_dir: &Path) -> Result<HashMap<String, StoredContract>, Box<dyn Error>> {
         let path = data_dir.join("stash.json");
         if path.exists() {
             let data = std::fs::read_to_string(&path)?;
@@ -268,8 +265,8 @@ impl RGBService {
 
     async fn save_stash(&self) -> Result<(), RGBError> {
         let guard = self.contracts.read().await;
-        let json = serde_json::to_string_pretty(&*guard)
-            .map_err(|e| RGBError::Storage(e.to_string()))?;
+        let json =
+            serde_json::to_string_pretty(&*guard).map_err(|e| RGBError::Storage(e.to_string()))?;
         tokio::fs::write(self.data_dir.join("stash.json"), json).await?;
         Ok(())
     }
@@ -279,22 +276,29 @@ impl RGBService {
     /// Signe 32 octets avec la clé émetteur, retourne la signature compacte hex (64 bytes)
     fn sign_bytes(&self, data: &[u8]) -> Result<String, RGBError> {
         let hash: [u8; 32] = Sha256::digest(data).into();
-        let msg = Message::from_slice(&hash)
-            .map_err(|e| RGBError::Signature(e.to_string()))?;
+        let msg = Message::from_slice(&hash).map_err(|e| RGBError::Signature(e.to_string()))?;
         let sig = self.secp.sign_ecdsa(&msg, &self.issuer_secret_key);
         Ok(hex::encode(sig.serialize_compact()))
     }
 
     /// Vérifie une signature ECDSA compacte (hex 64 bytes) contre une clé publique (hex 33 bytes)
     fn verify_ecdsa(&self, data: &[u8], sig_hex: &str, pubkey_hex: &str) -> bool {
-        let Ok(sig_bytes) = hex::decode(sig_hex) else { return false };
-        let Ok(pk_bytes) = hex::decode(pubkey_hex) else { return false };
-        let Ok(sig) = Signature::from_compact(&sig_bytes) else { return false };
+        let Ok(sig_bytes) = hex::decode(sig_hex) else {
+            return false;
+        };
+        let Ok(pk_bytes) = hex::decode(pubkey_hex) else {
+            return false;
+        };
+        let Ok(sig) = Signature::from_compact(&sig_bytes) else {
+            return false;
+        };
         let Ok(pk) = bitcoin::secp256k1::PublicKey::from_slice(&pk_bytes) else {
             return false;
         };
         let hash: [u8; 32] = Sha256::digest(data).into();
-        let Ok(msg) = Message::from_slice(&hash) else { return false };
+        let Ok(msg) = Message::from_slice(&hash) else {
+            return false;
+        };
         self.secp.verify_ecdsa(&msg, &sig, &pk).is_ok()
     }
 
@@ -317,9 +321,7 @@ impl RGBService {
     fn parse_outpoint(s: &str) -> Result<(String, u32), RGBError> {
         let parts: Vec<&str> = s.splitn(2, ':').collect();
         if parts.len() != 2 {
-            return Err(RGBError::Transfer(
-                "Format attendu : txid:vout".to_string(),
-            ));
+            return Err(RGBError::Transfer("Format attendu : txid:vout".to_string()));
         }
         bitcoin::Txid::from_str(parts[0])
             .map_err(|e| RGBError::Transfer(format!("txid invalide: {}", e)))?;
@@ -347,7 +349,10 @@ impl RGBService {
         rating: u8,
         comment: Option<String>,
     ) -> Result<(String, String), RGBError> {
-        self.create_proof_contract_with_seal(mentor_id, mentee_id, request_id, rating, comment, None).await
+        self.create_proof_contract_with_seal(
+            mentor_id, mentee_id, request_id, rating, comment, None,
+        )
+        .await
     }
 
     /// Variante avec UTXO seal explicite.
@@ -395,7 +400,11 @@ impl RGBService {
         // Parser le seal UTXO optionnel
         let seal = if let Some(outpoint_str) = utxo_seal {
             let (txid, vout) = Self::parse_outpoint(outpoint_str)?;
-            Some(RgbSeal { txid, vout, blinding: Self::random_blinding() })
+            Some(RgbSeal {
+                txid,
+                vout,
+                blinding: Self::random_blinding(),
+            })
         } else {
             None
         };
@@ -439,11 +448,7 @@ impl RGBService {
     /// Vérifie qu'une preuve est valide :
     /// 1. Le contract_id est cohérent avec les métadonnées stockées
     /// 2. La signature ECDSA est valide pour la clé émetteur du contrat
-    pub async fn verify_proof(
-        &self,
-        contract_id: &str,
-        signature: &str,
-    ) -> Result<bool, RGBError> {
+    pub async fn verify_proof(&self, contract_id: &str, signature: &str) -> Result<bool, RGBError> {
         let guard = self.contracts.read().await;
         let Some(c) = guard.get(contract_id) else {
             return Ok(false);
@@ -510,9 +515,16 @@ impl RGBService {
             .map(|s| s.blinding)
             .unwrap_or([0u8; 32]);
 
-        let from_seal = RgbSeal { txid: from_txid, vout: from_vout, blinding: from_blinding };
-        let to_seal =
-            RgbSeal { txid: to_txid, vout: to_vout, blinding: Self::random_blinding() };
+        let from_seal = RgbSeal {
+            txid: from_txid,
+            vout: from_vout,
+            blinding: from_blinding,
+        };
+        let to_seal = RgbSeal {
+            txid: to_txid,
+            vout: to_vout,
+            blinding: Self::random_blinding(),
+        };
 
         // Commitment = SHA256(from_seal_commit ‖ to_seal_commit ‖ contract_id)
         let mut h = Sha256::new();
@@ -611,7 +623,11 @@ impl RGBService {
         std::fs::remove_file(test)?;
 
         let count = self.contracts.read().await.len();
-        tracing::debug!("RGB health OK — {} contrat(s) en mémoire, réseau: {}", count, self.network);
+        tracing::debug!(
+            "RGB health OK — {} contrat(s) en mémoire, réseau: {}",
+            count,
+            self.network
+        );
 
         Ok(())
     }
@@ -730,9 +746,7 @@ mod tests {
     #[tokio::test]
     async fn test_invalid_rating_rejected() {
         let svc = make_service();
-        let result = svc
-            .create_proof_contract("m", "m2", "r", 10, None)
-            .await;
+        let result = svc.create_proof_contract("m", "m2", "r", 10, None).await;
         assert!(result.is_err());
     }
 
@@ -747,7 +761,11 @@ mod tests {
         let details = svc.get_proof_details(&contract_id).await.unwrap();
         assert_eq!(details.mentor_id, "mentor_detail");
         assert_eq!(details.rating, 3);
-        assert_eq!(details.signature.len(), 128, "signature ECDSA = 128 chars hex");
+        assert_eq!(
+            details.signature.len(),
+            128,
+            "signature ECDSA = 128 chars hex"
+        );
     }
 
     #[tokio::test]
@@ -762,11 +780,19 @@ mod tests {
         let to = "0000000000000000000000000000000000000000000000000000000000000002";
 
         let transfer_id = svc
-            .transfer_proof(&contract_id, &format!("{}:0", from), &format!("{}:1", to), 0)
+            .transfer_proof(
+                &contract_id,
+                &format!("{}:0", from),
+                &format!("{}:1", to),
+                0,
+            )
             .await
             .unwrap();
 
-        assert!(transfer_id.starts_with("transfer_"), "L'ID de transfer doit commencer par 'transfer_'");
+        assert!(
+            transfer_id.starts_with("transfer_"),
+            "L'ID de transfer doit commencer par 'transfer_'"
+        );
 
         // L'historique doit avoir 2 entrées : genesis + transition
         let history = svc.get_contract_history(&contract_id).await.unwrap();
@@ -785,7 +811,11 @@ mod tests {
         let history = svc.get_contract_history(&contract_id).await.unwrap();
         assert_eq!(history.len(), 1);
         assert_eq!(history[0].from, "issuer");
-        assert_eq!(history[0].txid.len(), 32, "commitment hex 16 bytes = 32 chars");
+        assert_eq!(
+            history[0].txid.len(),
+            32,
+            "commitment hex 16 bytes = 32 chars"
+        );
     }
 
     #[tokio::test]
@@ -797,8 +827,12 @@ mod tests {
     #[tokio::test]
     async fn test_list_proofs() {
         let svc = make_service();
-        svc.create_proof_contract("ma", "mb", "ra", 5, None).await.unwrap();
-        svc.create_proof_contract("mc", "md", "rb", 3, None).await.unwrap();
+        svc.create_proof_contract("ma", "mb", "ra", 5, None)
+            .await
+            .unwrap();
+        svc.create_proof_contract("mc", "md", "rb", 3, None)
+            .await
+            .unwrap();
 
         let list = svc.list_proofs().await.unwrap();
         assert!(list.len() >= 2);
@@ -820,7 +854,10 @@ mod tests {
 
         // L'historique doit mentionner le seal UTXO dans la destination
         let history = svc.get_contract_history(&contract_id).await.unwrap();
-        assert_eq!(history[0].to, "0000000000000000000000000000000000000000000000000000000000000001:0");
+        assert_eq!(
+            history[0].to,
+            "0000000000000000000000000000000000000000000000000000000000000001:0"
+        );
     }
 
     #[tokio::test]
@@ -835,8 +872,7 @@ mod tests {
     #[tokio::test]
     async fn test_stash_persistence() {
         // Répertoire isolé pour ce test
-        let data_dir = std::env::temp_dir()
-            .join(format!("rgb_persist_{}", uuid::Uuid::new_v4()));
+        let data_dir = std::env::temp_dir().join(format!("rgb_persist_{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&data_dir).unwrap();
 
         // Service 1 : créer la preuve
@@ -854,6 +890,9 @@ mod tests {
         std::env::set_var("RGB_DATA_DIR", data_dir.to_str().unwrap());
         let svc2 = RGBService::new().expect("Reload should work");
         let valid = svc2.verify_proof(&contract_id, &sig).await.unwrap();
-        assert!(valid, "La preuve doit être retrouvée après rechargement du stash");
+        assert!(
+            valid,
+            "La preuve doit être retrouvée après rechargement du stash"
+        );
     }
 }

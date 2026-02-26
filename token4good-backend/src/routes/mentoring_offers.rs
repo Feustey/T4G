@@ -118,29 +118,32 @@ pub async fn list_offers(
     }
     query = query.bind(limit).bind(offset);
 
-    let rows = query
-        .fetch_all(state.db.pool())
-        .await
-        .map_err(|e| {
-            tracing::error!("Error listing mentoring offers: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    let rows = query.fetch_all(state.db.pool()).await.map_err(|e| {
+        tracing::error!("Error listing mentoring offers: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
 
     let offers: Vec<MentoringOffer> = rows
         .into_iter()
         .map(|row| MentoringOffer {
-            id:               row.try_get("id").unwrap_or_default(),
-            mentor_id:        row.try_get("mentor_id").unwrap_or_default(),
-            topic_slug:       row.try_get("topic_slug").unwrap_or_default(),
-            target_level:     row.try_get("target_level").unwrap_or_default(),
-            description:      row.try_get("description").ok(),
+            id: row.try_get("id").unwrap_or_default(),
+            mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+            topic_slug: row.try_get("topic_slug").unwrap_or_default(),
+            target_level: row.try_get("target_level").unwrap_or_default(),
+            description: row.try_get("description").ok(),
             duration_minutes: row.try_get("duration_minutes").unwrap_or(60),
-            format:           row.try_get("format").unwrap_or_default(),
-            token_cost:       row.try_get("token_cost").unwrap_or(0),
-            availability:     row.try_get("availability").unwrap_or(serde_json::Value::Array(vec![])),
-            status:           row.try_get("status").unwrap_or_else(|_| "open".to_string()),
-            created_at:       row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-            updated_at:       row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+            format: row.try_get("format").unwrap_or_default(),
+            token_cost: row.try_get("token_cost").unwrap_or(0),
+            availability: row
+                .try_get("availability")
+                .unwrap_or(serde_json::Value::Array(vec![])),
+            status: row.try_get("status").unwrap_or_else(|_| "open".to_string()),
+            created_at: row
+                .try_get("created_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
+            updated_at: row
+                .try_get("updated_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
         })
         .collect();
 
@@ -152,31 +155,35 @@ pub async fn get_offer(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<MentoringOffer>, StatusCode> {
-    let row = sqlx::query(
-        "SELECT * FROM mentoring_offers WHERE id = $1"
-    )
-    .bind(&id)
-    .fetch_optional(state.db.pool())
-    .await
-    .map_err(|e| {
-        tracing::error!("Error fetching offer {}: {}", id, e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?
-    .ok_or(StatusCode::NOT_FOUND)?;
+    let row = sqlx::query("SELECT * FROM mentoring_offers WHERE id = $1")
+        .bind(&id)
+        .fetch_optional(state.db.pool())
+        .await
+        .map_err(|e| {
+            tracing::error!("Error fetching offer {}: {}", id, e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .ok_or(StatusCode::NOT_FOUND)?;
 
     Ok(Json(MentoringOffer {
-        id:               row.try_get("id").unwrap_or_default(),
-        mentor_id:        row.try_get("mentor_id").unwrap_or_default(),
-        topic_slug:       row.try_get("topic_slug").unwrap_or_default(),
-        target_level:     row.try_get("target_level").unwrap_or_default(),
-        description:      row.try_get("description").ok(),
+        id: row.try_get("id").unwrap_or_default(),
+        mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+        topic_slug: row.try_get("topic_slug").unwrap_or_default(),
+        target_level: row.try_get("target_level").unwrap_or_default(),
+        description: row.try_get("description").ok(),
         duration_minutes: row.try_get("duration_minutes").unwrap_or(60),
-        format:           row.try_get("format").unwrap_or_default(),
-        token_cost:       row.try_get("token_cost").unwrap_or(0),
-        availability:     row.try_get("availability").unwrap_or(serde_json::Value::Array(vec![])),
-        status:           row.try_get("status").unwrap_or_else(|_| "open".to_string()),
-        created_at:       row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        updated_at:       row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+        format: row.try_get("format").unwrap_or_default(),
+        token_cost: row.try_get("token_cost").unwrap_or(0),
+        availability: row
+            .try_get("availability")
+            .unwrap_or(serde_json::Value::Array(vec![])),
+        status: row.try_get("status").unwrap_or_else(|_| "open".to_string()),
+        created_at: row
+            .try_get("created_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: row
+            .try_get("updated_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
     }))
 }
 
@@ -215,21 +222,31 @@ pub async fn create_offer(
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
 
-    tracing::info!("Mentor {} created offer {}", auth_user.id, row.try_get::<String, _>("id").unwrap_or_default());
+    tracing::info!(
+        "Mentor {} created offer {}",
+        auth_user.id,
+        row.try_get::<String, _>("id").unwrap_or_default()
+    );
 
     Ok(Json(MentoringOffer {
-        id:               row.try_get("id").unwrap_or_default(),
-        mentor_id:        row.try_get("mentor_id").unwrap_or_default(),
-        topic_slug:       row.try_get("topic_slug").unwrap_or_default(),
-        target_level:     row.try_get("target_level").unwrap_or_default(),
-        description:      row.try_get("description").ok(),
+        id: row.try_get("id").unwrap_or_default(),
+        mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+        topic_slug: row.try_get("topic_slug").unwrap_or_default(),
+        target_level: row.try_get("target_level").unwrap_or_default(),
+        description: row.try_get("description").ok(),
         duration_minutes: row.try_get("duration_minutes").unwrap_or(60),
-        format:           row.try_get("format").unwrap_or_default(),
-        token_cost:       row.try_get("token_cost").unwrap_or(0),
-        availability:     row.try_get("availability").unwrap_or(serde_json::Value::Array(vec![])),
-        status:           row.try_get("status").unwrap_or_else(|_| "open".to_string()),
-        created_at:       row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        updated_at:       row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+        format: row.try_get("format").unwrap_or_default(),
+        token_cost: row.try_get("token_cost").unwrap_or(0),
+        availability: row
+            .try_get("availability")
+            .unwrap_or(serde_json::Value::Array(vec![])),
+        status: row.try_get("status").unwrap_or_else(|_| "open".to_string()),
+        created_at: row
+            .try_get("created_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: row
+            .try_get("updated_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
     }))
 }
 
@@ -248,7 +265,9 @@ pub async fn update_offer(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let owner_id: String = existing.try_get("mentor_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let owner_id: String = existing
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if owner_id != auth_user.id {
         return Err(StatusCode::FORBIDDEN);
     }
@@ -281,18 +300,24 @@ pub async fn update_offer(
     })?;
 
     Ok(Json(MentoringOffer {
-        id:               row.try_get("id").unwrap_or_default(),
-        mentor_id:        row.try_get("mentor_id").unwrap_or_default(),
-        topic_slug:       row.try_get("topic_slug").unwrap_or_default(),
-        target_level:     row.try_get("target_level").unwrap_or_default(),
-        description:      row.try_get("description").ok(),
+        id: row.try_get("id").unwrap_or_default(),
+        mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+        topic_slug: row.try_get("topic_slug").unwrap_or_default(),
+        target_level: row.try_get("target_level").unwrap_or_default(),
+        description: row.try_get("description").ok(),
         duration_minutes: row.try_get("duration_minutes").unwrap_or(60),
-        format:           row.try_get("format").unwrap_or_default(),
-        token_cost:       row.try_get("token_cost").unwrap_or(0),
-        availability:     row.try_get("availability").unwrap_or(serde_json::Value::Array(vec![])),
-        status:           row.try_get("status").unwrap_or_else(|_| "open".to_string()),
-        created_at:       row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        updated_at:       row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+        format: row.try_get("format").unwrap_or_default(),
+        token_cost: row.try_get("token_cost").unwrap_or(0),
+        availability: row
+            .try_get("availability")
+            .unwrap_or(serde_json::Value::Array(vec![])),
+        status: row.try_get("status").unwrap_or_else(|_| "open".to_string()),
+        created_at: row
+            .try_get("created_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: row
+            .try_get("updated_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
     }))
 }
 
@@ -309,7 +334,9 @@ pub async fn cancel_offer(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let owner_id: String = existing.try_get("mentor_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let owner_id: String = existing
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if owner_id != auth_user.id {
         return Err(StatusCode::FORBIDDEN);
     }
@@ -335,32 +362,37 @@ pub async fn get_my_offers(
     State(state): State<AppState>,
     AuthUserExtractor(auth_user): AuthUserExtractor,
 ) -> Result<Json<Vec<MentoringOffer>>, StatusCode> {
-    let rows = sqlx::query(
-        "SELECT * FROM mentoring_offers WHERE mentor_id = $1 ORDER BY created_at DESC"
-    )
-    .bind(&auth_user.id)
-    .fetch_all(state.db.pool())
-    .await
-    .map_err(|e| {
-        tracing::error!("Error fetching my offers: {}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+    let rows =
+        sqlx::query("SELECT * FROM mentoring_offers WHERE mentor_id = $1 ORDER BY created_at DESC")
+            .bind(&auth_user.id)
+            .fetch_all(state.db.pool())
+            .await
+            .map_err(|e| {
+                tracing::error!("Error fetching my offers: {}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
 
     let offers: Vec<MentoringOffer> = rows
         .into_iter()
         .map(|row| MentoringOffer {
-            id:               row.try_get("id").unwrap_or_default(),
-            mentor_id:        row.try_get("mentor_id").unwrap_or_default(),
-            topic_slug:       row.try_get("topic_slug").unwrap_or_default(),
-            target_level:     row.try_get("target_level").unwrap_or_default(),
-            description:      row.try_get("description").ok(),
+            id: row.try_get("id").unwrap_or_default(),
+            mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+            topic_slug: row.try_get("topic_slug").unwrap_or_default(),
+            target_level: row.try_get("target_level").unwrap_or_default(),
+            description: row.try_get("description").ok(),
             duration_minutes: row.try_get("duration_minutes").unwrap_or(60),
-            format:           row.try_get("format").unwrap_or_default(),
-            token_cost:       row.try_get("token_cost").unwrap_or(0),
-            availability:     row.try_get("availability").unwrap_or(serde_json::Value::Array(vec![])),
-            status:           row.try_get("status").unwrap_or_else(|_| "open".to_string()),
-            created_at:       row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-            updated_at:       row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+            format: row.try_get("format").unwrap_or_default(),
+            token_cost: row.try_get("token_cost").unwrap_or(0),
+            availability: row
+                .try_get("availability")
+                .unwrap_or(serde_json::Value::Array(vec![])),
+            status: row.try_get("status").unwrap_or_else(|_| "open".to_string()),
+            created_at: row
+                .try_get("created_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
+            updated_at: row
+                .try_get("updated_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
         })
         .collect();
 
@@ -373,7 +405,7 @@ pub async fn get_my_bookings(
     AuthUserExtractor(auth_user): AuthUserExtractor,
 ) -> Result<Json<Vec<MentoringBooking>>, StatusCode> {
     let rows = sqlx::query(
-        "SELECT * FROM mentoring_bookings WHERE mentee_id = $1 ORDER BY scheduled_at ASC"
+        "SELECT * FROM mentoring_bookings WHERE mentee_id = $1 ORDER BY scheduled_at ASC",
     )
     .bind(&auth_user.id)
     .fetch_all(state.db.pool())
@@ -386,21 +418,29 @@ pub async fn get_my_bookings(
     let bookings: Vec<MentoringBooking> = rows
         .into_iter()
         .map(|row| MentoringBooking {
-            id:               row.try_get("id").unwrap_or_default(),
-            offer_id:         row.try_get("offer_id").unwrap_or_default(),
-            mentee_id:        row.try_get("mentee_id").unwrap_or_default(),
-            scheduled_at:     row.try_get("scheduled_at").unwrap_or_else(|_| chrono::Utc::now()),
-            status:           row.try_get("status").unwrap_or_else(|_| "pending".to_string()),
+            id: row.try_get("id").unwrap_or_default(),
+            offer_id: row.try_get("offer_id").unwrap_or_default(),
+            mentee_id: row.try_get("mentee_id").unwrap_or_default(),
+            scheduled_at: row
+                .try_get("scheduled_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
+            status: row
+                .try_get("status")
+                .unwrap_or_else(|_| "pending".to_string()),
             mentee_confirmed: row.try_get("mentee_confirmed").unwrap_or(false),
             mentor_confirmed: row.try_get("mentor_confirmed").unwrap_or(false),
-            tokens_escrowed:  row.try_get("tokens_escrowed").unwrap_or(0),
-            mentee_rating:    row.try_get("mentee_rating").ok(),
-            mentor_rating:    row.try_get("mentor_rating").ok(),
-            mentee_comment:   row.try_get("mentee_comment").ok(),
-            mentor_comment:   row.try_get("mentor_comment").ok(),
-            learned_skills:   row.try_get("learned_skills").unwrap_or_default(),
-            created_at:       row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-            updated_at:       row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+            tokens_escrowed: row.try_get("tokens_escrowed").unwrap_or(0),
+            mentee_rating: row.try_get("mentee_rating").ok(),
+            mentor_rating: row.try_get("mentor_rating").ok(),
+            mentee_comment: row.try_get("mentee_comment").ok(),
+            mentor_comment: row.try_get("mentor_comment").ok(),
+            learned_skills: row.try_get("learned_skills").unwrap_or_default(),
+            created_at: row
+                .try_get("created_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
+            updated_at: row
+                .try_get("updated_at")
+                .unwrap_or_else(|_| chrono::Utc::now()),
         })
         .collect();
 
@@ -419,7 +459,7 @@ pub async fn create_booking(
 ) -> Result<Json<MentoringBooking>, StatusCode> {
     // Récupérer l'offre
     let offer_row = sqlx::query(
-        "SELECT token_cost, status, mentor_id, topic_slug FROM mentoring_offers WHERE id = $1"
+        "SELECT token_cost, status, mentor_id, topic_slug FROM mentoring_offers WHERE id = $1",
     )
     .bind(&payload.offer_id)
     .fetch_optional(state.db.pool())
@@ -427,18 +467,26 @@ pub async fn create_booking(
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
     .ok_or(StatusCode::NOT_FOUND)?;
 
-    let offer_status: String = offer_row.try_get("status").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let offer_status: String = offer_row
+        .try_get("status")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if offer_status != "open" {
         return Err(StatusCode::CONFLICT);
     }
 
-    let mentor_id: String = offer_row.try_get("mentor_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentor_id: String = offer_row
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if mentor_id == auth_user.id {
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let token_cost: i32   = offer_row.try_get("token_cost").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let topic_slug: String = offer_row.try_get("topic_slug").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let token_cost: i32 = offer_row
+        .try_get("token_cost")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let topic_slug: String = offer_row
+        .try_get("topic_slug")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     // ── Vérification du solde T4G du mentee ──
     mentoring_completion::check_balance(state.db.pool(), &auth_user.id, token_cost as i64)
@@ -448,7 +496,12 @@ pub async fn create_booking(
             StatusCode::PAYMENT_REQUIRED
         })?;
 
-    let mut tx = state.db.pool().begin().await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mut tx = state
+        .db
+        .pool()
+        .begin()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     // Créer la réservation
     let booking_row = sqlx::query(
@@ -481,38 +534,57 @@ pub async fn create_booking(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    tx.commit().await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    tx.commit()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     // ── Débit séquestre (hors transaction SQL pour éviter deadlock) ──
     if token_cost > 0 {
         if let Err(e) = mentoring_completion::debit_escrow(
-            state.db.pool(), &auth_user.id, token_cost as i64, &booking_id, &topic_slug,
-        ).await {
+            state.db.pool(),
+            &auth_user.id,
+            token_cost as i64,
+            &booking_id,
+            &topic_slug,
+        )
+        .await
+        {
             tracing::error!("Escrow debit failed for booking {}: {}", booking_id, e);
         }
     }
 
     tracing::info!(
         "Booking {} created: mentee {} booked offer {} for {} T4G (escrowed)",
-        booking_id, auth_user.id, payload.offer_id, token_cost
+        booking_id,
+        auth_user.id,
+        payload.offer_id,
+        token_cost
     );
 
     Ok(Json(MentoringBooking {
-        id:               booking_id,
-        offer_id:         booking_row.try_get("offer_id").unwrap_or_default(),
-        mentee_id:        booking_row.try_get("mentee_id").unwrap_or_default(),
-        scheduled_at:     booking_row.try_get("scheduled_at").unwrap_or_else(|_| chrono::Utc::now()),
-        status:           booking_row.try_get("status").unwrap_or_else(|_| "pending".to_string()),
+        id: booking_id,
+        offer_id: booking_row.try_get("offer_id").unwrap_or_default(),
+        mentee_id: booking_row.try_get("mentee_id").unwrap_or_default(),
+        scheduled_at: booking_row
+            .try_get("scheduled_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        status: booking_row
+            .try_get("status")
+            .unwrap_or_else(|_| "pending".to_string()),
         mentee_confirmed: false,
         mentor_confirmed: false,
-        tokens_escrowed:  token_cost,
-        mentee_rating:    None,
-        mentor_rating:    None,
-        mentee_comment:   None,
-        mentor_comment:   None,
-        learned_skills:   vec![],
-        created_at:       booking_row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        updated_at:       booking_row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+        tokens_escrowed: token_cost,
+        mentee_rating: None,
+        mentor_rating: None,
+        mentee_comment: None,
+        mentor_comment: None,
+        learned_skills: vec![],
+        created_at: booking_row
+            .try_get("created_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: booking_row
+            .try_get("updated_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
     }))
 }
 
@@ -538,28 +610,45 @@ pub async fn confirm_booking(
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
     .ok_or(StatusCode::NOT_FOUND)?;
 
-    let mentee_id: String   = booking_row.try_get("mentee_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let mentor_id: String   = booking_row.try_get("mentor_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let is_mentee           = auth_user.id == mentee_id;
-    let is_mentor           = auth_user.id == mentor_id;
+    let mentee_id: String = booking_row
+        .try_get("mentee_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentor_id: String = booking_row
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let is_mentee = auth_user.id == mentee_id;
+    let is_mentor = auth_user.id == mentor_id;
 
     if !is_mentee && !is_mentor {
         return Err(StatusCode::FORBIDDEN);
     }
 
     let (mentee_col, mentor_col, rating_col, comment_col) = if is_mentee {
-        ("mentee_confirmed", "mentor_confirmed", "mentee_rating", "mentee_comment")
+        (
+            "mentee_confirmed",
+            "mentor_confirmed",
+            "mentee_rating",
+            "mentee_comment",
+        )
     } else {
-        ("mentor_confirmed", "mentee_confirmed", "mentor_rating", "mentor_comment")
+        (
+            "mentor_confirmed",
+            "mentee_confirmed",
+            "mentor_rating",
+            "mentor_comment",
+        )
     };
 
     let other_confirmed: bool = booking_row.try_get(mentor_col).unwrap_or(false);
 
-    let new_status = if other_confirmed { "completed" } else { "pending_completion" };
+    let new_status = if other_confirmed {
+        "completed"
+    } else {
+        "pending_completion"
+    };
 
-    let updated = sqlx::query(
-        &format!(
-            r#"
+    let updated = sqlx::query(&format!(
+        r#"
             UPDATE mentoring_bookings SET
                 {mentee_col}  = true,
                 {rating_col}  = COALESCE($1, {rating_col}),
@@ -569,11 +658,10 @@ pub async fn confirm_booking(
             WHERE id = $5
             RETURNING *
             "#,
-            mentee_col  = mentee_col,
-            rating_col  = rating_col,
-            comment_col = comment_col,
-        )
-    )
+        mentee_col = mentee_col,
+        rating_col = rating_col,
+        comment_col = comment_col,
+    ))
     .bind(payload.rating)
     .bind(&payload.comment)
     .bind(payload.learned_skills.as_deref())
@@ -588,25 +676,26 @@ pub async fn confirm_booking(
 
     // Si complétion totale → libérer le séquestre + proof RGB
     if new_status == "completed" {
-        let offer_id: String      = updated.try_get("offer_id").unwrap_or_default();
-        let escrow: i32           = updated.try_get("tokens_escrowed").unwrap_or(0);
+        let offer_id: String = updated.try_get("offer_id").unwrap_or_default();
+        let escrow: i32 = updated.try_get("tokens_escrowed").unwrap_or(0);
         let m_rating: Option<i32> = updated.try_get("mentee_rating").ok();
         let m_comment: Option<String> = updated.try_get("mentee_comment").ok();
 
         // Récupérer topic + durée depuis l'offre
-        let offer_extra = sqlx::query(
-            "SELECT topic_slug, duration_minutes FROM mentoring_offers WHERE id = $1"
-        )
-        .bind(&offer_id)
-        .fetch_optional(state.db.pool())
-        .await
-        .ok()
-        .flatten();
+        let offer_extra =
+            sqlx::query("SELECT topic_slug, duration_minutes FROM mentoring_offers WHERE id = $1")
+                .bind(&offer_id)
+                .fetch_optional(state.db.pool())
+                .await
+                .ok()
+                .flatten();
 
-        let topic_slug = offer_extra.as_ref()
+        let topic_slug = offer_extra
+            .as_ref()
             .and_then(|r| r.try_get::<String, _>("topic_slug").ok())
             .unwrap_or_default();
-        let duration = offer_extra.as_ref()
+        let duration = offer_extra
+            .as_ref()
             .and_then(|r| r.try_get::<i32, _>("duration_minutes").ok())
             .unwrap_or(60);
 
@@ -634,8 +723,10 @@ pub async fn confirm_booking(
         tracing::info!(
             "Booking {} completed: {} T4G → mentor {}, {} T4G → mentee {}, RGB={}",
             id,
-            result.tokens_to_mentor, mentor_id,
-            result.tokens_to_mentee, mentee_id,
+            result.tokens_to_mentor,
+            mentor_id,
+            result.tokens_to_mentee,
+            mentee_id,
             result.rgb_contract_id.as_deref().unwrap_or("none")
         );
 
@@ -658,21 +749,29 @@ pub async fn confirm_booking(
     }
 
     Ok(Json(MentoringBooking {
-        id:               updated.try_get("id").unwrap_or_default(),
-        offer_id:         updated.try_get("offer_id").unwrap_or_default(),
-        mentee_id:        updated.try_get("mentee_id").unwrap_or_default(),
-        scheduled_at:     updated.try_get("scheduled_at").unwrap_or_else(|_| chrono::Utc::now()),
-        status:           updated.try_get("status").unwrap_or_else(|_| "pending_completion".to_string()),
+        id: updated.try_get("id").unwrap_or_default(),
+        offer_id: updated.try_get("offer_id").unwrap_or_default(),
+        mentee_id: updated.try_get("mentee_id").unwrap_or_default(),
+        scheduled_at: updated
+            .try_get("scheduled_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        status: updated
+            .try_get("status")
+            .unwrap_or_else(|_| "pending_completion".to_string()),
         mentee_confirmed: updated.try_get("mentee_confirmed").unwrap_or(false),
         mentor_confirmed: updated.try_get("mentor_confirmed").unwrap_or(false),
-        tokens_escrowed:  updated.try_get("tokens_escrowed").unwrap_or(0),
-        mentee_rating:    updated.try_get("mentee_rating").ok(),
-        mentor_rating:    updated.try_get("mentor_rating").ok(),
-        mentee_comment:   updated.try_get("mentee_comment").ok(),
-        mentor_comment:   updated.try_get("mentor_comment").ok(),
-        learned_skills:   updated.try_get("learned_skills").unwrap_or_default(),
-        created_at:       updated.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        updated_at:       updated.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+        tokens_escrowed: updated.try_get("tokens_escrowed").unwrap_or(0),
+        mentee_rating: updated.try_get("mentee_rating").ok(),
+        mentor_rating: updated.try_get("mentor_rating").ok(),
+        mentee_comment: updated.try_get("mentee_comment").ok(),
+        mentor_comment: updated.try_get("mentor_comment").ok(),
+        learned_skills: updated.try_get("learned_skills").unwrap_or_default(),
+        created_at: updated
+            .try_get("created_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: updated
+            .try_get("updated_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
     }))
 }
 
@@ -696,28 +795,40 @@ pub async fn get_booking(
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
     .ok_or(StatusCode::NOT_FOUND)?;
 
-    let mentee_id: String = booking_row.try_get("mentee_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let mentor_id: String = booking_row.try_get("mentor_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentee_id: String = booking_row
+        .try_get("mentee_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentor_id: String = booking_row
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if auth_user.id != mentee_id && auth_user.id != mentor_id {
         return Err(StatusCode::FORBIDDEN);
     }
 
     Ok(Json(MentoringBooking {
-        id:               booking_row.try_get("id").unwrap_or_default(),
-        offer_id:         booking_row.try_get("offer_id").unwrap_or_default(),
-        mentee_id:        booking_row.try_get("mentee_id").unwrap_or_default(),
-        scheduled_at:     booking_row.try_get("scheduled_at").unwrap_or_else(|_| chrono::Utc::now()),
-        status:           booking_row.try_get("status").unwrap_or_else(|_| "pending".to_string()),
+        id: booking_row.try_get("id").unwrap_or_default(),
+        offer_id: booking_row.try_get("offer_id").unwrap_or_default(),
+        mentee_id: booking_row.try_get("mentee_id").unwrap_or_default(),
+        scheduled_at: booking_row
+            .try_get("scheduled_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        status: booking_row
+            .try_get("status")
+            .unwrap_or_else(|_| "pending".to_string()),
         mentee_confirmed: booking_row.try_get("mentee_confirmed").unwrap_or(false),
         mentor_confirmed: booking_row.try_get("mentor_confirmed").unwrap_or(false),
-        tokens_escrowed:  booking_row.try_get("tokens_escrowed").unwrap_or(0),
-        mentee_rating:    booking_row.try_get("mentee_rating").ok(),
-        mentor_rating:    booking_row.try_get("mentor_rating").ok(),
-        mentee_comment:   booking_row.try_get("mentee_comment").ok(),
-        mentor_comment:   booking_row.try_get("mentor_comment").ok(),
-        learned_skills:   booking_row.try_get("learned_skills").unwrap_or_default(),
-        created_at:       booking_row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        updated_at:       booking_row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+        tokens_escrowed: booking_row.try_get("tokens_escrowed").unwrap_or(0),
+        mentee_rating: booking_row.try_get("mentee_rating").ok(),
+        mentor_rating: booking_row.try_get("mentor_rating").ok(),
+        mentee_comment: booking_row.try_get("mentee_comment").ok(),
+        mentor_comment: booking_row.try_get("mentor_comment").ok(),
+        learned_skills: booking_row.try_get("learned_skills").unwrap_or_default(),
+        created_at: booking_row
+            .try_get("created_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: booking_row
+            .try_get("updated_at")
+            .unwrap_or_else(|_| chrono::Utc::now()),
     }))
 }
 
@@ -753,8 +864,12 @@ pub async fn get_session_full(
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
     .ok_or(StatusCode::NOT_FOUND)?;
 
-    let mentee_id: String = row.try_get("mentee_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let mentor_id: String = row.try_get("mentor_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentee_id: String = row
+        .try_get("mentee_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentor_id: String = row
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if auth_user.id != mentee_id && auth_user.id != mentor_id {
         return Err(StatusCode::FORBIDDEN);
     }
@@ -803,16 +918,16 @@ pub async fn dispute_booking(
     AuthUserExtractor(auth_user): AuthUserExtractor,
     Path(id): Path<String>,
 ) -> Result<StatusCode, StatusCode> {
-    let booking_row = sqlx::query(
-        "SELECT mentee_id FROM mentoring_bookings WHERE id = $1"
-    )
-    .bind(&id)
-    .fetch_optional(state.db.pool())
-    .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-    .ok_or(StatusCode::NOT_FOUND)?;
+    let booking_row = sqlx::query("SELECT mentee_id FROM mentoring_bookings WHERE id = $1")
+        .bind(&id)
+        .fetch_optional(state.db.pool())
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
 
-    let mentee_id: String = booking_row.try_get("mentee_id").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mentee_id: String = booking_row
+        .try_get("mentee_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if mentee_id != auth_user.id {
         return Err(StatusCode::FORBIDDEN);
     }

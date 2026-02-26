@@ -35,8 +35,14 @@ pub fn user_routes() -> Router<AppState> {
         .route("/me/about", get(get_current_user_about))
         .route("/me/metrics", get(get_current_user_metrics))
         .route("/me/pending", get(get_current_user_pending))
-        .route("/me/mentoring-offers",   get(crate::routes::mentoring_offers::get_my_offers))
-        .route("/me/mentoring-bookings", get(crate::routes::mentoring_offers::get_my_bookings))
+        .route(
+            "/me/mentoring-offers",
+            get(crate::routes::mentoring_offers::get_my_offers),
+        )
+        .route(
+            "/me/mentoring-bookings",
+            get(crate::routes::mentoring_offers::get_my_bookings),
+        )
         // Routes /:id après /me
         .route("/:id", get(get_user).put(update_user).delete(delete_user))
         .route("/:id/profile", get(get_user_profile))
@@ -78,11 +84,11 @@ pub async fn create_user(
         lastname: payload.lastname,
         lightning_address: payload
             .lightning_address
-            .unwrap_or_else(|| format!("{}@lightning.token4good.com", user_id.to_string())),
+            .unwrap_or_else(|| format!("{user_id}@lightning.token4good.com")),
         role: payload.role,
         username: payload
             .username
-            .unwrap_or_else(|| format!("user_{}", &user_id.to_string()[..8])),
+            .unwrap_or_else(|| format!("user_{:.8}", user_id)),
         bio: payload.bio,
         score: 0,
         avatar: payload.avatar,
@@ -225,7 +231,7 @@ pub async fn get_user_transactions(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Vec<TransactionRecord>>, StatusCode> {
-    let user = state
+    let _user = state
         .db
         .get_user_by_id(&id)
         .await
@@ -249,12 +255,20 @@ pub async fn get_user_transactions(
             }
         }
         Err(e) => {
-            tracing::warn!("Failed to get Lightning transactions for user {}: {}", id, e);
+            tracing::warn!(
+                "Failed to get Lightning transactions for user {}: {}",
+                id,
+                e
+            );
         }
     }
 
     // Récupérer les transactions RGB depuis la base de données
-    match state.db.get_proofs(None, None, Some(id.clone()), 100, 0).await {
+    match state
+        .db
+        .get_proofs(None, None, Some(id.clone()), 100, 0)
+        .await
+    {
         Ok(proofs) => {
             for proof in proofs {
                 transactions.push(TransactionRecord {
@@ -314,7 +328,11 @@ pub async fn get_user_notifications(
     match state.db.get_user_notifications(&auth_user.id).await {
         Ok(notifications) => Ok(Json(notifications)),
         Err(e) => {
-            tracing::warn!("Failed to get notifications for user {}: {}", auth_user.id, e);
+            tracing::warn!(
+                "Failed to get notifications for user {}: {}",
+                auth_user.id,
+                e
+            );
             // Retourner une liste vide en cas d'erreur plutôt que de faire échouer la requête
             Ok(Json(vec![]))
         }
@@ -369,7 +387,7 @@ pub async fn get_current_user_about(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     // Return bio as a string (empty string if None)
-    let about = user.bio.unwrap_or_else(|| String::new());
+    let about = user.bio.unwrap_or_default();
 
     Ok(Json(about))
 }
@@ -379,15 +397,16 @@ pub async fn get_current_user_metrics(
     AuthUserExtractor(auth_user): AuthUserExtractor,
 ) -> Result<Json<UserMetrics>, StatusCode> {
     // Récupérer les transactions pour calculer les métriques
-    let transactions = match get_user_transactions(State(state.clone()), Path(auth_user.id.clone())).await {
-        Ok(Json(txs)) => txs,
-        Err(_) => vec![],
-    };
+    let transactions =
+        match get_user_transactions(State(state.clone()), Path(auth_user.id.clone())).await {
+            Ok(Json(txs)) => txs,
+            Err(_) => vec![],
+        };
 
     // Calculer les métriques à partir des transactions
     let mut total_earned_msat = 0u64;
     let mut total_spent_msat = 0u64;
-    
+
     for tx in &transactions {
         if tx.transaction_type == "invoice" && tx.status == "settled" {
             total_earned_msat += tx.amount_msat;
@@ -430,7 +449,7 @@ pub async fn get_current_user_metrics(
         services_consumed,
         reputation_score,
     };
-    
+
     Ok(Json(metrics))
 }
 
@@ -443,22 +462,22 @@ fn calculate_reputation_score(
     consumed: u32,
 ) -> f32 {
     let mut score = 0.0;
-    
+
     // Score basé sur le nombre de transactions (max 25 points)
     score += (total_txs as f32 * 0.5).min(25.0);
-    
+
     // Score basé sur le volume de transactions (max 25 points)
     let total_volume = (earned + spent) as f32 / 1_000_000.0; // Convertir en sats
     score += (total_volume * 0.01).min(25.0);
-    
+
     // Score basé sur les services fournis (max 25 points)
     score += (provided as f32 * 2.0).min(25.0);
-    
+
     // Score basé sur l'engagement (max 25 points)
     if provided > 0 && consumed > 0 {
         score += ((provided + consumed) as f32 * 1.0).min(25.0);
     }
-    
+
     // Normaliser sur 5.0
     (score / 20.0).min(5.0)
 }
@@ -470,7 +489,11 @@ pub async fn get_current_user_pending(
     let mut pending = vec![];
 
     // Récupérer les transactions Lightning en attente via Dazno
-    match state.dazno.get_wallet_payments("", &auth_user.id, None).await {
+    match state
+        .dazno
+        .get_wallet_payments("", &auth_user.id, None)
+        .await
+    {
         Ok(transactions) => {
             for tx in transactions {
                 if tx.status == "pending" || tx.status == "processing" {
@@ -545,11 +568,16 @@ pub async fn disable_first_access(
     let access_count: u32 = match state.db.increment_dashboard_access(&id).await {
         Ok(count) => count,
         Err(e) => {
-            tracing::warn!("Failed to increment dashboard access count for user {}: {}", id, e);
+            tracing::warn!(
+                "Failed to increment dashboard access count for user {}: {}",
+                id,
+                e
+            );
             user.preferences
                 .get("dashboardAccessCount")
                 .and_then(|v| v.as_u64())
-                .unwrap_or(1) as u32 + 1
+                .unwrap_or(1) as u32
+                + 1
         }
     };
 

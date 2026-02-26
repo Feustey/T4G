@@ -1,14 +1,12 @@
-use sqlx::{PgPool, Row};
-use std::error::Error;
-use std::collections::HashMap;
-use uuid::Uuid;
-
 use crate::models::{
     mentoring::{MentoringProof, MentoringRequest},
     proof::Proof,
     user::User,
 };
 use crate::services::database_services::ServiceDatabaseOps;
+use sqlx::{PgPool, Row};
+use std::collections::HashMap;
+use std::error::Error;
 
 #[derive(Clone)]
 pub struct DatabaseService {
@@ -40,7 +38,7 @@ impl DatabaseService {
                 updated_at = NOW()
             "#
         )
-        .bind(&user.id)
+        .bind(user.id)
         .bind(&user.email)
         .bind(&user.firstname)
         .bind(&user.lastname)
@@ -50,8 +48,8 @@ impl DatabaseService {
         .bind(&user.bio)
         .bind(user.score as i32)
         .bind(&user.avatar)
-        .bind(&user.created_at)
-        .bind(&user.updated_at)
+        .bind(user.created_at)
+        .bind(user.updated_at)
         .bind(user.is_active)
         .bind(&user.wallet_address)
         .bind(&user.preferences)
@@ -78,7 +76,10 @@ impl DatabaseService {
                 firstname: row.try_get("firstname")?,
                 lastname: row.try_get("lastname")?,
                 lightning_address: row.try_get("lightning_address")?,
-                role: row.try_get::<String, _>("role")?.parse().unwrap_or(crate::models::user::UserRole::Alumni),
+                role: row
+                    .try_get::<String, _>("role")?
+                    .parse()
+                    .unwrap_or(crate::models::user::UserRole::Alumni),
                 username: row.try_get("username")?,
                 bio: row.try_get("bio").ok(),
                 score: row.try_get::<i32, _>("score")? as u32,
@@ -284,7 +285,10 @@ impl DatabaseService {
     }
 
     /// Obtenir le solde d'un utilisateur (total gagné - total dépensé)
-    pub async fn get_user_token_balance(&self, user_id: &str) -> Result<(i64, i64, i64), Box<dyn Error>> {
+    pub async fn get_user_token_balance(
+        &self,
+        user_id: &str,
+    ) -> Result<(i64, i64, i64), Box<dyn Error>> {
         let earned = sqlx::query_scalar::<_, Option<i64>>(
             r#"
             SELECT COALESCE(SUM(tokens), 0)
@@ -319,7 +323,7 @@ impl DatabaseService {
         user_id: &str,
         limit: Option<i64>,
     ) -> Result<Vec<crate::routes::token4good::Transaction>, Box<dyn Error>> {
-        let limit_value = limit.unwrap_or(50).min(100) as i64;
+        let limit_value = limit.unwrap_or(50).min(100);
 
         let rows = sqlx::query(
             r#"
@@ -328,21 +332,26 @@ impl DatabaseService {
             WHERE user_id = $1
             ORDER BY created_at DESC
             LIMIT $2
-            "#
+            "#,
         )
         .bind(user_id)
         .bind(limit_value)
         .fetch_all(&self.pool)
         .await?;
 
-        Ok(rows.into_iter().map(|row| crate::routes::token4good::Transaction {
-            id: row.try_get("id").unwrap_or_default(),
-            user_id: row.try_get("user_id").unwrap_or_default(),
-            action_type: row.try_get("action_type").unwrap_or_default(),
-            tokens: row.try_get("tokens").unwrap_or(0),
-            description: row.try_get("description").unwrap_or_default(),
-            timestamp: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        }).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| crate::routes::token4good::Transaction {
+                id: row.try_get("id").unwrap_or_default(),
+                user_id: row.try_get("user_id").unwrap_or_default(),
+                action_type: row.try_get("action_type").unwrap_or_default(),
+                tokens: row.try_get("tokens").unwrap_or(0),
+                description: row.try_get("description").unwrap_or_default(),
+                timestamp: row
+                    .try_get("created_at")
+                    .unwrap_or_else(|_| chrono::Utc::now()),
+            })
+            .collect())
     }
 
     // ============= T4G MENTORING SESSIONS =============
@@ -393,16 +402,16 @@ impl DatabaseService {
             SELECT mentor_id, mentee_id, duration_minutes, category
             FROM t4g_mentoring_sessions
             WHERE id = $1 AND status = 'scheduled'
-            "#
+            "#,
         )
         .bind(session_id)
         .fetch_optional(&self.pool)
         .await?;
 
         let session_row = row.ok_or("Session not found or already completed")?;
-        
+
         let mentor_id: String = session_row.try_get("mentor_id")?;
-        let mentee_id: String = session_row.try_get("mentee_id")?;
+        let _mentee_id: String = session_row.try_get("mentee_id")?;
         let duration_minutes: i32 = session_row.try_get("duration_minutes")?;
         let category: String = session_row.try_get("category")?;
 
@@ -427,7 +436,7 @@ impl DatabaseService {
                 completed_at = NOW(),
                 updated_at = NOW()
             WHERE id = $1
-            "#
+            "#,
         )
         .bind(session_id)
         .bind(rating)
@@ -449,7 +458,8 @@ impl DatabaseService {
                 "duration_minutes": duration_minutes
             })),
             Some(1.0 + (rating as f64 / 10.0)),
-        ).await?;
+        )
+        .await?;
 
         Ok(())
     }
@@ -477,25 +487,35 @@ impl DatabaseService {
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(rows.into_iter().map(|row| crate::routes::token4good::MentoringSession {
-            id: row.try_get("id").unwrap_or_default(),
-            mentor_id: row.try_get("mentor_id").unwrap_or_default(),
-            mentee_id: row.try_get("mentee_id").unwrap_or_default(),
-            topic: row.try_get("topic").unwrap_or_default(),
-            category: row.try_get("category").unwrap_or_default(),
-            duration_minutes: row.try_get("duration_minutes").unwrap_or(0),
-            status: row.try_get("status").unwrap_or_else(|_| "unknown".to_string()),
-            created_at: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        }).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| crate::routes::token4good::MentoringSession {
+                id: row.try_get("id").unwrap_or_default(),
+                mentor_id: row.try_get("mentor_id").unwrap_or_default(),
+                mentee_id: row.try_get("mentee_id").unwrap_or_default(),
+                topic: row.try_get("topic").unwrap_or_default(),
+                category: row.try_get("category").unwrap_or_default(),
+                duration_minutes: row.try_get("duration_minutes").unwrap_or(0),
+                status: row
+                    .try_get("status")
+                    .unwrap_or_else(|_| "unknown".to_string()),
+                created_at: row
+                    .try_get("created_at")
+                    .unwrap_or_else(|_| chrono::Utc::now()),
+            })
+            .collect())
     }
 
     // ============= T4G STATISTICS =============
 
     /// Obtenir les statistiques d'un utilisateur
-    pub async fn get_user_statistics(&self, user_id: &str) -> Result<crate::routes::token4good::UserStatistics, Box<dyn Error>> {
+    pub async fn get_user_statistics(
+        &self,
+        user_id: &str,
+    ) -> Result<crate::routes::token4good::UserStatistics, Box<dyn Error>> {
         // Total transactions
         let total_transactions = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_token_transactions WHERE user_id = $1"
+            "SELECT COUNT(*) FROM t4g_token_transactions WHERE user_id = $1",
         )
         .bind(user_id)
         .fetch_one(&self.pool)
@@ -526,7 +546,7 @@ impl DatabaseService {
             SELECT AVG(rating)::FLOAT
             FROM t4g_mentoring_sessions
             WHERE mentor_id = $1 AND rating IS NOT NULL
-            "#
+            "#,
         )
         .bind(user_id)
         .fetch_one(&self.pool)
@@ -578,8 +598,11 @@ impl DatabaseService {
     }
 
     /// Obtenir le leaderboard
-    pub async fn get_leaderboard(&self, limit: i64) -> Result<Vec<crate::routes::token4good::LeaderboardEntry>, Box<dyn Error>> {
-        let limit_value = limit.min(100) as i64;
+    pub async fn get_leaderboard(
+        &self,
+        limit: i64,
+    ) -> Result<Vec<crate::routes::token4good::LeaderboardEntry>, Box<dyn Error>> {
+        let limit_value = limit.min(100);
 
         let rows = sqlx::query(
             r#"
@@ -599,12 +622,21 @@ impl DatabaseService {
         .fetch_all(&self.pool)
         .await?;
 
-        Ok(rows.into_iter().map(|row| crate::routes::token4good::LeaderboardEntry {
-            user_id: row.try_get("user_id").unwrap_or_default(),
-            username: row.try_get("username").unwrap_or_default(),
-            total_tokens: row.try_get::<Option<i64>, _>("total_tokens").unwrap_or(Some(0)).unwrap_or(0),
-            rank: row.try_get::<Option<i64>, _>("rank").unwrap_or(Some(0)).unwrap_or(0),
-        }).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| crate::routes::token4good::LeaderboardEntry {
+                user_id: row.try_get("user_id").unwrap_or_default(),
+                username: row.try_get("username").unwrap_or_default(),
+                total_tokens: row
+                    .try_get::<Option<i64>, _>("total_tokens")
+                    .unwrap_or(Some(0))
+                    .unwrap_or(0),
+                rank: row
+                    .try_get::<Option<i64>, _>("rank")
+                    .unwrap_or(Some(0))
+                    .unwrap_or(0),
+            })
+            .collect())
     }
 
     /// Compter le nombre total d'utilisateurs T4G
@@ -613,7 +645,7 @@ impl DatabaseService {
             r#"
             SELECT COUNT(DISTINCT user_id)
             FROM t4g_token_transactions
-            "#
+            "#,
         )
         .fetch_one(&self.pool)
         .await?
@@ -623,18 +655,19 @@ impl DatabaseService {
     }
 
     /// Obtenir les statistiques système
-    pub async fn get_system_statistics(&self) -> Result<(i64, i64, i64, HashMap<String, i64>), Box<dyn Error>> {
+    pub async fn get_system_statistics(
+        &self,
+    ) -> Result<(i64, i64, i64, HashMap<String, i64>), Box<dyn Error>> {
         let total_users = self.count_t4g_users().await?;
 
-        let total_transactions = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_token_transactions"
-        )
-        .fetch_one(&self.pool)
-        .await?
-        .unwrap_or(0);
+        let total_transactions =
+            sqlx::query_scalar::<_, Option<i64>>("SELECT COUNT(*) FROM t4g_token_transactions")
+                .fetch_one(&self.pool)
+                .await?
+                .unwrap_or(0);
 
         let active_services = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_services WHERE status = 'active'"
+            "SELECT COUNT(*) FROM t4g_services WHERE status = 'active'",
         )
         .fetch_one(&self.pool)
         .await?
@@ -663,16 +696,22 @@ impl DatabaseService {
             let count: Option<i64> = row.try_get("count").ok();
             level_distribution.insert(
                 level.unwrap_or_else(|| "contributeur".to_string()),
-                count.unwrap_or(0)
+                count.unwrap_or(0),
             );
         }
 
-        Ok((total_users, total_transactions, active_services, level_distribution))
+        Ok((
+            total_users,
+            total_transactions,
+            active_services,
+            level_distribution,
+        ))
     }
 
     // ============= T4G SERVICES (MARKETPLACE) =============
 
     /// Créer un service marketplace
+    #[allow(clippy::too_many_arguments)]
     pub async fn create_t4g_service(
         &self,
         provider_id: &str,
@@ -713,52 +752,73 @@ impl DatabaseService {
         &self,
         category: Option<&str>,
         max_cost: Option<i64>,
-        tags: Option<&[String]>,
-        provider_level: Option<&str>,
+        _tags: Option<&[String]>,
+        _provider_level: Option<&str>,
         limit: i64,
     ) -> Result<Vec<crate::routes::token4good::Service>, Box<dyn Error>> {
-        let limit_value = limit.min(100) as i64;
-        
+        let limit_value = limit.min(100);
+
         // Construire la requête dynamique
         let mut query = "SELECT id, provider_id, name, description, category, token_cost, estimated_duration, requirements, tags, rating, reviews_count, created_at FROM t4g_services WHERE status = 'active'".to_string();
         let mut conditions = Vec::new();
-        
+
         if let Some(cat) = category {
             conditions.push(format!("category = '{}'", cat.replace("'", "''")));
         }
         if let Some(max) = max_cost {
             conditions.push(format!("token_cost <= {}", max));
         }
-        
+
         if !conditions.is_empty() {
             query.push_str(" AND ");
             query.push_str(&conditions.join(" AND "));
         }
-        
-        query.push_str(&format!(" ORDER BY rating DESC, reviews_count DESC LIMIT {}", limit_value));
 
-        let rows = sqlx::query(&query)
-            .fetch_all(&self.pool)
-            .await?;
+        query.push_str(&format!(
+            " ORDER BY rating DESC, reviews_count DESC LIMIT {}",
+            limit_value
+        ));
 
-        Ok(rows.into_iter().map(|row| crate::routes::token4good::Service {
-            id: row.try_get("id").unwrap_or_default(),
-            provider_id: row.try_get("provider_id").unwrap_or_default(),
-            name: row.try_get("name").unwrap_or_default(),
-            description: row.try_get("description").unwrap_or_default(),
-            category: row.try_get("category").unwrap_or_default(),
-            token_cost: row.try_get("token_cost").unwrap_or(0),
-            estimated_duration: row.try_get("estimated_duration").unwrap_or_default(),
-            requirements: row.try_get::<Option<Vec<String>>, _>("requirements").unwrap_or_default().unwrap_or_default(),
-            tags: row.try_get::<Option<Vec<String>>, _>("tags").unwrap_or_default().unwrap_or_default(),
-            rating: row.try_get::<Option<f64>, _>("rating").unwrap_or(Some(0.0)).unwrap_or(0.0),
-            reviews_count: row.try_get::<Option<i64>, _>("reviews_count").unwrap_or(Some(0)).unwrap_or(0),
-            created_at: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-        }).collect())
+        let rows = sqlx::query(&query).fetch_all(&self.pool).await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| crate::routes::token4good::Service {
+                id: row.try_get("id").unwrap_or_default(),
+                provider_id: row.try_get("provider_id").unwrap_or_default(),
+                name: row.try_get("name").unwrap_or_default(),
+                description: row.try_get("description").unwrap_or_default(),
+                category: row.try_get("category").unwrap_or_default(),
+                token_cost: row.try_get("token_cost").unwrap_or(0),
+                estimated_duration: row.try_get("estimated_duration").unwrap_or_default(),
+                requirements: row
+                    .try_get::<Option<Vec<String>>, _>("requirements")
+                    .unwrap_or_default()
+                    .unwrap_or_default(),
+                tags: row
+                    .try_get::<Option<Vec<String>>, _>("tags")
+                    .unwrap_or_default()
+                    .unwrap_or_default(),
+                rating: row
+                    .try_get::<Option<f64>, _>("rating")
+                    .unwrap_or(Some(0.0))
+                    .unwrap_or(0.0),
+                reviews_count: row
+                    .try_get::<Option<i64>, _>("reviews_count")
+                    .unwrap_or(Some(0))
+                    .unwrap_or(0),
+                created_at: row
+                    .try_get("created_at")
+                    .unwrap_or_else(|_| chrono::Utc::now()),
+            })
+            .collect())
     }
 
     /// Obtenir un service par ID
-    pub async fn get_t4g_service_by_id(&self, service_id: &str) -> Result<Option<crate::routes::token4good::Service>, Box<dyn Error>> {
+    pub async fn get_t4g_service_by_id(
+        &self,
+        service_id: &str,
+    ) -> Result<Option<crate::routes::token4good::Service>, Box<dyn Error>> {
         let row = sqlx::query(
             "SELECT id, provider_id, name, description, category, token_cost, estimated_duration, requirements, tags, rating, reviews_count, created_at FROM t4g_services WHERE id = $1"
         )
@@ -775,11 +835,25 @@ impl DatabaseService {
                 category: row.try_get("category").unwrap_or_default(),
                 token_cost: row.try_get("token_cost").unwrap_or(0),
                 estimated_duration: row.try_get("estimated_duration").unwrap_or_default(),
-                requirements: row.try_get::<Option<Vec<String>>, _>("requirements").unwrap_or_default().unwrap_or_default(),
-                tags: row.try_get::<Option<Vec<String>>, _>("tags").unwrap_or_default().unwrap_or_default(),
-                rating: row.try_get::<Option<f64>, _>("rating").unwrap_or(Some(0.0)).unwrap_or(0.0),
-                reviews_count: row.try_get::<Option<i64>, _>("reviews_count").unwrap_or(Some(0)).unwrap_or(0),
-                created_at: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
+                requirements: row
+                    .try_get::<Option<Vec<String>>, _>("requirements")
+                    .unwrap_or_default()
+                    .unwrap_or_default(),
+                tags: row
+                    .try_get::<Option<Vec<String>>, _>("tags")
+                    .unwrap_or_default()
+                    .unwrap_or_default(),
+                rating: row
+                    .try_get::<Option<f64>, _>("rating")
+                    .unwrap_or(Some(0.0))
+                    .unwrap_or(0.0),
+                reviews_count: row
+                    .try_get::<Option<i64>, _>("reviews_count")
+                    .unwrap_or(Some(0))
+                    .unwrap_or(0),
+                created_at: row
+                    .try_get("created_at")
+                    .unwrap_or_else(|_| chrono::Utc::now()),
             }))
         } else {
             Ok(None)
@@ -797,7 +871,9 @@ impl DatabaseService {
         notes: Option<&str>,
     ) -> Result<String, Box<dyn Error>> {
         // Vérifier que le service existe et obtenir son coût
-        let service = self.get_t4g_service_by_id(service_id).await?
+        let service = self
+            .get_t4g_service_by_id(service_id)
+            .await?
             .ok_or("Service not found")?;
 
         // Vérifier le solde du client
@@ -836,7 +912,8 @@ impl DatabaseService {
                 "service_id": service_id
             })),
             Some(1.0),
-        ).await?;
+        )
+        .await?;
 
         Ok(id)
     }
@@ -858,12 +935,14 @@ impl DatabaseService {
         .await?;
 
         let booking_row = booking.ok_or("Booking not found or already completed")?;
-        let client_id: String = booking_row.try_get("client_id")?;
+        let _client_id: String = booking_row.try_get("client_id")?;
         let service_id: String = booking_row.try_get("service_id")?;
         let tokens_spent: i64 = booking_row.try_get("tokens_spent")?;
 
         // Obtenir le provider_id du service
-        let service = self.get_t4g_service_by_id(&service_id).await?
+        let service = self
+            .get_t4g_service_by_id(&service_id)
+            .await?
             .ok_or("Service not found")?;
 
         // Mettre à jour la réservation
@@ -877,7 +956,7 @@ impl DatabaseService {
                 completed_at = NOW(),
                 updated_at = NOW()
             WHERE id = $1
-            "#
+            "#,
         )
         .bind(booking_id)
         .bind(rating)
@@ -897,7 +976,8 @@ impl DatabaseService {
                 "rating": rating
             })),
             Some(1.0 + (rating as f64 / 20.0)), // Bonus basé sur la note
-        ).await?;
+        )
+        .await?;
 
         // Mettre à jour la note du service
         let current_rating: Option<f64> = sqlx::query_scalar(
@@ -908,22 +988,20 @@ impl DatabaseService {
         .await?;
 
         let reviews_count: Option<i64> = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_bookings WHERE service_id = $1 AND status = 'completed'"
+            "SELECT COUNT(*) FROM t4g_bookings WHERE service_id = $1 AND status = 'completed'",
         )
         .bind(&service_id)
         .fetch_one(&self.pool)
         .await?;
-        
+
         let reviews_count = reviews_count.unwrap_or(0);
 
-        sqlx::query(
-            "UPDATE t4g_services SET rating = $1, reviews_count = $2 WHERE id = $3"
-        )
-        .bind(current_rating.unwrap_or(0.0))
-        .bind(reviews_count)
-        .bind(&service_id)
-        .execute(&self.pool)
-        .await?;
+        sqlx::query("UPDATE t4g_services SET rating = $1, reviews_count = $2 WHERE id = $3")
+            .bind(current_rating.unwrap_or(0.0))
+            .bind(reviews_count)
+            .bind(&service_id)
+            .execute(&self.pool)
+            .await?;
 
         Ok(())
     }
@@ -934,13 +1012,20 @@ impl DatabaseService {
         user_id: &str,
     ) -> Result<Vec<crate::routes::token4good::Opportunity>, Box<dyn Error>> {
         // Récupérer les compétences de l'utilisateur
-        let user = self.find_user_by_id(user_id).await?
+        let user = self
+            .find_user_by_id(user_id)
+            .await?
             .ok_or("User not found")?;
 
-        let user_skills: Vec<String> = user.preferences
+        let user_skills: Vec<String> = user
+            .preferences
             .get("skills")
             .and_then(|v| v.as_array())
-            .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                    .collect()
+            })
             .unwrap_or_default();
 
         // Rechercher des sessions de mentoring demandées qui correspondent aux compétences
@@ -955,7 +1040,7 @@ impl DatabaseService {
                 WHERE status = 'scheduled' AND mentor_id IS NULL
                 ORDER BY created_at DESC
                 LIMIT 10
-                "#
+                "#,
             )
             .fetch_all(&self.pool)
             .await?;
@@ -963,10 +1048,16 @@ impl DatabaseService {
             for row in sessions {
                 let category: String = row.try_get("category")?;
                 // Vérifier si la catégorie correspond aux compétences
-                if user_skills.iter().any(|skill| category.to_lowercase().contains(&skill.to_lowercase())) {
+                if user_skills
+                    .iter()
+                    .any(|skill| category.to_lowercase().contains(&skill.to_lowercase()))
+                {
                     opportunities.push(crate::routes::token4good::Opportunity {
                         id: row.try_get("id")?,
-                        title: format!("Mentoring: {}", row.try_get::<String, _>("topic").unwrap_or_default()),
+                        title: format!(
+                            "Mentoring: {}",
+                            row.try_get::<String, _>("topic").unwrap_or_default()
+                        ),
                         description: format!("Session de mentoring dans la catégorie {}", category),
                         tokens_estimate: 50, // Estimation de base
                         category,
@@ -985,11 +1076,17 @@ impl DatabaseService {
         Ok(vec![])
     }
 
-    pub async fn count_user_services_provided(&self, _user_id: &str) -> Result<u32, Box<dyn Error>> {
+    pub async fn count_user_services_provided(
+        &self,
+        _user_id: &str,
+    ) -> Result<u32, Box<dyn Error>> {
         Ok(0)
     }
 
-    pub async fn count_user_services_consumed(&self, _user_id: &str) -> Result<u32, Box<dyn Error>> {
+    pub async fn count_user_services_consumed(
+        &self,
+        _user_id: &str,
+    ) -> Result<u32, Box<dyn Error>> {
         Ok(0)
     }
 
@@ -1011,11 +1108,13 @@ impl DatabaseService {
         limit: i64,
     ) -> Result<Vec<crate::routes::token4good::Service>, Box<dyn Error>> {
         // Récupérer les compétences et le niveau de l'utilisateur
-        let user = self.find_user_by_id(user_id).await?
+        let user = self
+            .find_user_by_id(user_id)
+            .await?
             .ok_or("User not found")?;
 
         let (total_earned, _, _) = self.get_user_token_balance(user_id).await?;
-        let user_level = if total_earned < 500 {
+        let _user_level = if total_earned < 500 {
             "contributeur"
         } else if total_earned < 1500 {
             "mentor"
@@ -1024,21 +1123,27 @@ impl DatabaseService {
         };
 
         // Rechercher des services qui correspondent aux compétences de l'utilisateur
-        let user_skills: Vec<String> = user.preferences
+        let user_skills: Vec<String> = user
+            .preferences
             .get("skills")
             .and_then(|v| v.as_array())
-            .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                    .collect()
+            })
             .unwrap_or_default();
 
-        let limit_value = limit.min(10) as i64;
+        let limit_value = limit.min(10);
 
         // Si l'utilisateur a des compétences, rechercher des services correspondants
         if !user_skills.is_empty() {
-            let skills_pattern = user_skills.iter()
+            let skills_pattern = user_skills
+                .iter()
                 .map(|s| format!("%{}%", s))
                 .collect::<Vec<_>>();
 
-            let query = format!(
+            let _query = format!(
                 r#"
                 SELECT id, provider_id, name, description, category, token_cost, estimated_duration, requirements, tags, rating, reviews_count, created_at
                 FROM t4g_services
@@ -1053,8 +1158,16 @@ impl DatabaseService {
                 ORDER BY rating DESC, reviews_count DESC
                 LIMIT $1
                 "#,
-                skills_pattern.iter().map(|_| "?").collect::<Vec<_>>().join(","),
-                skills_pattern.iter().map(|_| "?").collect::<Vec<_>>().join(",")
+                skills_pattern
+                    .iter()
+                    .map(|_| "?")
+                    .collect::<Vec<_>>()
+                    .join(","),
+                skills_pattern
+                    .iter()
+                    .map(|_| "?")
+                    .collect::<Vec<_>>()
+                    .join(",")
             );
 
             // Pour simplifier, utilisons une requête plus simple
@@ -1071,23 +1184,41 @@ impl DatabaseService {
             .fetch_all(&self.pool)
             .await?;
 
-            return Ok(rows.into_iter().map(|row| crate::routes::token4good::Service {
-                id: row.try_get("id").unwrap_or_default(),
-                provider_id: row.try_get("provider_id").unwrap_or_default(),
-                name: row.try_get("name").unwrap_or_default(),
-                description: row.try_get("description").unwrap_or_default(),
-                category: row.try_get("category").unwrap_or_default(),
-                token_cost: row.try_get("token_cost").unwrap_or(0),
-                estimated_duration: row.try_get("estimated_duration").unwrap_or_default(),
-                requirements: row.try_get::<Option<Vec<String>>, _>("requirements").unwrap_or_default().unwrap_or_default(),
-                tags: row.try_get::<Option<Vec<String>>, _>("tags").unwrap_or_default().unwrap_or_default(),
-                rating: row.try_get::<Option<f64>, _>("rating").unwrap_or(Some(0.0)).unwrap_or(0.0),
-                reviews_count: row.try_get::<Option<i64>, _>("reviews_count").unwrap_or(Some(0)).unwrap_or(0),
-                created_at: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
-            }).collect());
+            return Ok(rows
+                .into_iter()
+                .map(|row| crate::routes::token4good::Service {
+                    id: row.try_get("id").unwrap_or_default(),
+                    provider_id: row.try_get("provider_id").unwrap_or_default(),
+                    name: row.try_get("name").unwrap_or_default(),
+                    description: row.try_get("description").unwrap_or_default(),
+                    category: row.try_get("category").unwrap_or_default(),
+                    token_cost: row.try_get("token_cost").unwrap_or(0),
+                    estimated_duration: row.try_get("estimated_duration").unwrap_or_default(),
+                    requirements: row
+                        .try_get::<Option<Vec<String>>, _>("requirements")
+                        .unwrap_or_default()
+                        .unwrap_or_default(),
+                    tags: row
+                        .try_get::<Option<Vec<String>>, _>("tags")
+                        .unwrap_or_default()
+                        .unwrap_or_default(),
+                    rating: row
+                        .try_get::<Option<f64>, _>("rating")
+                        .unwrap_or(Some(0.0))
+                        .unwrap_or(0.0),
+                    reviews_count: row
+                        .try_get::<Option<i64>, _>("reviews_count")
+                        .unwrap_or(Some(0))
+                        .unwrap_or(0),
+                    created_at: row
+                        .try_get("created_at")
+                        .unwrap_or_else(|_| chrono::Utc::now()),
+                })
+                .collect());
         }
 
         // Sinon, retourner les services les plus populaires
-        self.search_t4g_services(None, None, None, None, limit_value).await
+        self.search_t4g_services(None, None, None, None, limit_value)
+            .await
     }
 }

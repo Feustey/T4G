@@ -3,10 +3,10 @@ pub mod models;
 pub mod routes;
 pub mod services;
 
-use axum::Router;
 use axum::http::Method;
+use axum::Router;
 use std::{env, error::Error};
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use tower_http::normalize_path::NormalizePathLayer;
 
 use services::{database::DatabaseService, dazno::DaznoService, rgb::RGBService};
@@ -65,15 +65,15 @@ pub async fn build_state() -> Result<AppState, Box<dyn Error>> {
 fn build_cors_layer() -> CorsLayer {
     // Liste des origines autorisées
     let allowed_origins = vec![
-        "http://localhost:4200".parse().unwrap(),                       // Dev frontend Nx
-        "http://localhost:3000".parse().unwrap(),                       // Dev Next.js
-        "http://localhost:3001".parse().unwrap(),                       // Dev backend Rust
-        "https://token4good.vercel.app".parse().unwrap(),               // Production Vercel
-        "https://t4g.dazno.de".parse().unwrap(),                        // Production custom
-        "https://apirust-production.up.railway.app".parse().unwrap(),   // Railway self
-        "https://www.token-for-good.com".parse().unwrap(),              // Production token-for-good
-        "https://token-for-good.com".parse().unwrap(),                  // Production token-for-good (sans www)
-        "https://app.token-for-good.com".parse().unwrap(),              // Production app token-for-good
+        "http://localhost:4200".parse().unwrap(), // Dev frontend Nx
+        "http://localhost:3000".parse().unwrap(), // Dev Next.js
+        "http://localhost:3001".parse().unwrap(), // Dev backend Rust
+        "https://token4good.vercel.app".parse().unwrap(), // Production Vercel
+        "https://t4g.dazno.de".parse().unwrap(),  // Production custom
+        "https://apirust-production.up.railway.app".parse().unwrap(), // Railway self
+        "https://www.token-for-good.com".parse().unwrap(), // Production token-for-good
+        "https://token-for-good.com".parse().unwrap(), // Production token-for-good (sans www)
+        "https://app.token-for-good.com".parse().unwrap(), // Production app token-for-good
     ];
 
     // Note: allow_credentials(true) est incompatible avec allow_headers(Any).

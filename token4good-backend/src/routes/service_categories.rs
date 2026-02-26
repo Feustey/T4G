@@ -1,7 +1,7 @@
 use axum::{extract::State, http::StatusCode, response::Json, routing::get, Router};
 use serde::Serialize;
 
-use crate::{models::user::UserRole, AppState};
+use crate::AppState;
 
 pub fn service_category_routes() -> Router<AppState> {
     Router::new()
@@ -30,7 +30,7 @@ pub async fn get_categories_as_consumer(
                 kind: cat.kind.unwrap_or_default(),
                 description: cat.description.unwrap_or_default(),
                 href,
-                default_price: cat.default_price as i32,
+                default_price: cat.default_price,
                 default_unit: cat.default_unit,
                 icon: cat.icon.unwrap_or_else(|| "default".to_string()),
                 disabled: if cat.disabled { 1 } else { 0 },
@@ -64,7 +64,7 @@ pub async fn get_categories_as_provider(
                 kind: cat.kind.unwrap_or_default(),
                 description: cat.description.unwrap_or_default(),
                 href,
-                default_price: cat.default_price as i32,
+                default_price: cat.default_price,
                 default_unit: cat.default_unit,
                 icon: cat.icon.unwrap_or_else(|| "default".to_string()),
                 disabled: if cat.disabled { 1 } else { 0 },

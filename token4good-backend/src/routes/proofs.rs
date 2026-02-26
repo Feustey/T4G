@@ -32,7 +32,6 @@ pub struct ProofQuery {
     pub offset: Option<u32>,
 }
 
-
 #[derive(Debug, Serialize)]
 pub struct ProofResponse {
     pub proof: Proof,
@@ -178,10 +177,11 @@ pub async fn verify_proof(
         // Extraire le txid du seal si présent dans la signature (les 16 premiers chars)
         // Pour une vraie vérification, on utiliserait le seal stocké
         let txid_prefix = &details.signature[..16.min(details.signature.len())];
-        match state.rgb.verify_tx_esplora(txid_prefix).await {
-            Ok(v) => v,
-            Err(_) => true, // non bloquant si Esplora absent
-        }
+        state
+            .rgb
+            .verify_tx_esplora(txid_prefix)
+            .await
+            .unwrap_or(true) // non bloquant si Esplora absent
     } else {
         true
     };

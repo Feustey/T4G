@@ -6,4 +6,6 @@
 //!
 //! Ce fichier est conservé pour référence mais n'est plus utilisé activement.
 
-pub use crate::services::rgb::{ProofDetails, RGBError, RGBService as RGBNativeService, TransferRecord};
+pub use crate::services::rgb::{
+    ProofDetails, RGBError, RGBService as RGBNativeService, TransferRecord,
+};

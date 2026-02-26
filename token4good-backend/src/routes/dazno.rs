@@ -10,9 +10,9 @@ use serde::Deserialize;
 use crate::{
     middleware::auth::AuthUser,
     services::dazno::{
-        ChannelCloseInfo, ChannelInfo, DaznoError, DaznoLightningInvoice,
-        DaznoLightningPayment, DaznoUserProfile, LightningBalance, LightningNetworkStats,
-        LightningTransaction, NodeInfo, RoutingAnalysis, TokenBalance,
+        ChannelCloseInfo, ChannelInfo, DaznoError, DaznoLightningInvoice, DaznoLightningPayment,
+        DaznoUserProfile, LightningBalance, LightningNetworkStats, LightningTransaction, NodeInfo,
+        RoutingAnalysis, TokenBalance,
     },
     AppState,
 };
@@ -68,7 +68,10 @@ pub fn dazno_routes() -> Router<AppState> {
         // Webhooks
         .route("/v1/webhook", post(configure_webhook))
         .route("/v1/webhook/user/:user_id", get(get_user_webhooks))
-        .route("/v1/webhook/id/:webhook_id", axum::routing::delete(delete_webhook))
+        .route(
+            "/v1/webhook/id/:webhook_id",
+            axum::routing::delete(delete_webhook),
+        )
         // LNURL
         .route("/v1/lnurl/pay", post(create_lnurl_pay))
         .route("/v1/lnurl/withdraw", post(create_lnurl_withdraw))
@@ -77,9 +80,18 @@ pub fn dazno_routes() -> Router<AppState> {
         .route("/v1/wallet", post(create_new_wallet))
         .route("/v1/wallet/list/:user_id", get(list_user_wallets))
         .route("/v1/wallet/:wallet_id", get(get_wallet_info))
-        .route("/v1/wallet/:wallet_id", axum::routing::delete(delete_user_wallet))
-        .route("/v1/wallet/:wallet_id/invoices", get(get_wallet_invoices_list))
-        .route("/v1/wallet/:wallet_id/payments", get(get_wallet_payments_list))
+        .route(
+            "/v1/wallet/:wallet_id",
+            axum::routing::delete(delete_user_wallet),
+        )
+        .route(
+            "/v1/wallet/:wallet_id/invoices",
+            get(get_wallet_invoices_list),
+        )
+        .route(
+            "/v1/wallet/:wallet_id/payments",
+            get(get_wallet_payments_list),
+        )
 }
 
 // ============= USER MANAGEMENT (dazno.de/api) =============
@@ -348,7 +360,12 @@ pub async fn open_channel(
 
     let channel = state
         .dazno
-        .open_channel(&dazno_token, &auth_user.id, &payload.node_pubkey, payload.amount_msat)
+        .open_channel(
+            &dazno_token,
+            &auth_user.id,
+            &payload.node_pubkey,
+            payload.amount_msat,
+        )
         .await
         .map_err(map_dazno_error)?;
 
@@ -450,7 +467,12 @@ pub async fn analyze_routing(
 
     let analysis = state
         .dazno
-        .analyze_lightning_routing(&dazno_token, &payload.from_node, &payload.to_node, payload.amount_msat)
+        .analyze_lightning_routing(
+            &dazno_token,
+            &payload.from_node,
+            &payload.to_node,
+            payload.amount_msat,
+        )
         .await
         .map_err(map_dazno_error)?;
 
@@ -459,8 +481,10 @@ pub async fn analyze_routing(
 
 // ============= WEBHOOKS HANDLERS =============
 
-use crate::services::dazno::{WebhookConfig, LnurlPayResponse, LnurlWithdrawResponse, 
-    LnurlAuthResponse, WalletInfo, WalletDetails};
+use crate::services::dazno::{
+    LnurlAuthResponse, LnurlPayResponse, LnurlWithdrawResponse, WalletDetails, WalletInfo,
+    WebhookConfig,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct ConfigureWebhookPayload {
@@ -478,7 +502,12 @@ pub async fn configure_webhook(
 
     let webhook = state
         .dazno
-        .configure_webhook(&dazno_token, &auth_user.id, &payload.webhook_url, payload.events)
+        .configure_webhook(
+            &dazno_token,
+            &auth_user.id,
+            &payload.webhook_url,
+            payload.events,
+        )
         .await
         .map_err(map_dazno_error)?;
 

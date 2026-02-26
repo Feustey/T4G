@@ -223,7 +223,9 @@ mod tests {
     fn test_create_token_contient_les_bons_claims() {
         with_secret(&test_secret(), || {
             let svc = JWTService::new().unwrap();
-            let token = svc.create_token("user-123", "bob@t4g.com", "mentor").unwrap();
+            let token = svc
+                .create_token("user-123", "bob@t4g.com", "mentor")
+                .unwrap();
             let claims = svc.verify_token(&token).unwrap();
             assert_eq!(claims.sub, "user-123");
             assert_eq!(claims.email, "bob@t4g.com");
@@ -271,7 +273,9 @@ mod tests {
     fn test_verify_token_valide_retourne_claims() {
         with_secret(&test_secret(), || {
             let svc = JWTService::new().unwrap();
-            let token = svc.create_token("user-42", "test@t4g.com", "admin").unwrap();
+            let token = svc
+                .create_token("user-42", "test@t4g.com", "admin")
+                .unwrap();
             let claims = svc.verify_token(&token);
             assert!(claims.is_ok());
             assert_eq!(claims.unwrap().sub, "user-42");
@@ -308,7 +312,10 @@ mod tests {
             std::env::set_var("JWT_SECRET", &test_secret());
 
             let result = svc_other.verify_token(&token);
-            assert!(result.is_err(), "Devrait rejeter un token signé avec un autre secret");
+            assert!(
+                result.is_err(),
+                "Devrait rejeter un token signé avec un autre secret"
+            );
         });
     }
 

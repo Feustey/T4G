@@ -108,9 +108,18 @@ mod tests {
 
     #[test]
     fn test_request_status_serialize() {
-        assert_eq!(serde_json::to_string(&RequestStatus::Open).unwrap(), "\"open\"");
-        assert_eq!(serde_json::to_string(&RequestStatus::Assigned).unwrap(), "\"assigned\"");
-        assert_eq!(serde_json::to_string(&RequestStatus::Completed).unwrap(), "\"completed\"");
+        assert_eq!(
+            serde_json::to_string(&RequestStatus::Open).unwrap(),
+            "\"open\""
+        );
+        assert_eq!(
+            serde_json::to_string(&RequestStatus::Assigned).unwrap(),
+            "\"assigned\""
+        );
+        assert_eq!(
+            serde_json::to_string(&RequestStatus::Completed).unwrap(),
+            "\"completed\""
+        );
     }
 
     #[test]
@@ -151,8 +160,10 @@ mod tests {
 
     #[test]
     fn test_mentoring_request_new_id_unique() {
-        let r1 = MentoringRequest::new("T1".to_string(), "D1".to_string(), "m1".to_string(), vec![]);
-        let r2 = MentoringRequest::new("T2".to_string(), "D2".to_string(), "m2".to_string(), vec![]);
+        let r1 =
+            MentoringRequest::new("T1".to_string(), "D1".to_string(), "m1".to_string(), vec![]);
+        let r2 =
+            MentoringRequest::new("T2".to_string(), "D2".to_string(), "m2".to_string(), vec![]);
         assert_ne!(r1.id, r2.id);
     }
 
