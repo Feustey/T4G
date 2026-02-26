@@ -58,7 +58,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const normalizedEmail = email.toLowerCase().trim();
   const token = createMagicToken(normalizedEmail);
 
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:4200').replace(/\/$/, '');
+  // Construire l'URL de base : priorité aux variables explicites, puis VERCEL_URL (Vercel fournit le host sans protocole)
+  let appUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+    'http://localhost:4200'
+  ).replace(/\/$/, '');
+
+  // En production, forcer HTTPS (évite les liens http non fonctionnels dans les emails)
+  if (process.env.NODE_ENV === 'production' && appUrl.startsWith('http://') && !appUrl.includes('localhost')) {
+    appUrl = appUrl.replace(/^http:\/\//, 'https://');
+  }
+
   const magicLink = `${appUrl}/auth/callback/magic-link?token=${encodeURIComponent(token)}`;
 
   try {
