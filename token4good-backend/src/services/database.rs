@@ -83,39 +83,16 @@ impl DatabaseService {
     }
 
     pub async fn find_user_by_id(&self, id: &str) -> Result<Option<User>, Box<dyn Error>> {
+        // Requête compatible avec ou sans colonnes mentoring (migration 007)
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour FROM users WHERE id = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE id = $1"
         )
         .bind(id)
         .fetch_optional(&self.pool)
         .await?;
 
         if let Some(row) = row {
-            let user = User {
-                id: row.try_get("id")?,
-                email: row.try_get("email")?,
-                firstname: row.try_get("firstname")?,
-                lastname: row.try_get("lastname")?,
-                lightning_address: row.try_get("lightning_address")?,
-                role: row.try_get::<String, _>("role")?.parse().unwrap_or(crate::models::user::UserRole::Alumni),
-                username: row.try_get("username")?,
-                bio: row.try_get("bio").ok(),
-                score: row.try_get::<i32, _>("score")? as u32,
-                avatar: row.try_get("avatar").ok(),
-                created_at: row.try_get("created_at")?,
-                updated_at: row.try_get("updated_at")?,
-                is_active: row.try_get("is_active")?,
-                wallet_address: row.try_get("wallet_address").ok(),
-                preferences: row.try_get("preferences")?,
-                email_verified: row.try_get("email_verified").unwrap_or(false),
-                last_login: row.try_get("last_login").ok(),
-                is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
-                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
-                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
-                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
-                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
-                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
-            };
+            let user = self.row_to_user_basic(&row)?;
             Ok(Some(user))
         } else {
             Ok(None)
@@ -123,43 +100,49 @@ impl DatabaseService {
     }
 
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<User>, Box<dyn Error>> {
+        // Requête compatible avec ou sans colonnes mentoring (migration 007)
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour FROM users WHERE email = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE email = $1"
         )
         .bind(email)
         .fetch_optional(&self.pool)
         .await?;
 
         if let Some(row) = row {
-            let user = User {
-                id: row.try_get("id")?,
-                email: row.try_get("email")?,
-                firstname: row.try_get("firstname")?,
-                lastname: row.try_get("lastname")?,
-                lightning_address: row.try_get("lightning_address")?,
-                role: row.try_get::<String, _>("role")?.parse().unwrap_or(crate::models::user::UserRole::Alumni),
-                username: row.try_get("username")?,
-                bio: row.try_get("bio").ok(),
-                score: row.try_get::<i32, _>("score")? as u32,
-                avatar: row.try_get("avatar").ok(),
-                created_at: row.try_get("created_at")?,
-                updated_at: row.try_get("updated_at")?,
-                is_active: row.try_get("is_active")?,
-                wallet_address: row.try_get("wallet_address").ok(),
-                preferences: row.try_get("preferences")?,
-                email_verified: row.try_get("email_verified").unwrap_or(false),
-                last_login: row.try_get("last_login").ok(),
-                is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
-                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
-                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
-                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
-                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
-                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
-            };
+            let user = self.row_to_user_basic(&row)?;
             Ok(Some(user))
         } else {
             Ok(None)
         }
+    }
+
+    /// Convertit une row en User (colonnes de base uniquement, compatible pré-migration 007)
+    fn row_to_user_basic(&self, row: &sqlx::postgres::PgRow) -> Result<User, Box<dyn Error>> {
+        Ok(User {
+            id: row.try_get("id")?,
+            email: row.try_get("email")?,
+            firstname: row.try_get("firstname")?,
+            lastname: row.try_get("lastname")?,
+            lightning_address: row.try_get("lightning_address")?,
+            role: row.try_get::<String, _>("role")?.parse().unwrap_or(crate::models::user::UserRole::Alumni),
+            username: row.try_get("username")?,
+            bio: row.try_get("bio").ok(),
+            score: row.try_get::<i32, _>("score")? as u32,
+            avatar: row.try_get("avatar").ok(),
+            created_at: row.try_get("created_at")?,
+            updated_at: row.try_get("updated_at")?,
+            is_active: row.try_get("is_active")?,
+            wallet_address: row.try_get("wallet_address").ok(),
+            preferences: row.try_get("preferences")?,
+            email_verified: row.try_get("email_verified").unwrap_or(false),
+            last_login: row.try_get("last_login").ok(),
+            is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+            is_mentor_active: false,
+            mentor_topics: vec![],
+            learning_topics: vec![],
+            mentor_bio: None,
+            mentor_tokens_per_hour: None,
+        })
     }
 
     pub async fn ping(&self) -> Result<(), Box<dyn Error>> {

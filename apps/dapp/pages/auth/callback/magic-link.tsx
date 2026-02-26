@@ -38,7 +38,7 @@ export default function MagicLinkCallback() {
             errorMsg = data.error || errorMsg;
           } catch {
             errorMsg = response.status === 500
-              ? 'Erreur serveur. Veuillez réessayer ou demander un nouveau lien.'
+              ? 'Erreur serveur lors de la vérification du lien. Veuillez demander un nouveau lien.'
               : `Erreur ${response.status}`;
           }
           throw new Error(errorMsg);
@@ -46,15 +46,21 @@ export default function MagicLinkCallback() {
 
         const userData = await response.json();
 
-        await login('magic_link', {
-          providerUserData: {
-            email: userData.email,
-            given_name: userData.given_name,
-            family_name: userData.family_name,
-            name: userData.name || userData.given_name,
-            sub: userData.sub,
-          },
-        });
+        try {
+          await login('magic_link', {
+            providerUserData: {
+              email: userData.email,
+              given_name: userData.given_name,
+              family_name: userData.family_name,
+              name: userData.name || userData.given_name,
+              sub: userData.sub,
+            },
+          });
+        } catch (loginErr) {
+          // Erreur backend (connexion, base de données, etc.)
+          const msg = loginErr instanceof Error ? loginErr.message : 'Erreur inconnue';
+          throw new Error(msg.includes('Backend') ? msg : `Erreur de connexion : ${msg}`);
+        }
 
         setStatus('success');
         const locale = router.locale || 'fr';
