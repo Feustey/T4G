@@ -19,6 +19,7 @@ export function createMagicToken(email: string): string {
 /**
  * Vérifie un token signé et retourne l'email si valide.
  * Retourne null si le token est invalide ou expiré.
+ * Note: crypto.timingSafeEqual() lance une erreur si les buffers ont des longueurs différentes.
  */
 export function verifyMagicToken(token: string): string | null {
   try {
@@ -26,8 +27,13 @@ export function verifyMagicToken(token: string): string | null {
     const [payload, sig] = token.split('.');
     if (!payload || !sig) return null;
 
+    const sigBuf = Buffer.from(sig, 'base64url');
     const expectedSig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
-    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null;
+    const expectedBuf = Buffer.from(expectedSig, 'base64url');
+
+    // timingSafeEqual lance ERR_CRYPTO_TIMING_SAFE_EQUAL_LENGTH si longueurs différentes
+    if (sigBuf.length !== expectedBuf.length) return null;
+    if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
 
     const { email, exp } = JSON.parse(Buffer.from(payload, 'base64url').toString());
     if (!email || !exp || Date.now() > exp) return null;
@@ -52,8 +58,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const normalizedEmail = email.toLowerCase().trim();
   const token = createMagicToken(normalizedEmail);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:4200';
-  const magicLink = `${appUrl}/auth/callback/magic-link?token=${token}`;
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:4200').replace(/\/$/, '');
+  const magicLink = `${appUrl}/auth/callback/magic-link?token=${encodeURIComponent(token)}`;
 
   try {
     const resendApiKey = process.env.RESEND_API_KEY;

@@ -32,8 +32,16 @@ export default function MagicLinkCallback() {
         });
 
         if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Vérification échouée');
+          let errorMsg = 'Vérification échouée';
+          try {
+            const data = await response.json();
+            errorMsg = data.error || errorMsg;
+          } catch {
+            errorMsg = response.status === 500
+              ? 'Erreur serveur. Veuillez réessayer ou demander un nouveau lien.'
+              : `Erreur ${response.status}`;
+          }
+          throw new Error(errorMsg);
         }
 
         const userData = await response.json();
