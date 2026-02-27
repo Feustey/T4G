@@ -69,16 +69,16 @@ export default function MagicLinkCallback() {
         const locale = getLocale(router);
         const dashboardUrl = `/${locale}/dashboard/`;
         setTimeout(() => {
-          // window.location pour éviter les blocages de redirection (liens ouverts depuis email)
-          window.location.href = dashboardUrl;
-        }, 1000);
+          // router.push préserve le contexte React (user déjà en AuthContext) — évite full reload
+          router.push(dashboardUrl, dashboardUrl, { locale });
+        }, 500);
       } catch (err) {
         setStatus('error');
         setErrorMessage(err instanceof Error ? err.message : 'Erreur inconnue');
         const locale = getLocale(router);
         const loginUrl = `/${locale}/login/?error=magic_link_failed`;
         setTimeout(() => {
-          window.location.href = loginUrl;
+          router.push(loginUrl, loginUrl, { locale });
         }, 2500);
       }
     };

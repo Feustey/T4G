@@ -227,7 +227,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
   return (
     <>
       <Head>
-        <title>{lang.page.dashboard.head.title}</title>
+        <title>{lang?.page?.dashboard?.head?.title ?? 'Tableau de bord'}</title>
         {useIndexing(false)}
       </Head>
       {isCancelling && transactionToUpdate && (
@@ -237,7 +237,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
         />
       )}
 
-      {user.role === 'mentee' && isConfirming && transactionToUpdate && (
+      {user?.role === 'mentee' && isConfirming && transactionToUpdate && (
         <ConfirmingTransactionModal
           transaction={transactionToUpdate}
           handleModalClose={handleTransactionModalClose}
@@ -245,13 +245,13 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
         />
       )}
       {dashboardAccessCount?.dashboardAccessCount === 1 && (
-        <FirstDashboardAccessModal userRole={user.role} />
+        <FirstDashboardAccessModal userRole={user?.role ?? 'mentee'} />
       )}
 
       <ConnectedLayout user={user} lang={lang}>
         <h1 className="u-d--flex u-align-items-center u-gap--s u-margin-lg--none u-margin--auto heading-2">
           <span className="c-icon--title u-margin--none">{Icons.dashboard}</span>
-          {lang.page.dashboard.title}
+          {lang?.page?.dashboard?.title ?? 'Tableau de bord'}
         </h1>
         
         {/* Banner d'avertissement en mode offline/cache */}
@@ -299,20 +299,20 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
         )}
 
         {isLoading ? (
-          <Spinner lang={lang} spinnerText={lang.utils.loading} size="lg" />
+          <Spinner lang={lang} spinnerText={lang?.utils?.loading ?? 'Chargement...'} size="lg" />
         ) : (
           <div className="o-dashboard">
             <section className="o-dahboard-content">
               {pendingTransactions?.length > 0 && (
                 <>
-                  <h2 className="subtitle-1">{lang.page.dashboard.pendingActions}</h2>
+                  <h2 className="subtitle-1">{lang?.page?.dashboard?.pendingActions ?? 'Actions en attente'}</h2>
                   <div className="o-layout--grid--auto" style={{ '--grid-min-size': `350px` } as React.CSSProperties}>
                     {pendingTransactions.map((pendingTransaction) => (
                       <PendingTransactionCard
                         key={pendingTransaction.dealId}
                         pendingTransaction={pendingTransaction}
                         lang={lang}
-                        userRole={user.role}
+                        userRole={user?.role ?? 'mentee'}
                         onClick={(type) => handleTransactionModalOpen(pendingTransaction, type)}
                       />
                     ))}
@@ -329,9 +329,9 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                   }}
                 >
                   <div className="u-d--flex u-align-items-center u-gap--s">
-                    <Image alt={lang.utils.tokenAlt} src="/assets/images/png/token.png" width={28} height={28} priority />
+                    <Image alt={lang?.utils?.tokenAlt ?? 'Token'} src="/assets/images/png/token.png" width={28} height={28} priority />
                     <p className="u-margin--none" style={{ fontWeight: 600 }}>
-                      {lang.page.dashboard.completeProfile.text}
+                      {lang?.page?.dashboard?.completeProfile?.text ?? 'Complétez votre profil'}
                     </p>
                   </div>
                   <p className="u-margin--none" style={{ fontSize: 13, color: 'var(--color-text-secondary, #64748b)' }}>
@@ -341,7 +341,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                     <Button
                       variant="primary"
                       onClick={() => router.push(`/profile`)}
-                      label={lang.page.dashboard.completeProfile.button}
+                      label={lang?.page?.dashboard?.completeProfile?.button ?? 'Compléter'}
                     />
                     <Button
                       variant="ghost"
@@ -357,7 +357,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                   <a className="c-metrics__section-link">
                     <div className="u-d--flex u-justify-content-between u-align-items-center u-width--fill">
                       <div className="u-d--flex u-align-items-center u-gap--s">
-                        <h2 className="subtitle-1">{lang.page.dashboard.notifications.title}</h2>
+                        <h2 className="subtitle-1">{lang?.page?.dashboard?.notifications?.title ?? 'Notifications'}</h2>
                         {totalNotificationsCount > 5 && (
                           <span className="c-metrics__metric__number" style={{
                             fontSize: '18px',
@@ -369,7 +369,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                         )}
                       </div>
                       <span className="c-link--icon" style={{ fontSize: '13px', color: 'var(--app-comunity-color)' }}>
-                        {(lang.utils as { seeAll?: string }).seeAll ?? 'Voir tout'} →
+                        {(lang?.utils as { seeAll?: string })?.seeAll ?? 'Voir tout'} →
                       </span>
                     </div>
                     <ul role="list" className="c-notifications" style={{ width: '100%' }}>
@@ -417,34 +417,34 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
               <div className="u-d--flex flex-wrap u-gap--s">
                 <div className="o-card flex-1 u-d--flex u-flex-column">
                   <span className="c-icon--title--benefits u-margin--none u-d--flex">{Icons.gift}</span>
-                  <p className="u-margin--none">{lang.page.dashboard.discoverBenefits.text}</p>
+                  <p className="u-margin--none">{lang?.page?.dashboard?.discoverBenefits?.text ?? 'Découvrez les avantages'}</p>
                   <Button
                     className="u-width--fill u-margin-t--auto"
                     variant="secondary"
                     theme="BENEFITS"
                     onClick={() => router.push(`/benefits`)}
-                    label={lang.page.dashboard.discoverBenefits.button}
+                    label={lang?.page?.dashboard?.discoverBenefits?.button ?? 'Découvrir'}
                   />
                 </div>
-                {(user.role === 'alumni' || user.role === 'mentor') && (
+                {(user?.role === 'alumni' || user?.role === 'mentor') && (
                   <div className="o-card flex-1 u-d--flex u-flex-column">
                     <span className="c-icon--title--services u-margin--none u-d--flex">{Icons.sparkles}</span>
-                    <p className="u-margin--none">{lang.page.dashboard.discoverServices.text}</p>
+                    <p className="u-margin--none">{lang?.page?.dashboard?.discoverServices?.text ?? 'Découvrez les services'}</p>
                     <Button
                       className="u-width--fill u-margin-t--auto"
                       variant="secondary"
                       theme="SERVICES"
                       onClick={() => router.push(`/services`)}
-                      label={lang.page.dashboard.discoverServices.button}
+                      label={lang?.page?.dashboard?.discoverServices?.button ?? 'Découvrir'}
                     />
                   </div>
                 )}
                 {/* Bloc mentor : proposer une session */}
-                {user.is_mentor_active && (
+                {user?.is_mentor_active && (
                   <div className="o-card flex-1 u-d--flex u-flex-column">
                     <span className="c-icon--title--services u-margin--none u-d--flex">{Icons.sparkles}</span>
                     <p className="u-margin--none">Partage ton expertise en proposant une session de mentoring.</p>
-                    {user.mentor_topics && user.mentor_topics.length > 0 ? (
+                    {user?.mentor_topics && user.mentor_topics.length > 0 ? (
                       <Button
                         className="u-width--fill u-margin-t--auto"
                         variant="primary"
@@ -462,7 +462,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                   </div>
                 )}
                 {/* Bloc mentee : trouver un mentor */}
-                {(user.role === 'mentee' || (user.learning_topics && user.learning_topics.length > 0)) && (
+                {(user?.role === 'mentee' || (user?.learning_topics && user.learning_topics.length > 0)) && (
                   <div className="o-card flex-1 u-d--flex u-flex-column">
                     <span className="c-icon--title--benefits u-margin--none u-d--flex">{Icons.gift}</span>
                     <p className="u-margin--none">Trouve un mentor pour progresser sur un thème qui t&apos;intéresse.</p>
@@ -508,7 +508,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
 
               {topServices.length > 0 && (
                 <div>
-                  <h2 className="subtitle-1">{lang.page.dashboard.topServices}</h2>
+                  <h2 className="subtitle-1">{lang?.page?.dashboard?.topServices ?? 'Top services'}</h2>
                   <section className="o-layout--grid--auto" style={{ '--grid-min-size': `300px` } as React.CSSProperties}>
                     {topServices.map((service) => (
                       <BenefitCard
@@ -518,7 +518,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                         parent={'benefits'}
                         service={service}
                         type={'BENEFITS'}
-                        userRole={user.role}
+                        userRole={user?.role ?? 'mentee'}
                         isLink={true}
                       />
                     ))}
