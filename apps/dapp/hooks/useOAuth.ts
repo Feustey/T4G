@@ -266,8 +266,8 @@ export const useOAuth = () => {
       }
 
       // Échanger le code contre les données utilisateur via notre API
-      // Pas de trailing slash : évite les redirects avec trailingSlash: true
-      const apiPath = `/api/auth/callback/${provider}`.replace(/\/+$/, '');
+      // Trailing slash requis : évite la redirection 308 avec trailingSlash: true (next.config.js)
+      const apiPath = `/api/auth/callback/${provider}/`;
       const response = await fetch(apiPath, {
         method: 'POST',
         headers: {
