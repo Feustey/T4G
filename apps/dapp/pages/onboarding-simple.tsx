@@ -14,3 +14,5 @@ export default function OnboardingSimpleRedirect() {
 
   return null;
 }
+
+export const getServerSideProps = () => ({ props: {} });

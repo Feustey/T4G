@@ -140,3 +140,5 @@ export default function LinkedInCallback() {
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

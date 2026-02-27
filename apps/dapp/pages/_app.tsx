@@ -113,4 +113,13 @@ function Auth({ children, lang, role }) {
   }
 }
 
+// Désactive l'optimisation statique pour que useRouter soit disponible lors du prerender (404, 500)
+CustomApp.getInitialProps = async ({ Component, ctx }) => {
+  let pageProps: Record<string, unknown> = {};
+  if (Component.getInitialProps) {
+    pageProps = await Component.getInitialProps(ctx);
+  }
+  return { pageProps };
+};
+
 export default CustomApp;

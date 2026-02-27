@@ -101,3 +101,5 @@ export default Page;
 
 Page.auth = true;
 Page.role = ['SERVICE_PROVIDER'];
+
+export const getServerSideProps = () => ({ props: {} });

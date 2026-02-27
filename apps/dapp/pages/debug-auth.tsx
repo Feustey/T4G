@@ -295,3 +295,5 @@ export default function DebugAuth() {
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

@@ -92,3 +92,5 @@ BenefitPage.auth = true;
 BenefitPage.role = ['ALUMNI', 'STUDENT'];
 
 export default BenefitPage;
+
+export const getServerSideProps = () => ({ props: {} });

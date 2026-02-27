@@ -84,3 +84,5 @@ export default function GitHubCallback() {
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

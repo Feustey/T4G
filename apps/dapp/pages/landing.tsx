@@ -152,3 +152,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

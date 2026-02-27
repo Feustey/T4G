@@ -534,3 +534,5 @@ const SessionDetailPage: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
 SessionDetailPage.role = ['alumni', 'mentee', 'mentor', 'service_provider', 'admin'];
 
 export default SessionDetailPage;
+
+export const getServerSideProps = () => ({ props: {} });

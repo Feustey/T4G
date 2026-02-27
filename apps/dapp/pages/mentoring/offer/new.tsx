@@ -482,3 +482,5 @@ export default Page;
 
 Page.auth = true;
 Page.role = ['alumni', 'mentor', 'service_provider'];
+
+export const getServerSideProps = () => ({ props: {} });

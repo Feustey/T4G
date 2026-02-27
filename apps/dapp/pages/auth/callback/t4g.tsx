@@ -140,3 +140,5 @@ export default function T4gCallback() {
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

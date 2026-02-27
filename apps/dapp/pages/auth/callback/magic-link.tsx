@@ -130,3 +130,5 @@ export default function MagicLinkCallback() {
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

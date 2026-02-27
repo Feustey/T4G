@@ -45,3 +45,5 @@ export function Page({ lang }: IPage) {
 }
 
 export default Page;
+
+export const getServerSideProps = () => ({ props: {} });

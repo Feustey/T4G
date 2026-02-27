@@ -376,3 +376,5 @@ NEXT_PUBLIC_T4G_AUTH_URL=https://oauth.t4g.com`}
     </>
   );
 }
+
+export const getServerSideProps = () => ({ props: {} });

@@ -134,3 +134,5 @@ export default Page;
 
 Page.auth = true;
 Page.role = ['ALUMNI', 'STUDENT'];
+
+export const getServerSideProps = () => ({ props: {} });

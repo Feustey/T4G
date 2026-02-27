@@ -283,3 +283,5 @@ DirectoryPage.auth = true;
 DirectoryPage.role = ['ALUMNI', 'STUDENT'];
 
 export default DirectoryPage;
+
+export const getServerSideProps = () => ({ props: {} });
