@@ -74,7 +74,7 @@ export function LandingFooter() {
           </nav>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} Token for Good. Tous droits réservés.</p>
+          <p suppressHydrationWarning>© {new Date().getFullYear()} Token for Good. Tous droits réservés.</p>
         </div>
       </div>
     </footer>

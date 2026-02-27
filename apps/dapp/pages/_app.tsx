@@ -1,7 +1,7 @@
 import { AppProps } from 'next/app';
 import localFont from 'next/font/local';
 // NextAuth supprimé - utilisation d'AuthContext JWT
-// import './styles.css'; // Temporarily commented due to build error
+import './styles.css';
 import '../styles/styles.scss';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { AppContextProvider } from '../contexts/AppContext';

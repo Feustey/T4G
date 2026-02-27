@@ -1,9 +1,16 @@
-import Document, { Head, Html, Main, NextScript } from 'next/document';
+import Document, { Head, Html, Main, NextScript, DocumentContext } from 'next/document';
 
-class RootDocument extends Document {
+class RootDocument extends Document<{ locale?: string }> {
+  static async getInitialProps(ctx: DocumentContext) {
+    const initialProps = await Document.getInitialProps(ctx);
+    const locale = (ctx as DocumentContext & { locale?: string }).locale ?? 'fr';
+    return { ...initialProps, locale };
+  }
+
   render() {
+    const locale = (this.props as { locale?: string }).locale ?? 'fr';
     return (
-      <Html>
+      <Html lang={locale}>
         <Head>
           <meta httpEquiv="cache-control" content="max-age=31536000" />
           <link

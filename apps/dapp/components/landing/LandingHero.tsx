@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export function LandingHero() {
   return (
-    <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
+    <section className="relative pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="max-w-6xl mx-auto px-6 md:px-8">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           {/* Visuel — centré dans son bloc */}
@@ -39,16 +39,16 @@ export function LandingHero() {
               En contrepartie de sa contribution, le membre reçoit des jetons numériques 
               et devient bénéficiaire de services et de nombreux avantages.
             </p>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start min-w-0">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-gradient-to-r from-t4g-blue-400 via-t4g-green-500 to-t4g-orange-500 text-white font-semibold shadow-lg shadow-t4g-green-500/25 hover:shadow-xl hover:shadow-t4g-green-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-t4g-blue-500 text-white font-semibold shadow-lg shadow-t4g-blue-500/30 hover:bg-t4g-blue-600 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0"
               >
                 GO !
               </Link>
               <Link
                 href="#pourquoi"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl border-2 border-t4g-blue-500 text-t4g-blue-500 dark:border-t4g-blue-400 dark:text-t4g-blue-400 font-semibold hover:bg-t4g-blue-500/10 hover:shadow-md active:scale-[0.98] transition-all duration-300"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl border-2 border-t4g-blue-500 text-t4g-blue-500 dark:border-t4g-blue-400 dark:text-t4g-blue-400 font-semibold hover:bg-t4g-blue-500/10 hover:shadow-md active:scale-[0.98] transition-all duration-300 shrink-0"
               >
                 En savoir plus
               </Link>
