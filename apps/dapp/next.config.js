@@ -246,17 +246,20 @@ const nextConfig = {
 };
 
 // Configuration Sentry pour la production
+// Sur Vercel : dryRun pour éviter exit 1 si upload Sentry échoue (token invalide, réseau, etc.)
+const isVercel = process.env.VERCEL === '1';
+const hasValidSentry = process.env.SENTRY_AUTH_TOKEN && !isVercel;
 const sentryWebpackPluginOptions = {
   silent: true,
   hideSourceMaps: true,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
-  dryRun: !process.env.SENTRY_AUTH_TOKEN, // Ne pas uploader si pas de token
+  dryRun: !hasValidSentry, // Skip upload sur Vercel ou si pas de token
 };
 
 // Export avec Nx et optionnellement Sentry
 const configWithNx = withNx(nextConfig);
-module.exports = process.env.SENTRY_AUTH_TOKEN 
+module.exports = process.env.SENTRY_AUTH_TOKEN
   ? withSentryConfig(configWithNx, sentryWebpackPluginOptions)
   : configWithNx;

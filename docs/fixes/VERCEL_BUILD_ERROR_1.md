@@ -1,16 +1,24 @@
 # Fix Vercel Build Error 1 (sans détail)
 
-**Symptôme :** Build bloque sur Vercel avec "error 1" sans message détaillé.
+**Symptôme :** Build bloque sur Vercel avec "Command npm run build exited with 1".
+
+## Fix appliqué dans le code (Sentry)
+
+L'upload Sentry en build peut provoquer un exit 1 si le token est invalide.  
+→ **Correction :** Sur Vercel (`VERCEL=1`), l'upload est désactivé (dryRun).  
+→ Vérifier que `next.config.js` contient bien `dryRun: !hasValidSentry`.
 
 ## Solution rapide (Dashboard Vercel)
 
-### 1. Root Directory (CRITIQUE)
+### 1. Root Directory
 
-1. Aller sur https://vercel.com/dashboard → Projet T4G
-2. **Settings** → **General**
-3. **Root Directory** → **Edit**
-4. Entrer : `apps/dapp`
-5. **Save**
+**Option A :** Root Directory = `apps/dapp` (recommandé)
+- Settings → General → Root Directory → `apps/dapp`
+- **Important :** Activer "Include source files outside of the Root Directory" (Build Step) pour accéder à `libs/`
+
+**Option B :** Root Directory = vide (racine du repo)
+- Le `vercel.json` à la racine sera utilisé
+- Build : `cd apps/dapp && npm run build`
 
 ### 2. Build & Development Settings
 
