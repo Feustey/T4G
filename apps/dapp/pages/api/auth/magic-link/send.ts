@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     appUrl = appUrl.replace(/^http:\/\//, 'https://');
   }
 
-  const magicLink = `${appUrl}/auth/callback/magic-link?token=${encodeURIComponent(token)}`;
+  const magicLink = `${appUrl}/auth/callback/magic-link/?token=${encodeURIComponent(token)}`;
 
   try {
     const resendApiKey = process.env.RESEND_API_KEY;

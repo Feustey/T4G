@@ -25,7 +25,7 @@ export default function MagicLinkCallback() {
 
     const verify = async () => {
       try {
-        const response = await fetch('/api/auth/magic-link/verify', {
+        const response = await fetch('/api/auth/magic-link/verify/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
