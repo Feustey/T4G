@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email } = req.body;
+  const { email, locale } = req.body ?? {};
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {
     return res.status(400).json({ error: 'Adresse email invalide' });
@@ -74,7 +74,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     appUrl = appUrl.replace(/^http:\/\//, 'https://');
   }
 
-  const magicLink = `${appUrl}/auth/callback/magic-link/?token=${encodeURIComponent(token)}`;
+  const safeLocale = typeof locale === 'string' && ['fr', 'en'].includes(locale) ? locale : 'fr';
+  const magicLink = `${appUrl}/${safeLocale}/auth/callback/magic-link/?token=${encodeURIComponent(token)}`;
 
   try {
     const resendApiKey = process.env.RESEND_API_KEY;

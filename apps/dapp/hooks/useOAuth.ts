@@ -230,10 +230,11 @@ export const useOAuth = () => {
    * Authentification Magic Link - envoie l'email
    */
   const sendMagicLink = async (email: string): Promise<{ success: boolean; dev_link?: string }> => {
+    const locale = router.locale || (router as { defaultLocale?: string }).defaultLocale || 'fr';
     const response = await fetch('/api/auth/magic-link/send/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, locale }),
     });
 
     if (!response.ok) {
