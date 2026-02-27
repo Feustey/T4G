@@ -119,11 +119,11 @@ Route (pages)                              Size     First Load JS
 
 | URL | Statut | Note |
 |-----|--------|------|
-| `https://t4g.dazno.de/` | ✅ HTTP 200 | Homepage fonctionne |
-| `https://t4g.dazno.de/landing/` | ✅ HTTP 200 | Landing page Next.js |
-| `https://t4g.dazno.de/profile/` | ✅ HTTP 308 | Redirection OK |
-| `https://t4g.dazno.de/services/` | ✅ HTTP 308 | Redirection OK |
-| `https://t4g.dazno.de/login/` | ✅ HTTP 308 | Redirection OK |
+| `https://app.token-for-good.com/` | ✅ HTTP 200 | Homepage fonctionne |
+| `https://app.token-for-good.com/landing/` | ✅ HTTP 200 | Landing page Next.js |
+| `https://app.token-for-good.com/profile/` | ✅ HTTP 308 | Redirection OK |
+| `https://app.token-for-good.com/services/` | ✅ HTTP 308 | Redirection OK |
+| `https://app.token-for-good.com/login/` | ✅ HTTP 308 | Redirection OK |
 
 ---
 

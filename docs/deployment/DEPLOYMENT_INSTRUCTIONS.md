@@ -56,9 +56,9 @@ Le frontend est prêt à être déployé mais nécessite une configuration manue
 
 Les variables suivantes ont déjà été ajoutées en production:
 - ✅ `NEXT_PUBLIC_API_URL` = `https://apirust-production.up.railway.app`
-- ✅ `NEXT_PUBLIC_DAZNO_API_URL` = `https://api.dazno.de`
-- ✅ `NEXT_PUBLIC_DAZNO_USERS_API_URL` = `https://dazno.de/api`
-- ✅ `NEXT_PUBLIC_DAZNO_VERIFY_URL` = `https://dazno.de/api/auth/verify-session`
+- ✅ `NEXT_PUBLIC_DAZNO_API_URL` = `https://api.token-for-good.com`
+- ✅ `NEXT_PUBLIC_DAZNO_USERS_API_URL` = `https://token-for-good.com/api`
+- ✅ `NEXT_PUBLIC_DAZNO_VERIFY_URL` = `https://token-for-good.com/api/auth/verify-session`
 
 ### Étape 3: Déployer le Frontend (2 minutes)
 
@@ -86,7 +86,7 @@ vercel --prod --yes
 
 ### Frontend (après déploiement)
 - Principal: https://t4-g-feusteys-projects.vercel.app
-- Domaine personnalisé: https://t4g.dazno.de (à configurer)
+- Domaine personnalisé: https://app.token-for-good.com (à configurer)
 
 ---
 
@@ -123,15 +123,15 @@ curl https://t4-g-feusteys-projects.vercel.app/health
 
 ## 🔧 Configuration Domaine Personnalisé (Optionnel)
 
-Pour utiliser `t4g.dazno.de`:
+Pour utiliser `app.token-for-good.com`:
 
 1. **Dans Vercel Dashboard:**
    - Aller dans "Settings" > "Domains"
    - Cliquer sur "Add"
-   - Entrer: `t4g.dazno.de`
+   - Entrer: `app.token-for-good.com`
    - Suivre les instructions
 
-2. **Dans votre DNS (dazno.de):**
+2. **Dans votre DNS (token-for-good.com):**
    - Ajouter un enregistrement CNAME:
      - Name: `t4g`
      - Value: `cname.vercel-dns.com`
@@ -181,7 +181,7 @@ Vérifier dans le navigateur (Console):
 | Backend Railway | ✅ Déployé | https://apirust-production.up.railway.app | Aucune |
 | Base de Données | ✅ Opérationnelle | PostgreSQL (Supabase via Railway) | Aucune |
 | Frontend Vercel | ⚠️ Config Requise | - | Configurer Root Directory |
-| DNS t4g.dazno.de | ⏳ À Configurer | - | Après déploiement frontend |
+| DNS app.token-for-good.com | ⏳ À Configurer | - | Après déploiement frontend |
 
 ---
 
@@ -194,7 +194,7 @@ Vérifier dans le navigateur (Console):
 4. ⏳ Tester l'application
 
 ### Court Terme (Semaine 1)
-- Configurer le domaine `t4g.dazno.de`
+- Configurer le domaine `app.token-for-good.com`
 - Mettre en place le monitoring
 - Tests end-to-end complets
 - Collecter les premiers retours

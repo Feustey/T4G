@@ -1,7 +1,7 @@
 # ✅ Implémentation du Système de Fallback - Terminée
 
 **Date**: 16 février 2026  
-**Objectif**: Permettre à l'application de fonctionner même si l'API `api.dazno.de` est indisponible
+**Objectif**: Permettre à l'application de fonctionner même si l'API `api.token-for-good.com` est indisponible
 
 ## 📦 Nouveaux fichiers créés
 

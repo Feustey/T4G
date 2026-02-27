@@ -56,15 +56,15 @@ Après redéploiement :
 
 ```bash
 # 1. Favicon
-curl -I https://t4g.dazno.de/favicon.ico
+curl -I https://app.token-for-good.com/favicon.ico
 # Attendu : HTTP/2 200
 
 # 2. Image
-curl -I https://t4g.dazno.de/assets/images/png/spinner.png
+curl -I https://app.token-for-good.com/assets/images/png/spinner.png
 # Attendu : HTTP/2 200
 
 # 3. Page d'accueil
-curl https://t4g.dazno.de
+curl https://app.token-for-good.com
 # Attendu : Page complète avec images chargées
 ```
 

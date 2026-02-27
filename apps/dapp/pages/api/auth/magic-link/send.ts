@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const resendApiKey = process.env.RESEND_API_KEY;
-    const emailFrom = process.env.EMAIL_FROM || 'Token For Good <t4g@dazno.de>';
+    const emailFrom = process.env.EMAIL_FROM || 'Token For Good <t4g@token-for-good.com>';
 
     if (!resendApiKey) {
       if (process.env.NODE_ENV === 'development') {

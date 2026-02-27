@@ -1,4 +1,4 @@
-# ✅ Configuration du Domaine t4g.dazno.de - Rapport Final
+# ✅ Configuration du Domaine app.token-for-good.com - Rapport Final
 
 **Date:** 14 décembre 2025  
 **Status Backend:** ✅ Opérationnel  
@@ -63,9 +63,9 @@ Toutes les variables nécessaires ont été ajoutées au projet Vercel `token4go
 | Variable | Valeur | Status |
 |----------|--------|--------|
 | `NEXT_PUBLIC_API_URL` | `https://apirust-production.up.railway.app` | ✅ |
-| `NEXT_PUBLIC_DAZNO_API_URL` | `https://api.dazno.de` | ✅ |
-| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://dazno.de/api` | ✅ |
-| `NEXT_PUBLIC_DAZNO_VERIFY_URL` | `https://api.dazno.de/auth/verify-session` | ✅ |
+| `NEXT_PUBLIC_DAZNO_API_URL` | `https://api.token-for-good.com` | ✅ |
+| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://token-for-good.com/api` | ✅ |
+| `NEXT_PUBLIC_DAZNO_VERIFY_URL` | `https://api.token-for-good.com/auth/verify-session` | ✅ |
 | `NODE_ENV` | `production` | ✅ |
 | `SKIP_ENV_VALIDATION` | `true` | ✅ |
 
@@ -170,7 +170,7 @@ Configurer Vercel pour gérer correctement le monorepo Nx :
 - **API Dazno**: ✅ `/api/dazno/*`
 
 ### Frontend (À configurer)
-- **Domaine cible**: `t4g.dazno.de` ⏳ (non configuré)
+- **Domaine cible**: `app.token-for-good.com` ⏳ (non configuré)
 - **Vercel**: Aucun déploiement réussi actuellement
 
 ---
@@ -179,7 +179,7 @@ Configurer Vercel pour gérer correctement le monorepo Nx :
 
 ### Immédiat (Backend uniquement)
 1. ✅ Backend Railway opérationnel
-2. ⏳ **Configurer DNS pour `t4g.dazno.de` → Railway directement**
+2. ⏳ **Configurer DNS pour `app.token-for-good.com` → Railway directement**
    ```
    Type: CNAME
    Name: t4g
@@ -191,7 +191,7 @@ Configurer Vercel pour gérer correctement le monorepo Nx :
 3. **Choisir une option de déploiement frontend** (voir ci-dessus)
 4. Implémenter la solution choisie
 5. Déployer le frontend
-6. Configurer le domaine `t4g.dazno.de` sur Vercel
+6. Configurer le domaine `app.token-for-good.com` sur Vercel
 
 ### Moyen Terme
 7. Réactiver Sentry avec les bonnes credentials
@@ -240,7 +240,7 @@ curl https://apirust-production.up.railway.app/api/v1/token4good/marketplace/sta
 - [ ] Choisir stratégie de déploiement
 - [ ] Résoudre dépendances monorepo
 - [ ] Build frontend réussi sur Vercel
-- [ ] Configurer domaine `t4g.dazno.de`
+- [ ] Configurer domaine `app.token-for-good.com`
 - [ ] DNS propagé
 - [ ] HTTPS actif
 - [ ] Proxy API fonctionnel

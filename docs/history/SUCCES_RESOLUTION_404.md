@@ -8,9 +8,9 @@
 ## 🎉 Résultat Final
 
 ```
-✅ https://t4g.dazno.de/     → HTTP 200 (Français)
-✅ https://t4g.dazno.de/fr   → HTTP 200 (Français)
-✅ https://t4g.dazno.de/en   → HTTP 200 (Anglais)
+✅ https://app.token-for-good.com/     → HTTP 200 (Français)
+✅ https://app.token-for-good.com/fr   → HTTP 200 (Français)
+✅ https://app.token-for-good.com/en   → HTTP 200 (Anglais)
 ```
 
 **La page d'accueil fonctionne parfaitement !**
@@ -35,7 +35,7 @@
 - Déploiement réussi
 
 ### Problème 3 : Mauvais Projet Vercel ✅
-**Cause :** Le domaine `t4g.dazno.de` était lié au projet `token4good`, pas `dapp`
+**Cause :** Le domaine `app.token-for-good.com` était lié au projet `token4good`, pas `dapp`
 **Solution :** 
 - Identification des projets Vercel : `vercel projects ls`
 - Liaison au bon projet : `vercel link --project=token4good`
@@ -69,7 +69,7 @@ Fichiers modifiés:
 ## 🏗️ Architecture Finale
 
 ```
-Browser: https://t4g.dazno.de/
+Browser: https://app.token-for-good.com/
     ↓
 Vercel Project: token4good
     ↓
@@ -92,21 +92,21 @@ AuthContext (JWT)
 
 ### Page d'Accueil
 ```bash
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 # HTTP/2 200
 # x-matched-path: /fr
 ```
 
 ### Locale Française
 ```bash
-curl -I https://t4g.dazno.de/fr
+curl -I https://app.token-for-good.com/fr
 # HTTP/2 200
 # content-disposition: inline; filename="fr"
 ```
 
 ### Locale Anglaise
 ```bash
-curl -I https://t4g.dazno.de/en
+curl -I https://app.token-for-good.com/en
 # HTTP/2 200
 # content-disposition: inline; filename="en"
 ```
@@ -132,13 +132,13 @@ curl -I https://t4g.dazno.de/en
 
 | Projet | Domaine Production | Usage |
 |--------|-------------------|-------|
-| **token4good** | https://t4g.dazno.de | ✅ Frontend T4G (en cours d'utilisation) |
+| **token4good** | https://app.token-for-good.com | ✅ Frontend T4G (en cours d'utilisation) |
 | dapp | https://dapp-mu-ten.vercel.app | ⚠️ Ancien, non utilisé |
 | t4-g | https://t4-g-feusteys-projects.vercel.app | ⚠️ Test, non utilisé |
 
 **Configuration correcte :**
 - `apps/dapp/` → déploie sur projet `token4good`
-- Domaine `t4g.dazno.de` → lié à `token4good`
+- Domaine `app.token-for-good.com` → lié à `token4good`
 
 ---
 
@@ -147,9 +147,9 @@ curl -I https://t4g.dazno.de/en
 ### Variables d'Environnement (Production)
 ```bash
 NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.dazno.de/api/verify
+NEXT_PUBLIC_DAZNO_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.token-for-good.com/api/verify
 ```
 
 ### Build Settings
@@ -171,7 +171,7 @@ NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.dazno.de/api/verify
 - **URL :** https://token4good-cayozyup7-feusteys-projects.vercel.app
 - **Status :** ✅ Ready
 - **Build Time :** ~45 secondes
-- **Domaine Production :** https://t4g.dazno.de
+- **Domaine Production :** https://app.token-for-good.com
 
 ### Build Output
 ```
@@ -243,14 +243,14 @@ vercel projects ls
 ### Tests Production
 ```bash
 # Page d'accueil
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 
 # Routes i18n
-curl -I https://t4g.dazno.de/fr
-curl -I https://t4g.dazno.de/en
+curl -I https://app.token-for-good.com/fr
+curl -I https://app.token-for-good.com/en
 
 # Backend health (via proxy)
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 ```
 
 ---
@@ -259,7 +259,7 @@ curl https://t4g.dazno.de/health
 
 **PROBLÈME ENTIÈREMENT RÉSOLU !**
 
-La page d'accueil https://t4g.dazno.de/ est maintenant :
+La page d'accueil https://app.token-for-good.com/ est maintenant :
 - ✅ Accessible (HTTP 200)
 - ✅ Fonctionnelle avec i18n (fr/en)
 - ✅ Affiche le spinner de redirection
@@ -279,7 +279,7 @@ La page d'accueil https://t4g.dazno.de/ est maintenant :
 
 ## 📞 Liens Rapides
 
-- **Production :** https://t4g.dazno.de
+- **Production :** https://app.token-for-good.com
 - **Vercel Dashboard :** https://vercel.com/feusteys-projects/token4good
 - **Railway Backend :** https://railway.app/project/token4good-backend
 - **GitHub :** https://github.com/Feustey/T4G

@@ -119,7 +119,7 @@ railway logs --follow
 
 # Chercher
 # INFO Webhook signature vérifiée avec succès
-# INFO Traitement webhook test_webhook_001 depuis dazno.de
+# INFO Traitement webhook test_webhook_001 depuis token-for-good.com
 ```
 
 ---
@@ -135,7 +135,7 @@ railway logs --follow
 Via **1Password / Signal / WhatsApp chiffré** :
 
 ```
-URL Webhook : https://t4g.dazno.de/api/webhooks/dazno
+URL Webhook : https://app.token-for-good.com/api/webhooks/dazno
 (ou votre domaine Railway si différent)
 
 T4G_API_KEY : 5f8d9a2fa2159bc248fb92925603e8681b82b1ba6c3d47e0795393861f56174f

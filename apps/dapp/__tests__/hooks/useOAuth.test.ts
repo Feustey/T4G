@@ -122,7 +122,7 @@ describe('loginWithDazno()', () => {
   })
 
   it('appelle login("dazeno") et redirige vers /dashboard si succès', async () => {
-    const daznoUser = { user: { email: 'alice@dazno.de', name: 'Alice' } }
+    const daznoUser = { user: { email: 'alice@token-for-good.com', name: 'Alice' } }
     mockFetch.mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue(daznoUser),
@@ -139,7 +139,7 @@ describe('loginWithDazno()', () => {
   })
 
   it('sauvegarde le token Dazno dans localStorage', async () => {
-    const daznoUser = { user: { email: 'alice@dazno.de', name: 'Alice' } }
+    const daznoUser = { user: { email: 'alice@token-for-good.com', name: 'Alice' } }
     mockFetch.mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue(daznoUser),
@@ -351,7 +351,7 @@ describe('initAuth()', () => {
       key === 'dazno_token' ? 'dazno-existing' : null
     )
     // Vérification du token OK
-    const daznoUser = { user: { email: 'u@dazno.de', name: 'User' } }
+    const daznoUser = { user: { email: 'u@token-for-good.com', name: 'User' } }
     mockFetch
       .mockResolvedValueOnce({ ok: true }) // checkExistingDaznoSession verify
       .mockResolvedValueOnce({ ok: true, json: jest.fn().mockResolvedValue(daznoUser) }) // loginWithDazno verify

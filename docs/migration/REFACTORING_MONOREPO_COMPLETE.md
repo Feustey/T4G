@@ -109,9 +109,9 @@ Route (pages)                              Size     First Load JS
 **Variables d'environnement ajoutées :**
 ```bash
 NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de  
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://dazno.de/api
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com  
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://token-for-good.com/api
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 SKIP_ENV_VALIDATION=true
 ```
 
@@ -220,13 +220,13 @@ Le build échoue sur Vercel sans message d'erreur détaillé.
 
 1. ✅ Build local fonctionnel
 2. ⏳ Résoudre l'erreur de build Vercel
-3. ⏳ Configurer le domaine `t4g.dazno.de`
+3. ⏳ Configurer le domaine `app.token-for-good.com`
 
 ### Après Déploiement
 
 ```bash
 # Ajouter le domaine personnalisé
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 
 # Configurer DNS
 Type: CNAME
@@ -239,13 +239,13 @@ TTL: 3600
 
 ```bash
 # Health check backend
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 
 # Page d'accueil
-curl https://t4g.dazno.de/
+curl https://app.token-for-good.com/
 
 # Test authentification
-# Ouvrir https://t4g.dazno.de/login dans le navigateur
+# Ouvrir https://app.token-for-good.com/login dans le navigateur
 ```
 
 ---
@@ -290,7 +290,7 @@ vercel rollback <deployment-url>
 
 ⏳ **En cours :**
 - Déploiement Vercel (erreur de build à résoudre)
-- Configuration domaine t4g.dazno.de
+- Configuration domaine app.token-for-good.com
 
 📊 **Impact :**
 - apps/dapp est maintenant **100% autonome**

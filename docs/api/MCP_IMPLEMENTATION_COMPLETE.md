@@ -6,7 +6,7 @@
 
 ## Résumé Exécutif
 
-Implémentation complète de l'intégration des 10 nouveaux endpoints MCP API v1 proposés sur `api.dazno.de`. Le backend Token4Good expose maintenant une API complète pour:
+Implémentation complète de l'intégration des 10 nouveaux endpoints MCP API v1 proposés sur `api.token-for-good.com`. Le backend Token4Good expose maintenant une API complète pour:
 - ✅ Wallet Operations (balance, payments)
 - ✅ Channel Management (list, detail, open, close)
 - ✅ Node Information (list, detail)
@@ -128,7 +128,7 @@ Token4Good Backend (Proxy)
     - user authorization ✅
     - rate limiting ✅
     ↓ HTTPS + Dazno Token
-Dazno Lightning API (api.dazno.de/api/v1/)
+Dazno Lightning API (api.token-for-good.com/api/v1/)
     - Wallet ✅
     - Channels ✅
     - Nodes ✅
@@ -220,7 +220,7 @@ GET  /api/dazno/lightning/transactions/:user_id
 
 ### Variables d'environnement
 ```bash
-DAZNO_LIGHTNING_API_URL=https://api.dazno.de  # Par défaut
+DAZNO_LIGHTNING_API_URL=https://api.token-for-good.com  # Par défaut
 DAZNO_API_KEY=your_api_key_here               # Optionnel
 ```
 

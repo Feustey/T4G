@@ -28,7 +28,7 @@ Corriger et nettoyer la structure du repository Token4Good v2 pour améliorer :
 
 **Résultat** :
 - 1 seule configuration Vercel
-- Origine CORS unifiée : `https://t4g.dazno.de`
+- Origine CORS unifiée : `https://app.token-for-good.com`
 - Build command cohérent
 - Proxy vers backend Rust Railway
 

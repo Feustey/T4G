@@ -652,7 +652,7 @@ async function sendNotificationByEmail(
 
   const recipient = process.env.EMAIL_TO || to || process.env.EMAIL_ADMIN;
   const bcc = process.env.EMAIL_ADMIN || "stephane.courant@token-for-good.com";
-  const from = process.env.EMAIL_FROM || "Token For Good <t4g@dazno.de>";
+  const from = process.env.EMAIL_FROM || "Token For Good <t4g@token-for-good.com>";
 
   console.log(`send mail to ${recipient} : ${subject}`);
 

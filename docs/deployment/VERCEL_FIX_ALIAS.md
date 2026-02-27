@@ -125,9 +125,9 @@ Dans la même section **Settings** → **General** :
 | Variable | Valeur | Environnement |
 |----------|--------|---------------|
 | `NEXT_PUBLIC_API_URL` | `https://apirust-production.up.railway.app` | Production, Preview, Development |
-| `NEXT_PUBLIC_DAZNO_API_URL` | `https://www.dazno.de/api` | Production, Preview, Development |
-| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://www.dazno.de/api` | Production, Preview, Development |
-| `NEXT_PUBLIC_DAZNO_VERIFY_URL` | `https://www.dazno.de/api/verify` | Production, Preview, Development |
+| `NEXT_PUBLIC_DAZNO_API_URL` | `https://www.token-for-good.com/api` | Production, Preview, Development |
+| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://www.token-for-good.com/api` | Production, Preview, Development |
+| `NEXT_PUBLIC_DAZNO_VERIFY_URL` | `https://www.token-for-good.com/api/verify` | Production, Preview, Development |
 | `NODE_ENV` | `production` | Production |
 | `SKIP_ENV_VALIDATION` | `true` | Production |
 

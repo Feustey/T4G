@@ -20,7 +20,7 @@ Token4Good v2 migration to RGB Bitcoin + Lightning Network is **85% complete** a
 ### Remaining Work ⚠️
 - ⚠️ Frontend migration from MongoDB to Supabase (2-3 weeks)
 - ⚠️ Remove Next.js API routes (1 week)
-- ⚠️ DNS configuration `t4g.dazno.de` (1 day)
+- ⚠️ DNS configuration `app.token-for-good.com` (1 day)
 - ⚠️ Production deployment Railway + Vercel (3 days)
 
 ---
@@ -179,7 +179,7 @@ test result: ok. 9 passed; 0 failed; 8 ignored
 - ✅ Build pipeline working
 - ⚠️ Remove Next.js API routes (`apps/dapp/pages/api/**`)
 - ⚠️ Update all data fetching to use backend REST API
-- ⚠️ Configure DNS `t4g.dazno.de`
+- ⚠️ Configure DNS `app.token-for-good.com`
 - ⚠️ Environment variables in Vercel dashboard
 
 #### Database (Supabase)
@@ -262,13 +262,13 @@ RGB Operations:
 2. **Configure secrets in Railway dashboard**
 3. **Setup LND + Bitcoin Core on dedicated VPS**
 4. **Vercel DNS configuration**
-   - Add `t4g.dazno.de` in domain settings
+   - Add `app.token-for-good.com` in domain settings
    - Configure CNAME record
 5. **Test live deployment**
 
 **Success Criteria:**
 - [ ] Backend accessible at `https://api.token-for-good.com`
-- [ ] Frontend at `https://t4g.dazno.de`
+- [ ] Frontend at `https://app.token-for-good.com`
 - [ ] Lightning invoices working in production
 - [ ] RGB proofs persisting correctly
 

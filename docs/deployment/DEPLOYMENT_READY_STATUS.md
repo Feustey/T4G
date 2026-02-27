@@ -108,7 +108,7 @@ vercel login
 vercel --prod
 
 # 3. Configurer DNS
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 ---
@@ -126,7 +126,7 @@ vercel domains add t4g.dazno.de
   - CLIENT_SECRET
 
 - [ ] Vérifier accès DNS
-  - Droits sur dazno.de
+  - Droits sur token-for-good.com
   - Pouvoir ajouter CNAME t4g
 
 ### Pendant le Déploiement
@@ -162,7 +162,7 @@ Docs: [DAZNO_API_EXTENSIONS.md]
 ### Frontend Vercel
 
 ```
-URL: https://t4g.dazno.de
+URL: https://app.token-for-good.com
 Health: /api/health (proxy vers Railway)
 App: /
 ```

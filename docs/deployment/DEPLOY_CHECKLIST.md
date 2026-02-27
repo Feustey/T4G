@@ -58,7 +58,7 @@
 - [ ] `LND_TLS_CERT_PATH`: (base64 encoded)
 
 #### Dazno Integration
-- [ ] `DAZNO_API_URL`: `https://api.dazno.de`
+- [ ] `DAZNO_API_URL`: `https://api.token-for-good.com`
 
 #### Server Config
 - [ ] `HOST`: `0.0.0.0`
@@ -66,7 +66,7 @@
 - [ ] `RUST_LOG`: `info,token4good_backend=debug`
 
 #### CORS
-- [ ] `ALLOWED_ORIGINS`: `https://t4g.dazno.de,https://dazno.de`
+- [ ] `ALLOWED_ORIGINS`: `https://app.token-for-good.com,https://token-for-good.com`
 
 ### Déploiement Backend
 - [ ] Script exécutable: `chmod +x scripts/deploy-railway.sh`
@@ -99,9 +99,9 @@
 - [ ] `NEXT_PUBLIC_API_URL`: `https://YOUR-RAILWAY-URL`
 
 #### Dazno Integration
-- [ ] `NEXT_PUBLIC_DAZNO_API_URL`: `https://api.dazno.de`
-- [ ] `NEXT_PUBLIC_DAZNO_USERS_API_URL`: `https://api.dazno.de/users`
-- [ ] `NEXT_PUBLIC_DAZNO_VERIFY_URL`: `https://api.dazno.de/auth/verify-session`
+- [ ] `NEXT_PUBLIC_DAZNO_API_URL`: `https://api.token-for-good.com`
+- [ ] `NEXT_PUBLIC_DAZNO_USERS_API_URL`: `https://api.token-for-good.com/users`
+- [ ] `NEXT_PUBLIC_DAZNO_VERIFY_URL`: `https://api.token-for-good.com/auth/verify-session`
 
 #### OAuth (Optionnel)
 - [ ] `LINKEDIN_CLIENT_ID`: (si utilisé)
@@ -148,14 +148,14 @@
 - [ ] CNAME sauvegardé et actif
 
 ### Configuration Vercel Domain
-- [ ] Ajout domaine: `vercel domains add t4g.dazno.de`
+- [ ] Ajout domaine: `vercel domains add app.token-for-good.com`
 - [ ] Vérification DNS: attendre propagation (1-5 min)
 - [ ] SSL certificate: auto-généré par Vercel
 - [ ] Domaine vérifié et actif
 
 ### Validation DNS
-- [ ] DNS résolu: `nslookup t4g.dazno.de`
-- [ ] HTTPS actif: `https://t4g.dazno.de`
+- [ ] DNS résolu: `nslookup app.token-for-good.com`
+- [ ] HTTPS actif: `https://app.token-for-good.com`
 - [ ] Certificate valide (cadenas vert)
 - [ ] Redirection HTTP → HTTPS automatique
 
@@ -165,14 +165,14 @@
 
 ### Tests d'Infrastructure
 - [ ] Backend health check: `curl https://YOUR-RAILWAY-URL/health`
-- [ ] Frontend health check: `curl https://t4g.dazno.de/health`
+- [ ] Frontend health check: `curl https://app.token-for-good.com/health`
 - [ ] Proxy API fonctionne correctement
 - [ ] Performance < 500ms (p95)
 
 ### Tests d'Authentification
 
 #### Login Dazno
-- [ ] Ouvrir `https://t4g.dazno.de/login`
+- [ ] Ouvrir `https://app.token-for-good.com/login`
 - [ ] Cliquer "Login with Dazno"
 - [ ] Redirection OAuth Dazno
 - [ ] Callback réussi
@@ -241,7 +241,7 @@
 #### UptimeRobot (ou équivalent)
 - [ ] Compte créé
 - [ ] Monitor backend: `https://YOUR-RAILWAY-URL/health`
-- [ ] Monitor frontend: `https://t4g.dazno.de`
+- [ ] Monitor frontend: `https://app.token-for-good.com`
 - [ ] Interval: 5 minutes
 - [ ] Alerts email configurées
 

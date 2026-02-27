@@ -8,7 +8,7 @@
 
 ## 🎯 Problème Initial
 
-**Erreur :** HTTP 500 sur https://t4g.dazno.de/
+**Erreur :** HTTP 500 sur https://app.token-for-good.com/
 
 ---
 
@@ -36,7 +36,7 @@ Development: http://localhost:8080
 
 ### ✅ Frontend
 ```bash
-curl -I https://t4g.dazno.de
+curl -I https://app.token-for-good.com
 # Résultat : HTTP/2 307 → redirection vers /fr (OK)
 ```
 
@@ -57,11 +57,11 @@ curl https://apirust-production.up.railway.app/health
 
 | Service | URL | Status |
 |---------|-----|--------|
-| **Frontend** | https://t4g.dazno.de | ✅ HTTP 307 → /fr |
+| **Frontend** | https://app.token-for-good.com | ✅ HTTP 307 → /fr |
 | **Backend** | https://apirust-production.up.railway.app | ✅ HTTP 200 |
 | **Database** | (Railway PostgreSQL) | ✅ OK |
 | **RGB Service** | (Backend interne) | ✅ OK |
-| **Dazno Integration** | https://www.dazno.de/api | ✅ OK |
+| **Dazno Integration** | https://www.token-for-good.com/api | ✅ OK |
 
 ---
 
@@ -102,7 +102,7 @@ curl https://apirust-production.up.railway.app/health
 ### Vérifications Rapides
 ```bash
 # 1. Status frontend
-curl -I https://t4g.dazno.de
+curl -I https://app.token-for-good.com
 
 # 2. Status backend
 curl https://apirust-production.up.railway.app/health

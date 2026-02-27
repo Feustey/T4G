@@ -17,7 +17,7 @@ export async function checkDaznoSession(): Promise<{
     const urlToken = urlParams.get('token');
 
     if (urlToken) {
-      // Passer par le proxy API pour éviter CORS (appel serveur → api.dazno.de)
+      // Passer par le proxy API pour éviter CORS (appel serveur → api.token-for-good.com)
       const response = await fetch('/api/auth/dazno-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

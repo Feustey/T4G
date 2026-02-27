@@ -14,7 +14,7 @@
 - Les tests unitaires et d'intégration ne compilent pas ou supposent des services externes actifs.
 - Le binaire backend écoute sur `127.0.0.1`, le script Docker requiert `expect`, et les dépendances Bitcoin/LND sont installées ad hoc.
 - Vercel ne proxifie que `/api/backend/**` vers Railway ; les autres routes `/api/*` restent servies par Next.
-- Le domaine `t4g.dazno.de` n'est pas enregistré côté Vercel.
+- Le domaine `app.token-for-good.com` n'est pas enregistré côté Vercel.
 - Le fichier `SAMPLE.env` contient des secrets sensibles à extraire hors du dépôt.
 
 ## Actions prioritaires
@@ -41,7 +41,7 @@
 - Vérifier que le healthcheck Docker fonctionne sans dépendances manuelles.
 
 ### 5. Configuration Vercel et DNS
-- Ajouter `t4g.dazno.de` dans Vercel (Settings → Domains) puis vérifier le CNAME.
+- Ajouter `app.token-for-good.com` dans Vercel (Settings → Domains) puis vérifier le CNAME.
 - Étendre `vercel.json` pour proxifier toutes les routes `/api/*` vers le backend Rust ou migrer totalement les endpoints côté Axum.
 - Mettre à jour les variables d'environnement (NextAuth, API URL, Dazno, Supabase) dans Vercel production et preview.
 
@@ -52,5 +52,5 @@
 ## Validation finale
 - Relancer un build `apps/dapp` (lint + type-check + `npm run build`).
 - Déployer le backend Rust corrigé dans l'environnement cible (Railway ou autre) et tester `/health`.
-- Vérifier depuis `https://t4g.dazno.de` les parcours clefs : login Dazno, création de preuve, transfert, tableau de bord.
+- Vérifier depuis `https://app.token-for-good.com` les parcours clefs : login Dazno, création de preuve, transfert, tableau de bord.
 - Mettre en place un monitoring (logs, métriques) pour Supabase, Axum et Vercel.

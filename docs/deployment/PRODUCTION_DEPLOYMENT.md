@@ -93,7 +93,7 @@ LND_MACAROON_PATH=<base64-encoded-macaroon>
 LND_TLS_CERT_PATH=<base64-encoded-cert>
 
 # Dazno
-DAZNO_API_URL=https://dazno.de
+DAZNO_API_URL=https://token-for-good.com
 
 # Server
 HOST=0.0.0.0
@@ -101,7 +101,7 @@ PORT=3000
 RUST_LOG=info,token4good_backend=debug
 
 # CORS
-ALLOWED_ORIGINS=https://token4good.vercel.app,https://t4g.dazno.de
+ALLOWED_ORIGINS=https://token4good.vercel.app,https://app.token-for-good.com
 ```
 
 #### 4. Déployer
@@ -169,7 +169,7 @@ LINKEDIN_CLIENT_ID=your_linkedin_client_id
 LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
 
 # Dazno
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 
 # NextAuth (Legacy - transition)
 NEXTAUTH_SECRET=<générer-nouveau-secret>
@@ -198,7 +198,7 @@ vercel --prod
 
 ## 🔧 Configuration DNS
 
-### Sous-domaine t4g.dazno.de
+### Sous-domaine app.token-for-good.com
 
 Dans votre DNS provider (Cloudflare, etc.):
 
@@ -211,7 +211,7 @@ TTL: Auto
 
 Puis dans Vercel:
 ```bash
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 ---

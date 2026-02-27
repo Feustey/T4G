@@ -23,8 +23,8 @@ DATABASE_URL=postgresql://postgres:[PASSWORD]@db.glikbylflheewbonytev.supabase.c
 
 # API URLs
 NEXT_PUBLIC_API_URL=https://token4good-backend-production.up.railway.app/api
-NEXT_PUBLIC_DAZNO_API_URL=https://dazno.de/api
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://api.dazno.de/users
+NEXT_PUBLIC_DAZNO_API_URL=https://token-for-good.com/api
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://api.token-for-good.com/users
 
 # Dazno Integration
 DAZNO_CLIENT_ID=token4good-prod
@@ -96,8 +96,8 @@ Le fichier `vercel.json` est déjà configuré avec :
    NEXTAUTH_SECRET → [SECURE_RANDOM_STRING]
    DATABASE_URL → postgresql://postgres:[PASSWORD]@db.glikbylflheewbonytev.supabase.co:5432/postgres
    NEXT_PUBLIC_API_URL → https://token4good-backend-production.up.railway.app/api
-   NEXT_PUBLIC_DAZNO_API_URL → https://dazno.de/api
-   NEXT_PUBLIC_DAZNO_USERS_API_URL → https://api.dazno.de/users
+   NEXT_PUBLIC_DAZNO_API_URL → https://token-for-good.com/api
+   NEXT_PUBLIC_DAZNO_USERS_API_URL → https://api.token-for-good.com/users
    ```
 
 3. **Environnements** : Production, Preview, Development
@@ -127,7 +127,7 @@ module.exports = {
       {
         source: '/api/:path*',
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: 'https://dazno.de' },
+          { key: 'Access-Control-Allow-Origin', value: 'https://token-for-good.com' },
           // ... autres headers
         ],
       },
@@ -136,7 +136,7 @@ module.exports = {
   
   // Images optimisées
   images: {
-    domains: ['dazno.de', 'api.dazno.de', 'token4good.com'],
+    domains: ['token-for-good.com', 'api.token-for-good.com', 'token4good.com'],
   },
 }
 ```
@@ -293,7 +293,7 @@ GET https://token4good-backend-production.up.railway.app/health
 3. **CORS Errors**
    ```javascript
    // Vérifier next.config.js headers
-   Access-Control-Allow-Origin: 'https://dazno.de'
+   Access-Control-Allow-Origin: 'https://token-for-good.com'
    ```
 
 4. **API Routes Timeout**

@@ -69,7 +69,7 @@ railway rollback --environment production <deployment-id>
 ### 2. Frontend Vercel Down (P0)
 
 **Symptômes** :
-- https://t4g.dazno.de inaccessible (502/503)
+- https://app.token-for-good.com inaccessible (502/503)
 - Build Vercel a échoué
 - Déploiement en erreur
 
@@ -130,7 +130,7 @@ vercel promote <deployment-url>
 
 ```bash
 # 1. Tester LinkedIn OAuth
-curl -I "https://t4g.dazno.de/auth/callback/linkedin?code=test&state=test"
+curl -I "https://app.token-for-good.com/auth/callback/linkedin?code=test&state=test"
 
 # 2. Consulter les logs backend
 railway logs --environment production | grep "OAuth"
@@ -164,7 +164,7 @@ vercel --prod
 
 **Redirect URI Mismatch** :
 1. Vérifier les Redirect URIs dans le provider dashboard
-2. Ajouter l'URI manquante : `https://t4g.dazno.de/auth/callback/<provider>`
+2. Ajouter l'URI manquante : `https://app.token-for-good.com/auth/callback/<provider>`
 3. Attendre 5-10min propagation
 4. Tester à nouveau
 
@@ -253,7 +253,7 @@ vercel logs | grep "500" | awk '{print $5}' | sort | uniq -c | sort -nr
 
 ```bash
 # Vérifier l'API Dazno
-curl -I https://api.dazno.de/health
+curl -I https://api.token-for-good.com/health
 
 # Si down, activer fallback mode
 railway variables set DAZNO_FALLBACK_MODE=true --environment production
@@ -278,7 +278,7 @@ railway restart --environment production
 
 ```bash
 # 1. Mesurer la performance
-curl -w "@curl-format.txt" -o /dev/null -s https://t4g.dazno.de/
+curl -w "@curl-format.txt" -o /dev/null -s https://app.token-for-good.com/
 
 # Format curl-format.txt :
 time_namelookup:  %{time_namelookup}\n
@@ -350,7 +350,7 @@ vercel logs --follow
 
 # 5. Tests post-déploiement
 curl https://apirust-production.up.railway.app/health
-curl https://t4g.dazno.de/
+curl https://app.token-for-good.com/
 
 # 6. Monitoring (15 minutes)
 # Surveiller les métriques et logs
@@ -580,7 +580,7 @@ Railway Pro plan requis :
 - **Railway Support** : https://help.railway.app
 - **Vercel Support** : https://vercel.com/support
 - **LinkedIn OAuth** : https://www.linkedin.com/help
-- **Dazno API** : api-support@dazno.de
+- **Dazno API** : api-support@token-for-good.com
 
 ---
 

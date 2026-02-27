@@ -59,7 +59,7 @@ Sur le serveur de production:
   
   Ajouter:
   0 4 * * 0 /root/cleanup-disk.sh >> /var/log/disk-cleanup.log 2>&1
-  0 * * * * /root/check-disk-space.sh --alert-email admin@dazno.de
+  0 * * * * /root/check-disk-space.sh --alert-email admin@token-for-good.com
 
 ═══════════════════════════════════════════════════════════════
    CE QUE ÇA NETTOIE

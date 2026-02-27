@@ -19,7 +19,7 @@ Allez sur le dashboard Vercel et ajoutez ces variables d'environnement :
 
 ```bash
 # URL de l'application (utilisée pour les redirects OAuth)
-NEXT_PUBLIC_APP_URL=https://t4g.dazno.de
+NEXT_PUBLIC_APP_URL=https://app.token-for-good.com
 
 # URL du backend Rust
 NEXT_PUBLIC_API_URL=https://votre-backend.railway.app
@@ -37,7 +37,7 @@ NEXT_PUBLIC_T4G_CLIENT_ID=votre_t4g_client_id
 NEXT_PUBLIC_T4G_AUTH_URL=https://oauth.t4g.com
 
 # Dazno
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 ```
 
 ### 2. Obtenir les Credentials LinkedIn OAuth
@@ -49,7 +49,7 @@ NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
 3. Remplissez les informations :
    - **App name:** Token4Good
    - **LinkedIn Page:** Votre page entreprise
-   - **Privacy policy URL:** https://t4g.dazno.de/privacy
+   - **Privacy policy URL:** https://app.token-for-good.com/privacy
    - **App logo:** Votre logo
 
 #### Étape 2 : Configurer les Produits OAuth
@@ -62,7 +62,7 @@ NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
 1. Allez dans l'onglet "Auth"
 2. Dans "Authorized redirect URLs for your app", ajoutez :
    ```
-   https://t4g.dazno.de/auth/callback/linkedin
+   https://app.token-for-good.com/auth/callback/linkedin
    http://localhost:4200/auth/callback/linkedin (pour développement)
    ```
 
@@ -110,7 +110,7 @@ npm run dev
 
 1. **Déployer sur Vercel** avec les variables d'environnement configurées
 2. **Tester le flow complet** :
-   - Aller sur https://t4g.dazno.de/login
+   - Aller sur https://app.token-for-good.com/login
    - Cliquer sur "Login with LinkedIn"
    - Autoriser l'application LinkedIn
    - Vérifier la redirection vers le dashboard
@@ -231,10 +231,10 @@ vercel --prod
 
 ```bash
 # Health check
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 
 # Test login
-open https://t4g.dazno.de/login
+open https://app.token-for-good.com/login
 ```
 
 ---

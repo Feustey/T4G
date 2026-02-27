@@ -79,7 +79,7 @@ Immédiat (1-2 jours):
   ☐ Déployer sur Railway (staging)
   ☐ Déployer sur Vercel (staging)
   ☐ Tester OAuth flows complets
-  ☐ Configurer DNS t4g.dazno.de
+  ☐ Configurer DNS app.token-for-good.com
 
 Court terme (1-2 semaines):
   ☐ Production deployment
@@ -108,7 +108,7 @@ DÉMARRAGE RAPIDE
 
 3. Vérifier:
    curl https://your-backend.railway.app/health
-   open https://t4g.dazno.de/login-v2
+   open https://app.token-for-good.com/login-v2
 
 ================================================================================
 DOCUMENTATION
@@ -122,7 +122,7 @@ Navigation rapide:
   
 URLs importantes:
   - Backend: https://[your-app].railway.app
-  - Frontend: https://t4g.dazno.de
+  - Frontend: https://app.token-for-good.com
   - Health: /health
   - Login: /login-v2
   - Metrics: /api/metrics (auth required)

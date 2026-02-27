@@ -130,10 +130,10 @@ curl http://localhost:3000/api/lightning/node/info
 
 ```bash
 # 1. Request new API key from Dazno team
-# Contact: support@dazno.de
+# Contact: support@token-for-good.com
 
 # 2. Test new key before rotation
-curl -H "Authorization: Bearer <NEW_KEY>" https://dazno.de/api/health
+curl -H "Authorization: Bearer <NEW_KEY>" https://token-for-good.com/api/health
 
 # 3. Update in Vercel & Railway
 DAZNO_API_KEY=<NEW_KEY>
@@ -187,7 +187,7 @@ If a secret is compromised:
 1. **Revoke compromised secret immediately**
    ```bash
    # Example: Revoke Dazno API key
-   curl -X POST https://dazno.de/api/keys/revoke \
+   curl -X POST https://token-for-good.com/api/keys/revoke \
      -H "Authorization: Bearer <OLD_KEY>"
    ```
 
@@ -315,7 +315,7 @@ curl -H "Authorization: Bearer <JWT>" \
 |------|------|---------|
 | Security Lead | TBD | security@token-for-good.com |
 | DevOps Lead | TBD | devops@token-for-good.com |
-| Dazno Support | TBD | support@dazno.de |
+| Dazno Support | TBD | support@token-for-good.com |
 | Supabase Support | TBD | https://supabase.com/support |
 
 ---

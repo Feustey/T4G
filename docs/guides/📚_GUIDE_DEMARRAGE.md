@@ -296,7 +296,7 @@ vercel logs --follow
 
 # Health checks
 curl https://YOUR-RAILWAY-URL/health
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 ```
 
 ---

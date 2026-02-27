@@ -97,7 +97,7 @@ cat .env | grep T4G_
 ### Informations à Partager avec Dazno
 
 ```
-URL Webhook : https://t4g.dazno.de/api/webhooks/dazno
+URL Webhook : https://app.token-for-good.com/api/webhooks/dazno
 T4G_API_KEY : <la_clé>
 T4G_WEBHOOK_SECRET : <le_secret>
 
@@ -173,7 +173,7 @@ Response: {"received":true,"webhook_id":"test_webhook_001","processed_at":"..."}
 
    ```bash
    # Vérifier que le service est UP
-   curl https://t4g.dazno.de/health
+   curl https://app.token-for-good.com/health
    
    # Devrait retourner :
    # {"status":"healthy"}
@@ -187,12 +187,12 @@ Response: {"received":true,"webhook_id":"test_webhook_001","processed_at":"..."}
 
 ```bash
 # Configuration
-API_URL="https://t4g.dazno.de/api/webhooks/dazno"
+API_URL="https://app.token-for-good.com/api/webhooks/dazno"
 API_KEY="<votre_T4G_API_KEY>"
 WEBHOOK_SECRET="<votre_T4G_WEBHOOK_SECRET>"
 
 # Payload de test
-PAYLOAD='{"id":"prod_test_001","timestamp":"2025-10-15T15:00:00Z","source":"dazno.de","event_type":"user.created","user_id":"test_prod","email":"test@prod.com"}'
+PAYLOAD='{"id":"prod_test_001","timestamp":"2025-10-15T15:00:00Z","source":"token-for-good.com","event_type":"user.created","user_id":"test_prod","email":"test@prod.com"}'
 
 # Calculer signature
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | sed 's/^.* //')
@@ -209,7 +209,7 @@ curl -X POST "$API_URL" \
 ### B. Test avec le Script
 
 ```bash
-export T4G_WEBHOOK_URL="https://t4g.dazno.de/api/webhooks/dazno"
+export T4G_WEBHOOK_URL="https://app.token-for-good.com/api/webhooks/dazno"
 export T4G_API_KEY="<votre_clé>"
 export T4G_WEBHOOK_SECRET="<votre_secret>"
 
@@ -223,7 +223,7 @@ railway logs
 
 # Chercher :
 # INFO Webhook signature vérifiée avec succès
-# INFO Traitement webhook prod_test_001 depuis dazno.de
+# INFO Traitement webhook prod_test_001 depuis token-for-good.com
 ```
 
 ---
@@ -265,7 +265,7 @@ railway logs | grep "Signature webhook invalide"
 Envoyer cette checklist à l'équipe Dazno :
 
 - [ ] Clés reçues : `T4G_API_KEY` et `T4G_WEBHOOK_SECRET`
-- [ ] URL configurée : `https://t4g.dazno.de/api/webhooks/dazno`
+- [ ] URL configurée : `https://app.token-for-good.com/api/webhooks/dazno`
 - [ ] Code d'envoi implémenté (voir `DAZNO_WEBHOOK_SETUP.md`)
 - [ ] Signature HMAC-SHA256 testée
 - [ ] Headers `x-api-key` et `x-t4g-signature` envoyés
@@ -340,7 +340,7 @@ railway variables | grep T4G_
 **Solutions** :
 ```bash
 # Vérifier que le service est UP
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 
 # Vérifier les règles firewall
 # Vérifier que Railway autorise les IPs Dazno
@@ -391,7 +391,7 @@ curl https://t4g.dazno.de/health
 
 - Railway Dashboard : https://railway.app/project/...
 - Logs : `railway logs --follow`
-- Monitoring : https://t4g.dazno.de/api/metrics
+- Monitoring : https://app.token-for-good.com/api/metrics
 
 ---
 

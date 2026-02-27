@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 /**
  * Proxy serveur pour la vérification de session Dazno.
- * Contourne le CORS : l'appel à api.dazno.de se fait depuis le serveur Next.js,
+ * Contourne le CORS : l'appel à api.token-for-good.com se fait depuis le serveur Next.js,
  * pas depuis le navigateur, donc l'origine n'est pas bloquée.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const verifyUrl = process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://dazno.de/api/auth/verify-session';
+    const verifyUrl = process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://token-for-good.com/api/auth/verify-session';
 
     const response = await fetch(verifyUrl, {
       method: 'POST',

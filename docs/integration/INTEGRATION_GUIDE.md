@@ -127,8 +127,8 @@ graph TB
     end
     
     subgraph "Dazno Ecosystem"
-        G --> K[api.dazno.de]
-        G --> L[dazno.de/api]
+        G --> K[api.token-for-good.com]
+        G --> L[token-for-good.com/api]
         K --> M[Lightning Network]
         L --> N[User Management]
     end
@@ -179,8 +179,8 @@ http://147.79.101.32:3000
 
 ### Dazno APIs (proxifiées)
 ```
-https://api.dazno.de        # Lightning Network
-https://dazno.de/api        # User Management
+https://api.token-for-good.com        # Lightning Network
+https://token-for-good.com/api        # User Management
 ```
 
 ## 🎯 Tests Frontend
@@ -223,7 +223,7 @@ describe('Intégration Dazno', () => {
 ```typescript
 // Remplacer les appels directs à reqwest par daznoAPI
 // AVANT:
-const response = await fetch('https://api.dazno.de/lightning/balance');
+const response = await fetch('https://api.token-for-good.com/lightning/balance');
 
 // APRÈS:
 const balance = await daznoAPI.getLightningBalance(userId);

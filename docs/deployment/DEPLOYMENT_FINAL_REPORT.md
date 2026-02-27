@@ -173,7 +173,7 @@ vercel --prod --yes
 - [ ] Résoudre erreur Supabase
 - [ ] Build Vercel réussi
 - [ ] Tests end-to-end
-- [ ] DNS configuré (t4g.dazno.de)
+- [ ] DNS configuré (app.token-for-good.com)
 
 ### Post-Déploiement ⏳
 - [ ] Monitoring configuré
@@ -271,7 +271,7 @@ vercel --prod --yes
 1. **Corriger Supabase** dans `useOAuth.ts`
 2. **Redéployer** sur Vercel
 3. **Tester** l'application complète
-4. **Configurer DNS** t4g.dazno.de
+4. **Configurer DNS** app.token-for-good.com
 
 ### Moyen Terme (Cette Semaine)
 

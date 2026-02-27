@@ -247,7 +247,7 @@ RGB_DATA_DIR=/var/lib/rgb
 LND_REST_HOST=https://lnd.example.com
 LND_MACAROON_PATH=/path/to/admin.macaroon
 LND_TLS_CERT_PATH=/path/to/tls.cert
-DAZNO_API_URL=https://dazno.de
+DAZNO_API_URL=https://token-for-good.com
 RUST_LOG=info
 ```
 
@@ -266,7 +266,7 @@ LINKEDIN_CLIENT_ID=your_linkedin_client_id
 LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
 
 # Dazno
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 ```
 
 ---
@@ -300,7 +300,7 @@ NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
 ### Phase 3: Déploiement Production (2-3 jours)
 - [ ] Setup Railway (backend)
 - [ ] Setup Vercel (frontend) avec proxy
-- [ ] Configuration DNS t4g.dazno.de
+- [ ] Configuration DNS app.token-for-good.com
 - [ ] Monitoring et logs (Sentry + CloudWatch)
 - [ ] Load testing
 

@@ -231,7 +231,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost
 │ 2. Redirect vers LinkedIn OAuth                             │
 │    https://linkedin.com/oauth/authorize?                    │
 │      client_id=XXX                                           │
-│      redirect_uri=https://t4g.dazno.de/auth/callback/linkedin│
+│      redirect_uri=https://app.token-for-good.com/auth/callback/linkedin│
 └────────────────────┬────────────────────────────────────────┘
                      │
                      ↓
@@ -242,7 +242,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost
                      ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ 4. LinkedIn redirect vers callback avec CODE                │
-│    https://t4g.dazno.de/auth/callback/linkedin?code=ABC123  │
+│    https://app.token-for-good.com/auth/callback/linkedin?code=ABC123  │
 └────────────────────┬────────────────────────────────────────┘
                      │
                      ↓
@@ -340,7 +340,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Frontend Next.js (Vercel)                                    │
-│ https://t4g.dazno.de                                         │
+│ https://app.token-for-good.com                                         │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │ Components & Pages                                           │

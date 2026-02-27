@@ -118,7 +118,7 @@ tail -f apps/dapp/.next/server/dev.log 2>/dev/null || echo "Logs non disponibles
 
 ### OAuth Dazno ne Fonctionne Pas en Local
 **C'est normal !** Dazno OAuth nécessite :
-- Domaine public (dazno.de)
+- Domaine public (token-for-good.com)
 - Callback URL HTTPS
 - Session cookie partagée
 

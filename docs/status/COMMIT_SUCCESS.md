@@ -194,7 +194,7 @@ GitHub:  https://github.com/Feustey/T4G
 - [ ] Notifier l'équipe du déploiement
 
 ### Cette Semaine
-- [ ] Configurer domaine custom (t4g.dazno.de)
+- [ ] Configurer domaine custom (app.token-for-good.com)
 - [ ] Tests de charge
 - [ ] Optimisations performance
 

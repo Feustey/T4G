@@ -74,7 +74,7 @@ curl https://<backend>.up.railway.app/health
 curl https://token4good.vercel.app/api/health
 
 # Domaine custom (si DNS propagé)
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 ```
 
 ---

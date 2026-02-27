@@ -156,7 +156,7 @@ docker-compose -f docker-compose.dev.yml restart backend
 
 ### OAuth ne fonctionne pas
 - Vérifier que `NEXT_PUBLIC_APP_URL=http://localhost:4200` dans `.env.local`
-- Pour Dazno : Ne fonctionne qu'en production (redirect vers dazno.de)
+- Pour Dazno : Ne fonctionne qu'en production (redirect vers token-for-good.com)
 - Pour LinkedIn : Vérifier `LINKEDIN_CLIENT_ID` et `LINKEDIN_CLIENT_SECRET`
 
 ## 📚 Documentation Associée
@@ -182,4 +182,4 @@ Les 3 boutons de login fonctionnent maintenant correctement en local, à conditi
 2. Le frontend est configuré avec `NEXT_PUBLIC_API_URL=http://localhost:3000`
 3. Les services OAuth sont correctement configurés (LinkedIn, Dazno)
 
-**Note** : En local, l'OAuth Dazno ne fonctionnera pas car il nécessite une URL publique accessible depuis dazno.de. Utilisez les boutons de debug ou LinkedIn pour tester.
+**Note** : En local, l'OAuth Dazno ne fonctionnera pas car il nécessite une URL publique accessible depuis token-for-good.com. Utilisez les boutons de debug ou LinkedIn pour tester.

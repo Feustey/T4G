@@ -8,7 +8,7 @@
 
 ## 🎯 Résumé
 
-L'authentification OAuth pour **LinkedIn** et **t4g** a été complètement implémentée et est maintenant fonctionnelle. Le bouton "Login with LinkedIn" sur https://t4g.dazno.de/login fonctionnera une fois les variables d'environnement configurées sur Vercel.
+L'authentification OAuth pour **LinkedIn** et **t4g** a été complètement implémentée et est maintenant fonctionnelle. Le bouton "Login with LinkedIn" sur https://app.token-for-good.com/login fonctionnera une fois les variables d'environnement configurées sur Vercel.
 
 ---
 
@@ -114,7 +114,7 @@ Pour que l'authentification LinkedIn fonctionne en production, vous devez :
 1. Allez sur https://www.linkedin.com/developers/apps
 2. Créez une nouvelle application "Token4Good"
 3. Activez le produit "Sign In with LinkedIn using OpenID Connect"
-4. Ajoutez l'URL de redirect : `https://t4g.dazno.de/auth/callback/linkedin`
+4. Ajoutez l'URL de redirect : `https://app.token-for-good.com/auth/callback/linkedin`
 5. Copiez le **Client ID** et **Client Secret**
 
 #### 2. Ajouter les Variables sur Vercel
@@ -124,7 +124,7 @@ Pour que l'authentification LinkedIn fonctionne en production, vous devez :
 vercel env add LINKEDIN_CLIENT_ID production
 vercel env add LINKEDIN_CLIENT_SECRET production
 vercel env add NEXT_PUBLIC_LINKEDIN_CLIENT_ID production
-vercel env add NEXT_PUBLIC_APP_URL production  # https://t4g.dazno.de
+vercel env add NEXT_PUBLIC_APP_URL production  # https://app.token-for-good.com
 ```
 
 #### 3. Redéployer
@@ -137,7 +137,7 @@ vercel --prod
 
 | Variable | Description | Exemple |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_APP_URL` | URL de l'application | `https://t4g.dazno.de` |
+| `NEXT_PUBLIC_APP_URL` | URL de l'application | `https://app.token-for-good.com` |
 | `LINKEDIN_CLIENT_ID` | ID client LinkedIn | `78xxxxxxxxxxxxx` |
 | `LINKEDIN_CLIENT_SECRET` | Secret client LinkedIn | `xxxxxxxxxx` (privé!) |
 | `NEXT_PUBLIC_LINKEDIN_CLIENT_ID` | ID client (public) | `78xxxxxxxxxxxxx` |
@@ -157,7 +157,7 @@ vercel --prod
   ```
 
 - [ ] **Login LinkedIn en production**
-  - Aller sur https://t4g.dazno.de/login
+  - Aller sur https://app.token-for-good.com/login
   - Cliquer sur "Login with LinkedIn"
   - Autoriser l'application
   - Vérifier la redirection vers dashboard

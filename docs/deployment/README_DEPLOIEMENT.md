@@ -51,7 +51,7 @@ vercel login
 
 Votre application est maintenant en production sur:
 - **Backend:** URL Railway notée à l'étape 1
-- **Frontend:** https://t4g.dazno.de (après configuration DNS)
+- **Frontend:** https://app.token-for-good.com (après configuration DNS)
 
 ---
 
@@ -88,7 +88,7 @@ vercel logs --follow
 
 # Tests
 curl https://VOTRE-URL-RAILWAY/health
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 ```
 
 ---

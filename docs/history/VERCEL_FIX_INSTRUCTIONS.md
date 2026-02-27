@@ -64,9 +64,9 @@ Vérifiez que ces variables sont définies dans **Settings → Environment Varia
 | Variable | Valeur | Environnement |
 |----------|--------|---------------|
 | `NEXT_PUBLIC_API_URL` | `https://apirust-production.up.railway.app` | Production |
-| `NEXT_PUBLIC_DAZNO_API_URL` | `https://www.dazno.de/api` | Production |
-| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://www.dazno.de/api` | Production |
-| `NEXT_PUBLIC_DAZNO_VERIFY_URL` | `https://www.dazno.de/api/verify` | Production |
+| `NEXT_PUBLIC_DAZNO_API_URL` | `https://www.token-for-good.com/api` | Production |
+| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://www.token-for-good.com/api` | Production |
+| `NEXT_PUBLIC_DAZNO_VERIFY_URL` | `https://www.token-for-good.com/api/verify` | Production |
 
 ### Étape 5 : Redéployer
 
@@ -88,9 +88,9 @@ Après ces changements, le déploiement devrait :
 ```
 
 **URLs de production :**
-- https://t4g.dazno.de/
-- https://t4g.dazno.de/landing
-- https://t4g.dazno.de/login
+- https://app.token-for-good.com/
+- https://app.token-for-good.com/landing
+- https://app.token-for-good.com/login
 
 ---
 
@@ -100,15 +100,15 @@ Une fois le déploiement réussi, testez :
 
 ```bash
 # Page d'accueil
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 # Devrait retourner : HTTP/2 200
 
 # Landing page
-curl -I https://t4g.dazno.de/landing
+curl -I https://app.token-for-good.com/landing
 # Devrait retourner : HTTP/2 200
 
 # Login
-curl -I https://t4g.dazno.de/login
+curl -I https://app.token-for-good.com/login
 # Devrait retourner : HTTP/2 200
 ```
 

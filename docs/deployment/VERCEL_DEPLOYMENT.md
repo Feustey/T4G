@@ -37,8 +37,8 @@ vercel
 NEXTAUTH_URL=https://app.token-for-good.com
 NEXTAUTH_SECRET=your-super-secret-key-minimum-32-characters
 NEXT_PUBLIC_API_URL=https://token4good-backend-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://dazno.de/api
+NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://token-for-good.com/api
 DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.glikbylflheewbonytev.supabase.co:5432/postgres
 NODE_ENV=production
 ```
@@ -89,7 +89,7 @@ Réponse attendue :
 
 #### Test d'intégration Dazno
 ```bash
-curl -H "Origin: https://dazno.de" https://app.token-for-good.com/api/auth/providers
+curl -H "Origin: https://token-for-good.com" https://app.token-for-good.com/api/auth/providers
 ```
 
 ### 7. Commandes de déploiement
@@ -117,8 +117,8 @@ VERCEL_PROJECT_ID=your-vercel-project-id
 NEXTAUTH_URL=https://app.token-for-good.com
 NEXTAUTH_SECRET=your-secret
 NEXT_PUBLIC_API_URL=https://token4good-backend-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://dazno.de/api
+NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://token-for-good.com/api
 ```
 
 ### 9. Monitoring et logs

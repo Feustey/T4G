@@ -174,7 +174,7 @@ Vercel fournit automatiquement :
 **Monitor Frontend** :
 ```
 Type: HTTP(s)
-URL: https://t4g.dazno.de
+URL: https://app.token-for-good.com
 Interval: 5 minutes
 ```
 
@@ -188,7 +188,7 @@ Interval: 5 minutes
 **Monitor API Login** :
 ```
 Type: HTTP(s)
-URL: https://t4g.dazno.de/api/auth/health
+URL: https://app.token-for-good.com/api/auth/health
 Interval: 5 minutes
 ```
 
@@ -359,11 +359,11 @@ curl -I https://apirust-production.up.railway.app/health
 # Attendu: HTTP 200
 
 # Frontend Vercel
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 # Attendu: HTTP 200
 
 # API Routes
-curl -I https://t4g.dazno.de/api/health
+curl -I https://app.token-for-good.com/api/health
 # Attendu: HTTP 200
 ```
 

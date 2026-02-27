@@ -1,4 +1,4 @@
-# 📋 Résumé : Correction Erreur 502 sur t4g.dazno.de
+# 📋 Résumé : Correction Erreur 502 sur app.token-for-good.com
 
 **Date :** 24 octobre 2025  
 **Status :** ✅ Scripts créés - Prêt à appliquer  
@@ -11,9 +11,9 @@
 ### Situation Actuelle
 
 ```
-https://t4g.dazno.de/       → ❌ 502 Bad Gateway
-https://t4g.dazno.de/health → ✅ 200 OK (backend fonctionne)
-https://api.dazno.de/       → ✅ OK (MCP préservé)
+https://app.token-for-good.com/       → ❌ 502 Bad Gateway
+https://app.token-for-good.com/health → ✅ 200 OK (backend fonctionne)
+https://api.token-for-good.com/       → ✅ OK (MCP préservé)
 ```
 
 ### Diagnostic
@@ -77,7 +77,7 @@ scp scripts/fix-t4g-502.sh root@147.79.101.32:/tmp/
 ssh root@147.79.101.32 'bash /tmp/fix-t4g-502.sh'
 
 # 3. Vérifier dans votre navigateur
-open https://t4g.dazno.de/
+open https://app.token-for-good.com/
 ```
 
 ### Option B : Correction Manuelle (5 min)
@@ -101,7 +101,7 @@ Suivez le guide : [`FIX_502_INSTRUCTIONS.md`](./FIX_502_INSTRUCTIONS.md)
 3. **Configuration Nginx optimisée**
    - Backup de l'ancienne config
    - Nouvelle config compatible Next.js standalone
-   - Préserve la cohabitation avec MCP (api.dazno.de)
+   - Préserve la cohabitation avec MCP (api.token-for-good.com)
 
 4. **Validation**
    - Teste la configuration avant de l'appliquer
@@ -126,9 +126,9 @@ Après l'exécution du script :
 ```
 
 Le site sera accessible :
-- **https://t4g.dazno.de/** → Page d'accueil ✅
-- **https://t4g.dazno.de/health** → Backend API ✅
-- **https://api.dazno.de/** → MCP préservé ✅
+- **https://app.token-for-good.com/** → Page d'accueil ✅
+- **https://app.token-for-good.com/health** → Backend API ✅
+- **https://api.token-for-good.com/** → MCP préservé ✅
 
 ---
 
@@ -138,7 +138,7 @@ La nouvelle configuration inclut :
 
 ### Routing Séparé
 ```nginx
-server_name t4g.dazno.de;  # Seulement T4G (ne touche pas MCP)
+server_name app.token-for-good.com;  # Seulement T4G (ne touche pas MCP)
 ```
 
 ### Proxy Frontend Optimisé

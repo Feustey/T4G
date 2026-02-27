@@ -1,7 +1,7 @@
-# 🔧 Instructions pour Corriger l'Erreur 502 sur t4g.dazno.de
+# 🔧 Instructions pour Corriger l'Erreur 502 sur app.token-for-good.com
 
 **Date:** 24 octobre 2025  
-**Problème:** Erreur 502 Bad Gateway sur https://t4g.dazno.de/  
+**Problème:** Erreur 502 Bad Gateway sur https://app.token-for-good.com/  
 **Cause probable:** Configuration Nginx ou service frontend Next.js  
 
 ---
@@ -79,7 +79,7 @@ curl http://localhost:3000/
 
 ```bash
 # Voir la config actuelle
-cat /etc/nginx/sites-available/t4g.dazno.de
+cat /etc/nginx/sites-available/app.token-for-good.com
 
 # Tester la config
 nginx -t
@@ -90,18 +90,18 @@ nginx -t
 ```bash
 # Backup de l'ancienne config
 mkdir -p /var/backups/nginx
-cp /etc/nginx/sites-available/t4g.dazno.de /var/backups/nginx/t4g.dazno.de.backup.$(date +%Y%m%d_%H%M%S)
+cp /etc/nginx/sites-available/app.token-for-good.com /var/backups/nginx/app.token-for-good.com.backup.$(date +%Y%m%d_%H%M%S)
 
 # Créer la nouvelle configuration
-cat > /etc/nginx/sites-available/t4g.dazno.de << 'EOF'
+cat > /etc/nginx/sites-available/app.token-for-good.com << 'EOF'
 # Token4Good - Configuration Nginx
-# Cohabitation avec MCP (api.dazno.de)
+# Cohabitation avec MCP (api.token-for-good.com)
 
 # Redirect HTTP to HTTPS
 server {
     listen 80;
     listen [::]:80;
-    server_name t4g.dazno.de;
+    server_name app.token-for-good.com;
     
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -116,11 +116,11 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name t4g.dazno.de;
+    server_name app.token-for-good.com;
 
     # SSL Certificates
-    ssl_certificate /etc/letsencrypt/live/t4g.dazno.de/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/t4g.dazno.de/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/app.token-for-good.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.token-for-good.com/privkey.pem;
     
     # SSL Configuration
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -209,11 +209,11 @@ systemctl reload nginx
 
 ```bash
 # Test depuis le serveur
-curl -I https://t4g.dazno.de/
-curl https://t4g.dazno.de/health
+curl -I https://app.token-for-good.com/
+curl https://app.token-for-good.com/health
 
 # Depuis votre navigateur
-# Ouvrir: https://t4g.dazno.de/
+# Ouvrir: https://app.token-for-good.com/
 ```
 
 ---
@@ -248,7 +248,7 @@ systemctl restart token4good-frontend
 
 ```bash
 # Restaurer la backup
-cp /var/backups/nginx/t4g.dazno.de.backup.* /etc/nginx/sites-available/t4g.dazno.de
+cp /var/backups/nginx/app.token-for-good.com.backup.* /etc/nginx/sites-available/app.token-for-good.com
 
 # Recharger Nginx
 systemctl reload nginx
@@ -256,7 +256,7 @@ systemctl reload nginx
 
 ### Problème 3 : Conflit avec MCP
 
-**Symptôme :** api.dazno.de ne fonctionne plus
+**Symptôme :** api.token-for-good.com ne fonctionne plus
 
 **Solution :**
 
@@ -265,8 +265,8 @@ systemctl reload nginx
 ls -la /etc/nginx/sites-enabled/
 
 # Chaque domaine doit avoir son propre fichier
-# - api.dazno.de → MCP
-# - t4g.dazno.de → Token4Good
+# - api.token-for-good.com → MCP
+# - app.token-for-good.com → Token4Good
 
 # Vérifier qu'il n'y a pas de conflits de port
 ss -tlnp | grep -E ':8000|:3001|:3000'
@@ -285,18 +285,18 @@ Une fois la correction appliquée :
 curl -I http://localhost:3000/
 
 # Frontend public
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 
 # Backend
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 
 # MCP (vérifier qu'il fonctionne toujours)
-curl -I https://api.dazno.de/
+curl -I https://api.token-for-good.com/
 ```
 
 ### Tests depuis votre navigateur
 
-1. Ouvrir : https://t4g.dazno.de/
+1. Ouvrir : https://app.token-for-good.com/
 2. Vérifier que la page se charge (pas de 502)
 3. Tester l'authentification
 4. Vérifier les appels API dans DevTools
@@ -305,10 +305,10 @@ curl -I https://api.dazno.de/
 
 ## 🎯 Résultat Attendu
 
-✅ **https://t4g.dazno.de/** → Page d'accueil (code 200 ou 307)  
-✅ **https://t4g.dazno.de/health** → Status backend (code 200)  
-✅ **https://t4g.dazno.de/api/users** → API backend accessible  
-✅ **https://api.dazno.de/** → MCP toujours fonctionnel  
+✅ **https://app.token-for-good.com/** → Page d'accueil (code 200 ou 307)  
+✅ **https://app.token-for-good.com/health** → Status backend (code 200)  
+✅ **https://app.token-for-good.com/api/users** → API backend accessible  
+✅ **https://api.token-for-good.com/** → MCP toujours fonctionnel  
 
 ---
 
@@ -337,7 +337,7 @@ ps aux | grep node
 netstat -tlnp | grep -E ':3000|:3001|:8000'
 
 # Tester Nginx avec verbosité
-curl -v https://t4g.dazno.de/ 2>&1 | grep -E "HTTP|502"
+curl -v https://app.token-for-good.com/ 2>&1 | grep -E "HTTP|502"
 ```
 
 ### Rollback complet
@@ -346,7 +346,7 @@ Si rien ne fonctionne :
 
 ```bash
 # Restaurer l'ancienne config Nginx
-cp /var/backups/nginx/t4g.dazno.de.backup.* /etc/nginx/sites-available/t4g.dazno.de
+cp /var/backups/nginx/app.token-for-good.com.backup.* /etc/nginx/sites-available/app.token-for-good.com
 
 # Recharger
 nginx -t && systemctl reload nginx
@@ -364,13 +364,13 @@ nginx -t && systemctl reload nginx
 - Nginx : ports 80/443
 
 **Configuration :**
-- Nginx : `/etc/nginx/sites-available/t4g.dazno.de`
+- Nginx : `/etc/nginx/sites-available/app.token-for-good.com`
 - Service : `/etc/systemd/system/token4good-frontend.service`
 - Frontend : `/var/www/token4good/frontend/`
 
 ---
 
 **Créé le :** 24 octobre 2025  
-**Objectif :** Corriger l'erreur 502 et rendre t4g.dazno.de opérationnel  
+**Objectif :** Corriger l'erreur 502 et rendre app.token-for-good.com opérationnel  
 **Deadline :** 28 octobre 2025 (Go-Live)
 

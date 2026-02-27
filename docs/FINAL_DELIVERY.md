@@ -201,7 +201,7 @@ Name: t4g
 Value: cname.vercel-dns.com
 
 # Puis dans Vercel
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 ### Vérification

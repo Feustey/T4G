@@ -2,7 +2,7 @@
 
 ## Vue d'ensemble
 
-Le système d'authentification a été migré de OAuth (t4g/LinkedIn) vers **Supabase OTP** avec support de la **session Dazno partagée**. Les utilisateurs de app.dazno.de et token4good.com partagent maintenant la même base d'utilisateurs Supabase.
+Le système d'authentification a été migré de OAuth (t4g/LinkedIn) vers **Supabase OTP** avec support de la **session Dazno partagée**. Les utilisateurs de app.token-for-good.com et token4good.com partagent maintenant la même base d'utilisateurs Supabase.
 
 ## Fonctionnalités
 
@@ -13,7 +13,7 @@ Le système d'authentification a été migré de OAuth (t4g/LinkedIn) vers **Sup
 - Redirection vers `/onboarding` (nouveau) ou `/dashboard` (existant)
 
 ### 2. Session partagée avec Dazno
-- Si l'utilisateur est déjà connecté sur `app.dazno.de`, sa session est automatiquement détectée
+- Si l'utilisateur est déjà connecté sur `app.token-for-good.com`, sa session est automatiquement détectée
 - Le token Dazno est stocké dans `localStorage` avec la clé `dazno_token`
 - À chaque chargement de page, le système vérifie si une session Dazno existe
 - Si oui, l'utilisateur est automatiquement connecté sans redemander d'authentification
@@ -31,7 +31,7 @@ Le système d'authentification a été migré de OAuth (t4g/LinkedIn) vers **Sup
         │                                       │
         ▼                                       ▼
 ┌──────────────────┐                  ┌──────────────────┐
-│  app.dazno.de    │                  │  token4good.com  │
+│  app.token-for-good.com    │                  │  token4good.com  │
 │                  │                  │                  │
 │  Session Dazno   │ ◄──────────────► │  Session T4G     │
 │  (localStorage)  │   Token partagé  │  (localStorage)  │
@@ -64,7 +64,7 @@ Le système d'authentification a été migré de OAuth (t4g/LinkedIn) vers **Sup
 
 ### Utilisateur avec session Dazno
 ```
-1. Utilisateur déjà connecté sur app.dazno.de
+1. Utilisateur déjà connecté sur app.token-for-good.com
 2. Visite token4good.com
 3. Le système détecte le token Dazno dans localStorage
 4. Vérifie que le token est valide
@@ -82,7 +82,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://<PROJECT_ID>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY>
 
 # Dazno (session partagée)
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 ```
 
 ### Configuration Supabase
@@ -166,7 +166,7 @@ Le système vérifie automatiquement si l'utilisateur a complété son onboardin
 
 ## Notes importantes
 
-⚠️ **Cookies et localStorage** : Le token Dazno est stocké dans `localStorage` avec la clé `dazno_token`. Assurez-vous que les deux applications partagent le même domaine principal (ex: `*.token4good.com` et `*.dazno.de`) ou utilisez un domaine commun.
+⚠️ **Cookies et localStorage** : Le token Dazno est stocké dans `localStorage` avec la clé `dazno_token`. Assurez-vous que les deux applications partagent le même domaine principal (ex: `*.token4good.com` et `*.token-for-good.com`) ou utilisez un domaine commun.
 
 ⚠️ **CORS** : Si les domaines sont différents, configurez correctement les CORS sur le backend Dazno pour autoriser les requêtes depuis token4good.com.
 

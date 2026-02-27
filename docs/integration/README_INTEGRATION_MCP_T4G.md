@@ -9,7 +9,7 @@
 ## 🎯 Ce qui a été implémenté
 
 ### 1. MCP API v1 (10 endpoints)
-Intégration complète des endpoints MCP proposés sur `api.dazno.de/api/v1/`:
+Intégration complète des endpoints MCP proposés sur `api.token-for-good.com/api/v1/`:
 
 - ✅ **Wallet** (2): balance, payments
 - ✅ **Channels** (4): list, detail, open, close

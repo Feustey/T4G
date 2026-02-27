@@ -5,7 +5,7 @@
 
 ## Vue d'ensemble
 
-Intégration complète des nouveaux endpoints MCP API v1 de Dazno (`api.dazno.de/api/v1/`) dans le backend Rust Token4Good.
+Intégration complète des nouveaux endpoints MCP API v1 de Dazno (`api.token-for-good.com/api/v1/`) dans le backend Rust Token4Good.
 
 ## Endpoints Implémentés
 
@@ -105,7 +105,7 @@ Documentation complète des nouveaux endpoints avec:
          │ HTTPS + Dazno Token
          ↓
 ┌─────────────────────────────────────┐
-│  Dazno Lightning API (api.dazno.de) │
+│  Dazno Lightning API (api.token-for-good.com) │
 │                                     │
 │  /api/v1/wallet/*                   │
 │  /api/v1/channels/*                 │
@@ -160,8 +160,8 @@ Les anciens endpoints restent disponibles pour compatibilité arrière:
 
 Variables d'environnement requises:
 ```bash
-DAZNO_LIGHTNING_API_URL=https://api.dazno.de  # Par défaut
-DAZNO_USERS_API_URL=https://dazno.de/api       # Par défaut
+DAZNO_LIGHTNING_API_URL=https://api.token-for-good.com  # Par défaut
+DAZNO_USERS_API_URL=https://token-for-good.com/api       # Par défaut
 DAZNO_API_KEY=your_api_key_here                # Optionnel
 ```
 

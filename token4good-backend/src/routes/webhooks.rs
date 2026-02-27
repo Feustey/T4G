@@ -51,7 +51,7 @@ pub enum WebhookEvent {
 pub struct WebhookPayload {
     pub id: String, // Webhook ID unique
     pub timestamp: chrono::DateTime<chrono::Utc>,
-    pub source: String, // "dazno.de"
+    pub source: String, // "token-for-good.com"
     #[serde(flatten)]
     pub event: WebhookEvent,
 }

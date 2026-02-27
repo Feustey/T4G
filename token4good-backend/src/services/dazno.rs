@@ -17,8 +17,8 @@ pub enum DaznoError {
 
 #[derive(Clone)]
 pub struct DaznoService {
-    lightning_api_base: String, // api.dazno.de
-    users_api_base: String,     // dazno.de/api
+    lightning_api_base: String, // api.token-for-good.com
+    users_api_base: String,     // token-for-good.com/api
     api_key: Option<String>,
     client: reqwest::Client,
 }
@@ -26,9 +26,9 @@ pub struct DaznoService {
 impl DaznoService {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         let lightning_api_base = std::env::var("DAZNO_LIGHTNING_API_URL")
-            .unwrap_or_else(|_| "https://api.dazno.de".to_string());
+            .unwrap_or_else(|_| "https://api.token-for-good.com".to_string());
         let users_api_base = std::env::var("DAZNO_USERS_API_URL")
-            .unwrap_or_else(|_| "https://dazno.de/api".to_string());
+            .unwrap_or_else(|_| "https://token-for-good.com/api".to_string());
         let api_key = std::env::var("DAZNO_API_KEY").ok();
 
         let client = reqwest::Client::builder()
@@ -68,7 +68,7 @@ impl DaznoService {
         }
     }
 
-    // ============= USER MANAGEMENT (dazno.de/api) =============
+    // ============= USER MANAGEMENT (token-for-good.com/api) =============
 
     pub async fn verify_user_session(&self, token: &str) -> Result<DaznoUser, DaznoError> {
         let url = format!("{}/auth/verify-session", self.users_api_base);
@@ -178,7 +178,7 @@ impl DaznoService {
         Ok(())
     }
 
-    // ============= LIGHTNING NETWORK (api.dazno.de) =============
+    // ============= LIGHTNING NETWORK (api.token-for-good.com) =============
 
     pub async fn create_lightning_invoice(
         &self,
@@ -306,7 +306,7 @@ impl DaznoService {
             .map_err(|e| DaznoError::LightningApiError(e.to_string()))
     }
 
-    // ============= MCP API v1 ENDPOINTS (api.dazno.de/api/v1) =============
+    // ============= MCP API v1 ENDPOINTS (api.token-for-good.com/api/v1) =============
 
     // Wallet Operations (/api/v1/wallet)
     pub async fn get_wallet_balance(
@@ -995,7 +995,7 @@ impl DaznoService {
 
 // ============= TYPES =============
 
-// Auth & Users (dazno.de/api)
+// Auth & Users (token-for-good.com/api)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DaznoAuthResponse {
     pub authenticated: bool,
@@ -1036,7 +1036,7 @@ pub struct GamificationUpdate {
     pub timestamp: chrono::DateTime<chrono::Utc>,
 }
 
-// Lightning (api.dazno.de)
+// Lightning (api.token-for-good.com)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateInvoiceRequest {
     pub amount_msat: u64,

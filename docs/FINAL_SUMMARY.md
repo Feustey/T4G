@@ -135,7 +135,7 @@ Railway (Backend):
 Vercel (Frontend):
 - Next.js SSR/SSG
 - API Proxy → Railway
-- Custom domain: t4g.dazno.de
+- Custom domain: app.token-for-good.com
 ```
 
 ---
@@ -184,7 +184,7 @@ Vercel (Frontend):
 **Tasks:**
 1. Deploy backend to Railway staging
 2. Deploy frontend to Vercel preview
-3. Configure DNS `t4g.dazno.de`
+3. Configure DNS `app.token-for-good.com`
 4. Setup monitoring (Railway dashboard + UptimeRobot)
 5. Load testing
 
@@ -266,7 +266,7 @@ Frontend:
                  │
                  ▼
 ┌────────────────────────────────────────────┐
-│   t4g.dazno.de (Vercel - Next.js)          │
+│   app.token-for-good.com (Vercel - Next.js)          │
 │   - User Interface                         │
 │   - SSR/SSG Pages                          │
 │   - API Proxy → Backend                    │
@@ -460,7 +460,7 @@ railway up
 # Frontend
 vercel --prod
 
-# URL: https://t4g.dazno.de
+# URL: https://app.token-for-good.com
 ```
 
 ---
@@ -515,7 +515,7 @@ vercel --prod
 - [ ] Setup Bitcoin Core VPS
 - [ ] Setup LND node
 - [ ] Configure Vercel project
-- [ ] Configure DNS `t4g.dazno.de`
+- [ ] Configure DNS `app.token-for-good.com`
 - [ ] Setup monitoring (Railway + UptimeRobot)
 - [ ] Configure alerting (Slack webhooks)
 - [ ] Test rollback procedures

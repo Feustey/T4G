@@ -81,7 +81,7 @@ railway variables set LND_MACAROON_PATH=<base64-encoded-macaroon>
 railway variables set LND_TLS_CERT_PATH=<base64-encoded-cert>
 
 # Dazno Integration
-railway variables set DAZNO_API_URL=https://api.dazno.de
+railway variables set DAZNO_API_URL=https://api.token-for-good.com
 
 # Server
 railway variables set HOST=0.0.0.0
@@ -89,7 +89,7 @@ railway variables set PORT=3000
 railway variables set RUST_LOG=info,token4good_backend=debug
 
 # CORS (mettre à jour avec vos domaines)
-railway variables set ALLOWED_ORIGINS=https://t4g.dazno.de,https://dazno.de
+railway variables set ALLOWED_ORIGINS=https://app.token-for-good.com,https://token-for-good.com
 ```
 
 #### 1.5 Déploiement Automatisé
@@ -145,9 +145,9 @@ Dans le dashboard Vercel:
 NEXT_PUBLIC_API_URL=https://VOTRE-URL-RAILWAY.up.railway.app
 
 # Dazno Integration
-NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://api.dazno.de/users
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://api.dazno.de/auth/verify-session
+NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://api.token-for-good.com/users
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://api.token-for-good.com/auth/verify-session
 
 # OAuth (optionnel - à configurer si nécessaire)
 LINKEDIN_CLIENT_ID=your_linkedin_client_id
@@ -188,7 +188,7 @@ TTL: Auto
 
 Dans Vercel:
 ```bash
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 #### 3.2 Tests de Validation
@@ -211,13 +211,13 @@ Expected response:
 
 **Frontend Health Check:**
 ```bash
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 ```
 
 Should proxy to the backend and return the same response.
 
 **Test OAuth Flow:**
-1. Ouvrir https://t4g.dazno.de/login
+1. Ouvrir https://app.token-for-good.com/login
 2. Tester login avec Dazno
 3. Vérifier JWT dans localStorage
 4. Tester navigation dans l'app

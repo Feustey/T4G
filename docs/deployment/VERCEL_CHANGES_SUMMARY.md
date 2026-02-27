@@ -217,7 +217,7 @@ Headers ajoutés :
 - ✅ X-Frame-Options: DENY
 - ✅ X-Content-Type-Options: nosniff
 - ✅ Referrer-Policy: origin-when-cross-origin
-- ✅ CORS configuré pour dazno.de
+- ✅ CORS configuré pour token-for-good.com
 
 ---
 

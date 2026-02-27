@@ -27,7 +27,7 @@ Ce document décrit la configuration complète des providers OAuth pour l'enviro
 3. Remplir les informations :
    - **App name**: Token4Good Production
    - **LinkedIn Page**: Votre page entreprise
-   - **Privacy policy URL**: https://t4g.dazno.de/privacy
+   - **Privacy policy URL**: https://app.token-for-good.com/privacy
    - **App logo**: Logo Token4Good
 
 ### 2. Configurer les Redirect URLs
@@ -36,11 +36,11 @@ Dans l'onglet "Auth" de votre application LinkedIn :
 
 ```
 Production:
-https://t4g.dazno.de/api/auth/callback/linkedin
-https://t4g.dazno.de/auth/callback/linkedin
+https://app.token-for-good.com/api/auth/callback/linkedin
+https://app.token-for-good.com/auth/callback/linkedin
 
 Staging (optionnel):
-https://staging.t4g.dazno.de/api/auth/callback/linkedin
+https://staging.token-for-good.com/api/auth/callback/linkedin
 ```
 
 ### 3. Activer les Permissions
@@ -66,11 +66,11 @@ Le serveur OAuth t4g doit être configuré pour accepter les redirections depuis
 
 ```
 Production:
-https://t4g.dazno.de/api/auth/callback/t4g
-https://t4g.dazno.de/auth/callback/t4g
+https://app.token-for-good.com/api/auth/callback/t4g
+https://app.token-for-good.com/auth/callback/t4g
 
 Staging:
-https://staging.t4g.dazno.de/api/auth/callback/t4g
+https://staging.token-for-good.com/api/auth/callback/t4g
 ```
 
 ### 2. Credentials
@@ -100,15 +100,15 @@ Coordonner avec l'équipe Dazno pour configurer :
 
 ```
 Redirect URLs Production:
-https://t4g.dazno.de/api/auth/callback/dazno
-https://t4g.dazno.de/auth/callback/dazno
+https://app.token-for-good.com/api/auth/callback/dazno
+https://app.token-for-good.com/auth/callback/dazno
 ```
 
 ### 2. Credentials Dazno
 
 - **DAZNO_API_KEY**: Clé API Dazno
-- **DAZNO_LIGHTNING_API_URL**: https://api.dazno.de
-- **DAZNO_USERS_API_URL**: https://dazno.de/api
+- **DAZNO_LIGHTNING_API_URL**: https://api.token-for-good.com
+- **DAZNO_USERS_API_URL**: https://token-for-good.com/api
 
 ---
 
@@ -129,14 +129,14 @@ T4G_CLIENT_SECRET=<votre_client_secret_t4g>
 T4G_AUTH_URL=https://auth.token4good.com
 
 # === Dazno Integration ===
-NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://dazno.de/api
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://token-for-good.com/api
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 
 # === Application URLs ===
-NEXT_PUBLIC_APP_URL=https://t4g.dazno.de
+NEXT_PUBLIC_APP_URL=https://app.token-for-good.com
 NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-NEXTAUTH_URL=https://t4g.dazno.de
+NEXTAUTH_URL=https://app.token-for-good.com
 
 # === JWT ===
 NEXTAUTH_SECRET=<générer_avec_openssl_rand_base64_32>
@@ -164,11 +164,11 @@ JWT_EXPIRATION_HOURS=24
 
 # === Dazno API ===
 DAZNO_API_KEY=<votre_api_key_dazno>
-DAZNO_LIGHTNING_API_URL=https://api.dazno.de
-DAZNO_USERS_API_URL=https://dazno.de/api
+DAZNO_LIGHTNING_API_URL=https://api.token-for-good.com
+DAZNO_USERS_API_URL=https://token-for-good.com/api
 
 # === CORS ===
-ALLOWED_ORIGINS=https://t4g.dazno.de,https://token4good.vercel.app
+ALLOWED_ORIGINS=https://app.token-for-good.com,https://token4good.vercel.app
 
 # === Database ===
 # DATABASE_URL est auto-configuré par Railway PostgreSQL
@@ -206,7 +206,7 @@ npm run dev
 
 ```bash
 # Naviguer depuis Dazno vers Token4Good avec token
-# URL: https://t4g.dazno.de?token=JWT_TOKEN
+# URL: https://app.token-for-good.com?token=JWT_TOKEN
 # Vérifier l'authentification automatique
 ```
 
@@ -320,7 +320,7 @@ npm run dev
 
 - **LinkedIn Support**: https://www.linkedin.com/help/linkedin/answer/a1340928
 - **t4g Team**: auth@token4good.com
-- **Dazno Team**: api@dazno.de
+- **Dazno Team**: api@token-for-good.com
 
 ### Documentation
 
@@ -352,7 +352,7 @@ vercel env ls --environment production
 vercel --prod
 
 # 4. Tester les flows OAuth
-curl -I https://t4g.dazno.de/login
+curl -I https://app.token-for-good.com/login
 ```
 
 ---

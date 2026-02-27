@@ -36,23 +36,21 @@ pub async fn build_state() -> Result<AppState, Box<dyn Error>> {
     let database_url = env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgresql://postgres:password@localhost:5432/token4good".to_string());
 
-    // Skip database if URL is "disabled" or connection fails
-    let db = if database_url.contains("disabled") || database_url.is_empty() {
-        tracing::warn!("⚠️  Database disabled by configuration - using fallback");
-        // Create a fallback connection that won't be used
-        DatabaseService::new("postgresql://postgres:password@localhost:5432/fallback").await?
-    } else {
-        match DatabaseService::new(&database_url).await {
-            Ok(db) => {
-                tracing::info!("✅ Database service initialized successfully");
-                db
-            }
-            Err(e) => {
-                tracing::error!("❌ Database connection failed: {}. Using fallback", e);
-                // Use a fallback that won't crash
-                DatabaseService::new("postgresql://postgres:password@localhost:5432/fallback")
-                    .await?
-            }
+    // Skip database if URL is "disabled" or empty -> démarrage en mode minimal
+    if database_url.contains("disabled") || database_url.is_empty() {
+        tracing::warn!("⚠️  Database disabled by configuration - returning error to trigger minimal mode");
+        return Err("Database disabled - use minimal mode".into());
+    }
+
+    let db = match DatabaseService::new(&database_url).await {
+        Ok(db) => {
+            tracing::info!("✅ Database service initialized successfully");
+            db
+        }
+        Err(e) => {
+            tracing::error!("❌ Database connection failed: {}. Using fallback", e);
+            DatabaseService::new("postgresql://postgres:password@localhost:5432/fallback")
+                .await?
         }
     };
 

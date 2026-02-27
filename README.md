@@ -10,7 +10,7 @@
 
 > Token4Good is a community trust platform that **tokenizes peer interactions as verifiable proofs on the RGB Protocol**, settled via Lightning Network on Bitcoin. Each mentoring session, knowledge transfer, or contribution generates an immutable, transferable proof anchored on-chain.
 
-**Production:** https://t4g.dazno.de
+**Production:** https://app.token-for-good.com
 
 ---
 

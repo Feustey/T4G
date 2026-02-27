@@ -255,7 +255,7 @@ vercel --prod
 
 ### Moyen Terme (1 semaine)
 
-- [ ] Configurer domaine custom (t4g.dazno.de)
+- [ ] Configurer domaine custom (app.token-for-good.com)
 - [ ] Mettre en place monitoring avancé
 - [ ] Analyser les métriques d'utilisation
 - [ ] Optimisations performance si nécessaire

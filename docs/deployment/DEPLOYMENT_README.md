@@ -31,7 +31,7 @@ Ce récapitulatif centralise toutes les ressources nécessaires pour opérer la 
 - **Backend** : Railway – service `token4good-backend`
 - **Base de données** : Railway PostgreSQL (backups automatiques)
 - **Frontend** : Vercel – projet `token4good`
-- **Domaines** : `token4good.vercel.app`, `t4g.dazno.de`
+- **Domaines** : `token4good.vercel.app`, `app.token-for-good.com`
 - **Blockchain** : VPS dédié LND + stockage RGB
 
 ### Variables d’environnement incontournables
@@ -66,7 +66,7 @@ vercel logs token4good --since 1h
 ```
 curl https://<backend>.up.railway.app/health
 curl https://token4good.vercel.app/api/health
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 ```
 
 ---

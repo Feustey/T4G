@@ -4,25 +4,25 @@
 
 L'intégration entre Token4Good et Dazno utilise **deux APIs distinctes** :
 
-- **`dazno.de/api`** : Gestion utilisateurs, sessions, CRM, gamification, tokens T4G
-- **`api.dazno.de`** : Lightning Network, paiements, invoices
+- **`token-for-good.com/api`** : Gestion utilisateurs, sessions, CRM, gamification, tokens T4G
+- **`api.token-for-good.com`** : Lightning Network, paiements, invoices
 
 ## 🔗 Architecture d'Intégration
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Dazno.de      │    │   Token4Good     │    │  api.dazno.de   │
+│   Dazno.de      │    │   Token4Good     │    │  api.token-for-good.com   │
 │   (Users/CRM)   │◄──►│   (RGB/Proofs)   │◄──►│  (Lightning)    │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
 ## 1. APIs Requises côté Dazno
 
-### 🔐 Gestion Users/Sessions (`dazno.de/api`)
+### 🔐 Gestion Users/Sessions (`token-for-good.com/api`)
 
 #### Vérification de Session
 ```http
-POST https://dazno.de/api/auth/verify-session
+POST https://token-for-good.com/api/auth/verify-session
 Authorization: Bearer JWT_TOKEN
 Content-Type: application/json
 
@@ -31,7 +31,7 @@ Response:
   "authenticated": true,
   "user": {
     "id": "user123",
-    "email": "user@dazno.de",
+    "email": "user@token-for-good.com",
     "name": "John Doe",
     "role": "member"
   }
@@ -40,13 +40,13 @@ Response:
 
 #### Profil Utilisateur Étendu
 ```http
-GET https://dazno.de/api/users/{user_id}
+GET https://token-for-good.com/api/users/{user_id}
 Authorization: Bearer JWT_TOKEN
 
 Response:
 {
   "id": "user123",
-  "email": "user@dazno.de",
+  "email": "user@token-for-good.com",
   "name": "John Doe",
   "avatar": "https://...",
   "bio": "Software engineer",
@@ -59,7 +59,7 @@ Response:
 
 #### Balance T4G Tokens
 ```http
-GET https://dazno.de/api/users/{user_id}/tokens/t4g
+GET https://token-for-good.com/api/users/{user_id}/tokens/t4g
 Authorization: Bearer JWT_TOKEN
 
 Response:
@@ -71,7 +71,7 @@ Response:
 
 #### Mise à jour Gamification
 ```http
-POST https://dazno.de/api/users/{user_id}/gamification
+POST https://token-for-good.com/api/users/{user_id}/gamification
 Authorization: Bearer JWT_TOKEN
 Content-Type: application/json
 
@@ -83,11 +83,11 @@ Body:
 }
 ```
 
-### ⚡ Lightning Network (`api.dazno.de`)
+### ⚡ Lightning Network (`api.token-for-good.com`)
 
 #### Créer Invoice
 ```http
-POST https://api.dazno.de/lightning/invoice
+POST https://api.token-for-good.com/lightning/invoice
 Authorization: Bearer JWT_TOKEN
 Content-Type: application/json
 
@@ -112,7 +112,7 @@ Response:
 
 #### Payer Invoice
 ```http
-POST https://api.dazno.de/lightning/pay
+POST https://api.token-for-good.com/lightning/pay
 Authorization: Bearer JWT_TOKEN
 Content-Type: application/json
 
@@ -135,7 +135,7 @@ Response:
 
 #### Balance Lightning
 ```http
-GET https://api.dazno.de/lightning/balance/{user_id}
+GET https://api.token-for-good.com/lightning/balance/{user_id}
 Authorization: Bearer JWT_TOKEN
 
 Response:
@@ -149,7 +149,7 @@ Response:
 
 #### Historique Transactions
 ```http
-GET https://api.dazno.de/lightning/transactions/{user_id}?limit=50
+GET https://api.token-for-good.com/lightning/transactions/{user_id}?limit=50
 Authorization: Bearer JWT_TOKEN
 
 Response:
@@ -172,9 +172,9 @@ Response:
 
 ### Redirection Dazno → Token4Good
 ```
-1. Utilisateur connecté sur dazno.de
+1. Utilisateur connecté sur token-for-good.com
 2. Redirection: https://app.token-for-good.com/login?token=JWT_TOKEN
-3. Token4Good vérifie le token via dazno.de/api/auth/verify-session
+3. Token4Good vérifie le token via token-for-good.com/api/auth/verify-session
 4. Création automatique utilisateur si nouveau
 5. Génération JWT Token4Good pour session locale
 ```
@@ -192,7 +192,7 @@ export async function checkDaznoSession(): Promise<{
     const token = urlParams.get('token');
     
     if (token) {
-      const response = await fetch('https://dazno.de/api/auth/verify-session', {
+      const response = await fetch('https://token-for-good.com/api/auth/verify-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -224,21 +224,21 @@ export async function checkDaznoSession(): Promise<{
 ```
 1. Utilisateur demande transfert de preuve RGB
    ↓
-2. Token4Good → api.dazno.de/lightning/invoice
+2. Token4Good → api.token-for-good.com/lightning/invoice
    ├── Montant: coût du transfert
    ├── Description: "Transfer proof ABC123"
    └── User ID: utilisateur payeur
    ↓
 3. Affichage invoice à l'utilisateur
    ↓
-4. Token4Good → api.dazno.de/lightning/pay
+4. Token4Good → api.token-for-good.com/lightning/pay
    ├── Payment request de l'invoice
    └── Confirmation paiement
    ↓
 5. Si paiement réussi:
    ├── Transfert RGB effectué
    ├── Mise à jour ownership
-   └── dazno.de/api/users/{id}/gamification (+points)
+   └── token-for-good.com/api/users/{id}/gamification (+points)
 ```
 
 ## 4. Variables d'Environnement
@@ -246,8 +246,8 @@ export async function checkDaznoSession(): Promise<{
 ### Token4Good Backend
 ```bash
 # .env
-DAZNO_LIGHTNING_API_URL=https://api.dazno.de
-DAZNO_USERS_API_URL=https://dazno.de/api
+DAZNO_LIGHTNING_API_URL=https://api.token-for-good.com
+DAZNO_USERS_API_URL=https://token-for-good.com/api
 JWT_SECRET=your-jwt-secret
 ```
 
@@ -294,12 +294,12 @@ Authorization: Bearer TOKEN
 ### Tests à implémenter (côté Dazno)
 ```bash
 # Authentification
-curl -X POST https://dazno.de/api/auth/verify-session \
+curl -X POST https://token-for-good.com/api/auth/verify-session \
   -H "Authorization: Bearer test_token" \
   -H "Content-Type: application/json"
 
 # Lightning Invoice
-curl -X POST https://api.dazno.de/lightning/invoice \
+curl -X POST https://api.token-for-good.com/lightning/invoice \
   -H "Authorization: Bearer test_token" \
   -H "Content-Type: application/json" \
   -d '{"amount_msat": 1000, "description": "Test", "user_id": "test_user"}'

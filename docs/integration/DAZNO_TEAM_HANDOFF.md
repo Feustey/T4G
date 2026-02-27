@@ -8,7 +8,7 @@
 
 ## 🎯 Objectif
 
-Mettre en place l'intégration webhook permettant à **Dazno.de** d'envoyer des événements en temps réel à **Token4Good** (t4g.dazno.de).
+Mettre en place l'intégration webhook permettant à **Dazno.de** d'envoyer des événements en temps réel à **Token4Good** (app.token-for-good.com).
 
 ---
 
@@ -36,7 +36,7 @@ T4G_WEBHOOK_SECRET=<sera_fourni_séparément>
 ### Token4Good → Dazno
 
 ```
-URL : https://dazno.de/api/webhooks/t4g
+URL : https://token-for-good.com/api/webhooks/t4g
 Méthode : POST
 Content-Type : application/json
 ```
@@ -44,7 +44,7 @@ Content-Type : application/json
 ### Dazno → Token4Good
 
 ```
-URL : https://t4g.dazno.de/api/webhooks/dazno
+URL : https://app.token-for-good.com/api/webhooks/dazno
 Méthode : POST
 Content-Type : application/json
 ```
@@ -111,7 +111,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_unique_id",
   "timestamp": "2025-10-15T10:30:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "<TYPE>",
   ...
 }
@@ -125,7 +125,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_001",
   "timestamp": "2025-10-15T10:30:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.created",
   "user_id": "user_123",
   "email": "user@example.com"
@@ -138,7 +138,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_002",
   "timestamp": "2025-10-15T10:35:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.updated",
   "user_id": "user_123"
 }
@@ -150,7 +150,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_003",
   "timestamp": "2025-10-15T10:40:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_received",
   "user_id": "user_123",
   "amount_msat": 10000,
@@ -164,7 +164,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_004",
   "timestamp": "2025-10-15T10:45:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_sent",
   "user_id": "user_123",
   "amount_msat": 5000,
@@ -178,7 +178,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_005",
   "timestamp": "2025-10-15T10:50:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "t4g.balance_updated",
   "user_id": "user_123",
   "new_balance": 3000
@@ -191,7 +191,7 @@ Tous les webhooks doivent inclure :
 {
   "id": "webhook_006",
   "timestamp": "2025-10-15T10:55:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "gamification.level_up",
   "user_id": "user_123",
   "new_level": 7,
@@ -243,12 +243,12 @@ Tentative 5 : 30 minutes
 
 ```bash
 # Configuration
-API_URL="https://t4g.dazno.de/api/webhooks/dazno"
+API_URL="https://app.token-for-good.com/api/webhooks/dazno"
 API_KEY="<votre_T4G_API_KEY>"
 WEBHOOK_SECRET="<votre_T4G_WEBHOOK_SECRET>"
 
 # Payload
-PAYLOAD='{"id":"test_001","timestamp":"2025-10-15T10:00:00Z","source":"dazno.de","event_type":"user.created","user_id":"test","email":"test@test.com"}'
+PAYLOAD='{"id":"test_001","timestamp":"2025-10-15T10:00:00Z","source":"token-for-good.com","event_type":"user.created","user_id":"test","email":"test@test.com"}'
 
 # Signature
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | sed 's/^.* //')
@@ -323,7 +323,7 @@ console.log({
 
 - [ ] Recevoir `T4G_API_KEY` et `T4G_WEBHOOK_SECRET` de manière sécurisée
 - [ ] Stocker les clés dans votre système de gestion de secrets
-- [ ] Configurer l'URL : `https://t4g.dazno.de/api/webhooks/dazno`
+- [ ] Configurer l'URL : `https://app.token-for-good.com/api/webhooks/dazno`
 
 ### Phase 2 : Développement
 

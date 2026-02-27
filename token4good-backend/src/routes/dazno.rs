@@ -36,11 +36,11 @@ pub struct UpdateGamificationRequest {
 
 pub fn dazno_routes() -> Router<AppState> {
     Router::new()
-        // User Management (dazno.de/api)
+        // User Management (token-for-good.com/api)
         .route("/users/:id/profile", get(get_dazno_user_profile))
         .route("/users/:id/tokens/t4g", get(get_user_t4g_balance))
         .route("/users/:id/gamification", post(update_user_gamification))
-        // Lightning Network (api.dazno.de) - Legacy endpoints
+        // Lightning Network (api.token-for-good.com) - Legacy endpoints
         .route("/lightning/invoice", post(create_dazno_lightning_invoice))
         .route("/lightning/pay", post(pay_dazno_lightning_invoice))
         .route(
@@ -94,7 +94,7 @@ pub fn dazno_routes() -> Router<AppState> {
         )
 }
 
-// ============= USER MANAGEMENT (dazno.de/api) =============
+// ============= USER MANAGEMENT (token-for-good.com/api) =============
 
 pub async fn get_dazno_user_profile(
     State(state): State<AppState>,
@@ -151,7 +151,7 @@ pub async fn update_user_gamification(
     Ok(StatusCode::OK)
 }
 
-// ============= LIGHTNING NETWORK (api.dazno.de) =============
+// ============= LIGHTNING NETWORK (api.token-for-good.com) =============
 
 pub async fn create_dazno_lightning_invoice(
     State(state): State<AppState>,

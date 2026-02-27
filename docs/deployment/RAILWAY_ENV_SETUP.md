@@ -53,7 +53,7 @@ base64 -i /path/to/tls.cert
 
 ### 5. Dazno Integration
 ```bash
-DAZNO_API_URL=https://api.dazno.de
+DAZNO_API_URL=https://api.token-for-good.com
 ```
 
 ### 6. Server Configuration
@@ -65,7 +65,7 @@ RUST_LOG=info,token4good_backend=debug
 
 ### 7. CORS
 ```bash
-ALLOWED_ORIGINS=https://t4g.dazno.de,https://dazno.de
+ALLOWED_ORIGINS=https://app.token-for-good.com,https://token-for-good.com
 ```
 
 **Note:** Ajoutez vos domaines séparés par des virgules
@@ -124,7 +124,7 @@ LND_MACAROON_PATH=your_base64_macaroon
 LND_TLS_CERT_PATH=your_base64_cert
 
 # Dazno
-DAZNO_API_URL=https://api.dazno.de
+DAZNO_API_URL=https://api.token-for-good.com
 
 # Server
 HOST=0.0.0.0
@@ -132,7 +132,7 @@ PORT=3000
 RUST_LOG=info,token4good_backend=debug
 
 # CORS
-ALLOWED_ORIGINS=https://t4g.dazno.de,https://dazno.de
+ALLOWED_ORIGINS=https://app.token-for-good.com,https://token-for-good.com
 ```
 
 ---

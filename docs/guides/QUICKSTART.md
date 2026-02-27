@@ -38,7 +38,7 @@ railway open  # Dashboard → Variables
 ```
 JWT_SECRET=<openssl rand -base64 32>
 DATABASE_URL=<auto-créé par Railway>
-DAZNO_API_URL=https://dazno.de
+DAZNO_API_URL=https://token-for-good.com
 ```
 
 ### 2️⃣ Frontend (Vercel) - 2 min
@@ -71,7 +71,7 @@ Name: t4g
 Value: cname.vercel-dns.com
 
 # Puis
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 ### 4️⃣ Vérification - 30 sec
@@ -81,10 +81,10 @@ vercel domains add t4g.dazno.de
 curl https://your-backend.railway.app/health
 
 # Frontend
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 
 # OAuth (navigateur)
-open https://t4g.dazno.de/login-v2
+open https://app.token-for-good.com/login-v2
 ```
 
 ### 5️⃣ Monitoring - 30 sec
@@ -128,8 +128,8 @@ railway logs
 ### OAuth failed
 ```bash
 # Vérifier redirect URIs dans dashboards OAuth:
-# - t4g: https://t4g.dazno.de/auth/callback/t4g
-# - LinkedIn: https://t4g.dazno.de/auth/callback/linkedin
+# - t4g: https://app.token-for-good.com/auth/callback/t4g
+# - LinkedIn: https://app.token-for-good.com/auth/callback/linkedin
 ```
 
 ---
@@ -147,7 +147,7 @@ railway logs
 | Service | URL | Notes |
 |---------|-----|-------|
 | Backend | https://YOUR.railway.app | À remplacer |
-| Frontend | https://t4g.dazno.de | Configurer DNS |
+| Frontend | https://app.token-for-good.com | Configurer DNS |
 | Health | /health | Status système |
 | Metrics | /api/metrics | Nécessite JWT |
 | Login | /login-v2 | Nouvelle page |

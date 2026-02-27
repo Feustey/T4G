@@ -38,7 +38,7 @@ NEXT_PUBLIC_T4G_CLIENT_ID=votre_client_id_t4g
 NEXT_PUBLIC_T4G_AUTH_URL=https://auth.token4good.com
 
 # ============= DAZNO =============
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 
 # ============= URLS =============
 NEXT_PUBLIC_APP_URL=http://localhost:4200

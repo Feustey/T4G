@@ -80,7 +80,7 @@ git push origin main
 Envoyer de manière sécurisée (1Password/Signal) :
 - Le fichier **DAZNO_TEAM_HANDOFF.md**
 - Les clés `T4G_API_KEY` et `T4G_WEBHOOK_SECRET`
-- L'URL : `https://t4g.dazno.de/api/webhooks/dazno`
+- L'URL : `https://app.token-for-good.com/api/webhooks/dazno`
 
 ---
 
@@ -119,7 +119,7 @@ export T4G_WEBHOOK_SECRET="test_secret"
 
 ```bash
 # Après déploiement
-export T4G_WEBHOOK_URL="https://t4g.dazno.de/api/webhooks/dazno"
+export T4G_WEBHOOK_URL="https://app.token-for-good.com/api/webhooks/dazno"
 export T4G_API_KEY="<votre_clé>"
 export T4G_WEBHOOK_SECRET="<votre_secret>"
 ./token4good-backend/scripts/test-webhook.sh

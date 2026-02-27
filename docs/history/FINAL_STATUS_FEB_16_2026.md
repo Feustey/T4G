@@ -139,7 +139,7 @@ Token4Good v2 est **prêt pour la production** avec :
 | Service | Status | URL |
 |---------|--------|-----|
 | Backend Railway | ✅ Opérationnel | https://apirust-production.up.railway.app |
-| Frontend Vercel | ✅ Opérationnel | https://t4g.dazno.de |
+| Frontend Vercel | ✅ Opérationnel | https://app.token-for-good.com |
 | PostgreSQL | ✅ Opérationnel | Railway/Supabase |
 | Health checks | ✅ Configurés | `/health` |
 | Monitoring | ✅ Opérationnel | Railway + Vercel dashboards |

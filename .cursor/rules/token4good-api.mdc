@@ -5,7 +5,7 @@ description: API Token4Good (T4G) pour token-for-good.com - Documentation compl�
 
 # 📘 API Token4Good (T4G) - Standards d'Implémentation
 
-**Base URL**: `https://app.token-for-good.com` ou `https://api.dazno.de/api/v1/token4good`  
+**Base URL**: `https://app.token-for-good.com` ou `https://api.token-for-good.com/api/v1/token4good`  
 **Version**: 1.0  
 **Dernière mise à jour**: 7 janvier 2025
 
@@ -21,8 +21,8 @@ Authorization: Bearer <votre_jwt_token>
 **Structure JWT requise**:
 - `tenant_id`: Identifiant du tenant
 - `sub`: user_id ou tenant_id
-- `iss`: app.dazno.de
-- `aud`: api.dazno.de
+- `iss`: app.token-for-good.com
+- `aud`: api.token-for-good.com
 - `exp`: Timestamp d'expiration
 
 ## 📚 Endpoints Token4Good

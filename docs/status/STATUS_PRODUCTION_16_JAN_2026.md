@@ -8,7 +8,7 @@
 ## 🌐 Services en Production
 
 ### Frontend (Next.js)
-- **URL Production :** https://t4g.dazno.de
+- **URL Production :** https://app.token-for-good.com
 - **Plateforme :** Vercel
 - **Status :** ✅ **OPÉRATIONNEL** (HTTP 200)
 - **Dernier Déploiement :** 16 janvier 2026 - 10h22
@@ -39,9 +39,9 @@
 #### Production
 ```bash
 NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.dazno.de/api/verify
+NEXT_PUBLIC_DAZNO_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.token-for-good.com/api/verify
 ```
 
 #### Preview
@@ -94,7 +94,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 
 ```bash
 # Frontend
-✅ https://t4g.dazno.de → HTTP 200
+✅ https://app.token-for-good.com → HTTP 200
 ✅ Redirection vers /login fonctionne
 ✅ Assets statiques chargés
 
@@ -146,7 +146,7 @@ Database
 - [x] Frontend déployé sur Vercel
 - [x] Backend déployé sur Railway
 - [x] Variables d'environnement configurées
-- [x] Domaine configuré (t4g.dazno.de)
+- [x] Domaine configuré (app.token-for-good.com)
 - [x] SSL/TLS actif
 - [x] Erreur 500 corrigée
 - [x] SSR fonctionnel

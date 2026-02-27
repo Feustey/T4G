@@ -165,7 +165,7 @@ Toutes les routes sont maintenant gérées par `token4good-backend` (Rust + Axum
 ### Frontend (.env.local)
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 ```
 
 ### Backend (.env)

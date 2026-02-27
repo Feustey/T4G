@@ -161,7 +161,7 @@ npm run dev
 ### OAuth ne fonctionne pas
 
 **Dazno** :
-- Ne fonctionne qu'en production (domaine dazno.de requis)
+- Ne fonctionne qu'en production (domaine token-for-good.com requis)
 - Utilisez les boutons de debug en local
 
 **LinkedIn** :

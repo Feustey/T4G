@@ -161,7 +161,7 @@
 NEXT_PUBLIC_API_URL=http://localhost:8080
 
 # OAuth Providers
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 LINKEDIN_CLIENT_ID=your_linkedin_client_id
 LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
 
@@ -189,7 +189,7 @@ LND_MACAROON_PATH=/path/to/admin.macaroon
 LND_TLS_CERT_PATH=/path/to/tls.cert
 
 # OAuth
-DAZNO_VERIFY_SESSION_URL=https://dazno.de/api/auth/verify-session
+DAZNO_VERIFY_SESSION_URL=https://token-for-good.com/api/auth/verify-session
 ```
 
 ---

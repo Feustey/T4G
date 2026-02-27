@@ -214,11 +214,11 @@ git push origin main
 4. **Vérification Production**
 ```bash
 # Test page landing
-curl -I https://t4g.dazno.de/landing
+curl -I https://app.token-for-good.com/landing
 # Devrait retourner HTTP 200
 
 # Test page d'accueil (redirection vers landing)
-curl -L https://t4g.dazno.de/
+curl -L https://app.token-for-good.com/
 # Devrait afficher la landing page
 ```
 

@@ -63,7 +63,7 @@ echo -e "${GREEN}  # Nettoyage automatique tous les dimanches à 4h${NC}"
 echo -e "${GREEN}  0 4 * * 0 /root/cleanup-disk.sh >> /var/log/disk-cleanup.log 2>&1${NC}"
 echo ""
 echo -e "${GREEN}  # Monitoring toutes les heures avec alertes${NC}"
-echo -e "${GREEN}  0 * * * * /root/check-disk-space.sh --alert-email admin@dazno.de${NC}"
+echo -e "${GREEN}  0 * * * * /root/check-disk-space.sh --alert-email admin@token-for-good.com${NC}"
 echo ""
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"

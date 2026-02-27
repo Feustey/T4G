@@ -113,7 +113,7 @@ T4G_WEBHOOK_SECRET=<GENERATE_RANDOM_SECRET> # openssl rand -hex 64
 
 - [ ] **Partager les clés avec Dazno** (de manière sécurisée) :
   - Via 1Password / Vault / Signal
-  - Avec l'URL : `https://t4g.dazno.de/api/webhooks/dazno`
+  - Avec l'URL : `https://app.token-for-good.com/api/webhooks/dazno`
 
 - [ ] **Tester en production** :
   ```bash
@@ -128,7 +128,7 @@ T4G_WEBHOOK_SECRET=<GENERATE_RANDOM_SECRET> # openssl rand -hex 64
   ```bash
   T4G_API_KEY=<reçu>
   T4G_WEBHOOK_SECRET=<reçu>
-  T4G_WEBHOOK_URL=https://t4g.dazno.de/api/webhooks/dazno
+  T4G_WEBHOOK_URL=https://app.token-for-good.com/api/webhooks/dazno
   ```
 
 - [ ] **Implémenter l'envoi de webhooks** :
@@ -167,13 +167,13 @@ T4G_WEBHOOK_SECRET=<GENERATE_RANDOM_SECRET> # openssl rand -hex 64
 3. Vérifier les logs du backend :
    ```
    INFO Webhook signature vérifiée avec succès
-   INFO Traitement webhook test_webhook_001 depuis dazno.de
+   INFO Traitement webhook test_webhook_001 depuis token-for-good.com
    ```
 
 ### Test avec cURL
 
 ```bash
-PAYLOAD='{"id":"test","timestamp":"2025-10-15T10:00:00Z","source":"dazno.de","event_type":"user.created","user_id":"test","email":"test@test.com"}'
+PAYLOAD='{"id":"test","timestamp":"2025-10-15T10:00:00Z","source":"token-for-good.com","event_type":"user.created","user_id":"test","email":"test@test.com"}'
 
 SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$T4G_WEBHOOK_SECRET" | sed 's/^.* //')
 
@@ -194,7 +194,7 @@ curl -X POST http://localhost:3000/api/webhooks/dazno \
 {
   "id": "webhook_unique_id",
   "timestamp": "2025-10-15T10:30:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "<TYPE>",
   ...
 }
@@ -206,7 +206,7 @@ curl -X POST http://localhost:3000/api/webhooks/dazno \
 {
   "id": "webhook_abc123",
   "timestamp": "2025-10-15T14:30:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_received",
   "user_id": "user_789",
   "amount_msat": 50000,
@@ -218,7 +218,7 @@ curl -X POST http://localhost:3000/api/webhooks/dazno \
 
 ```http
 POST /api/webhooks/dazno HTTP/1.1
-Host: t4g.dazno.de
+Host: app.token-for-good.com
 Content-Type: application/json
 x-api-key: <T4G_API_KEY>
 x-t4g-signature: sha256=<HMAC_SHA256_HEX>

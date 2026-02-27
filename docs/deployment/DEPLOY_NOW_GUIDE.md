@@ -58,11 +58,11 @@ railway variables set LND_REST_HOST="https://your-lnd-node.com:8080"
 railway variables set LND_MACAROON_PATH="<base64-encoded-macaroon>"
 
 # Variables Dazno
-railway variables set DAZNO_LIGHTNING_API_URL="https://api.dazno.de"
-railway variables set DAZNO_USERS_API_URL="https://dazno.de/api"
+railway variables set DAZNO_LIGHTNING_API_URL="https://api.token-for-good.com"
+railway variables set DAZNO_USERS_API_URL="https://token-for-good.com/api"
 
 # CORS
-railway variables set ALLOWED_ORIGINS="https://t4g.dazno.de,https://t4g-dazno-de.vercel.app"
+railway variables set ALLOWED_ORIGINS="https://app.token-for-good.com,https://t4g-dazno-de.vercel.app"
 ```
 
 #### 1.3 Ajouter PostgreSQL
@@ -135,8 +135,8 @@ Allez sur: https://vercel.com/dashboard → Votre projet → Settings → Enviro
 Ajouter:
 ```
 NEXT_PUBLIC_API_URL=https://VOTRE-URL-RAILWAY.up.railway.app
-NEXT_PUBLIC_APP_URL=https://t4g.dazno.de
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_APP_URL=https://app.token-for-good.com
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 NEXT_PUBLIC_GTM_ID=GTM-NCQWLBN
 ```
 
@@ -153,7 +153,7 @@ vercel --prod
 **✅ Validation:**
 ```bash
 # Tester le frontend
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 ```
 
 ---
@@ -163,7 +163,7 @@ curl https://t4g.dazno.de/api/health
 #### 3.1 Ajouter le Domaine dans Vercel
 
 ```bash
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 #### 3.2 Configurer le DNS
@@ -198,10 +198,10 @@ curl https://VOTRE-URL-RAILWAY.up.railway.app/api/auth/login \
 
 ```bash
 # Via le frontend (devrait proxy vers le backend)
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 
 # Test page d'accueil
-curl -I https://t4g.dazno.de
+curl -I https://app.token-for-good.com
 ```
 
 #### 4.3 Test Nouveaux Endpoints Dazno
@@ -212,7 +212,7 @@ TOKEN="votre_jwt_token"
 DAZNO_TOKEN="votre_dazno_token"
 
 # Test webhook
-curl https://t4g.dazno.de/api/dazno/v1/webhook \
+curl https://app.token-for-good.com/api/dazno/v1/webhook \
   -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "X-Dazno-Token: $DAZNO_TOKEN" \
@@ -223,7 +223,7 @@ curl https://t4g.dazno.de/api/dazno/v1/webhook \
   }'
 
 # Test LNURL-pay
-curl https://t4g.dazno.de/api/dazno/v1/lnurl/pay \
+curl https://app.token-for-good.com/api/dazno/v1/lnurl/pay \
   -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "X-Dazno-Token: $DAZNO_TOKEN" \
@@ -235,7 +235,7 @@ curl https://t4g.dazno.de/api/dazno/v1/lnurl/pay \
   }'
 
 # Test multi-wallets
-curl https://t4g.dazno.de/api/dazno/v1/wallet \
+curl https://app.token-for-good.com/api/dazno/v1/wallet \
   -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "X-Dazno-Token: $DAZNO_TOKEN" \
@@ -322,7 +322,7 @@ railway add -d postgres --force
 - [ ] **Frontend Vercel**
   - [ ] Page d'accueil charge
   - [ ] API proxy fonctionne
-  - [ ] DNS t4g.dazno.de résolu
+  - [ ] DNS app.token-for-good.com résolu
   - [ ] HTTPS actif
 
 - [ ] **Nouveaux Endpoints**

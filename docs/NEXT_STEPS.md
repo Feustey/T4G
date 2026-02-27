@@ -84,7 +84,7 @@ vercel login
 - Configure le domaine (optionnel)
 - Teste l'accessibilité
 
-**URL attendue:** `https://t4g.dazno.de`
+**URL attendue:** `https://app.token-for-good.com`
 
 ---
 
@@ -100,7 +100,7 @@ Avant de commencer:
 - [ ] Node.js installé (v18+)
 - [ ] Compte Railway créé (https://railway.app)
 - [ ] Compte Vercel créé (https://vercel.com)
-- [ ] Accès au DNS pour t4g.dazno.de
+- [ ] Accès au DNS pour app.token-for-good.com
 - [ ] 60-90 minutes disponibles
 
 Pendant le déploiement:
@@ -135,7 +135,7 @@ vercel logs --follow
 
 # Tests
 curl https://YOUR-RAILWAY-URL/health
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 ```
 
 ### Rollback Rapide

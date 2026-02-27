@@ -8,7 +8,7 @@
 
 ## 🎯 Objectif
 
-Compléter l'intégration de l'API Dazno (api.dazno.de) en ajoutant les fonctionnalités LNBits manquantes pour atteindre **100% de couverture**.
+Compléter l'intégration de l'API Dazno (api.token-for-good.com) en ajoutant les fonctionnalités LNBits manquantes pour atteindre **100% de couverture**.
 
 ---
 
@@ -197,7 +197,7 @@ Backend Rust (routes/dazno.rs)
     ↓
 Service Layer (services/dazno.rs)
     ↓ HTTP/JSON
-API Dazno (api.dazno.de)
+API Dazno (api.token-for-good.com)
 ```
 
 ### Authentification

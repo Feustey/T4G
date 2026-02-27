@@ -30,7 +30,7 @@ openssl rand -hex 64
 ### URL du Webhook
 
 ```
-URL: https://t4g.dazno.de/api/webhooks/dazno
+URL: https://app.token-for-good.com/api/webhooks/dazno
 Méthode: POST
 Content-Type: application/json
 ```
@@ -65,7 +65,7 @@ function signWebhook(payload, secret) {
 const payload = {
   id: "webhook_123",
   timestamp: "2025-10-15T10:30:00Z",
-  source: "dazno.de",
+  source: "token-for-good.com",
   event_type: "lightning.payment_received",
   user_id: "user_abc",
   amount_msat: 10000,
@@ -119,7 +119,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_unique_id",
   "timestamp": "2025-10-15T10:30:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "<TYPE>",
   ...
 }
@@ -133,7 +133,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_001",
   "timestamp": "2025-10-15T10:30:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.created",
   "user_id": "user_123",
   "email": "user@example.com"
@@ -150,7 +150,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_002",
   "timestamp": "2025-10-15T10:35:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.updated",
   "user_id": "user_123"
 }
@@ -166,7 +166,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_003",
   "timestamp": "2025-10-15T10:40:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_received",
   "user_id": "user_123",
   "amount_msat": 10000,
@@ -184,7 +184,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_004",
   "timestamp": "2025-10-15T10:45:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_sent",
   "user_id": "user_123",
   "amount_msat": 5000,
@@ -202,7 +202,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_005",
   "timestamp": "2025-10-15T10:50:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "t4g.balance_updated",
   "user_id": "user_123",
   "new_balance": 3000
@@ -219,7 +219,7 @@ Tous les webhooks incluent ces champs de base :
 {
   "id": "webhook_006",
   "timestamp": "2025-10-15T10:55:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "gamification.level_up",
   "user_id": "user_123",
   "new_level": 7,
@@ -260,7 +260,7 @@ Token4Good répondra avec un JSON :
 
 ```bash
 # Configuration
-API_URL="https://t4g.dazno.de/api/webhooks/dazno"
+API_URL="https://app.token-for-good.com/api/webhooks/dazno"
 API_KEY="votre_api_key"
 WEBHOOK_SECRET="votre_secret"
 
@@ -268,7 +268,7 @@ WEBHOOK_SECRET="votre_secret"
 PAYLOAD='{
   "id": "test_webhook_001",
   "timestamp": "2025-10-15T10:00:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.created",
   "user_id": "test_user_123",
   "email": "test@example.com"
@@ -288,7 +288,7 @@ curl -X POST "$API_URL" \
 
 ### Test avec Postman
 
-1. **URL** : `POST https://t4g.dazno.de/api/webhooks/dazno`
+1. **URL** : `POST https://app.token-for-good.com/api/webhooks/dazno`
 2. **Headers** :
    - `Content-Type: application/json`
    - `x-api-key: <T4G_API_KEY>`
@@ -353,7 +353,7 @@ Si toutes les tentatives échouent, envoyer une alerte à l'équipe technique.
 ### Contact Technique
 
 - **Équipe Token4Good** : [contact technique]
-- **Documentation API** : https://t4g.dazno.de/docs
+- **Documentation API** : https://app.token-for-good.com/docs
 - **Status Page** : https://status.token-for-good.com
 
 ### Variables d'Environnement à Partager
@@ -362,7 +362,7 @@ Si toutes les tentatives échouent, envoyer une alerte à l'équipe technique.
 # À configurer côté Dazno
 T4G_API_KEY=<fourni_par_token4good>
 T4G_WEBHOOK_SECRET=<fourni_par_token4good>
-T4G_WEBHOOK_URL=https://t4g.dazno.de/api/webhooks/dazno
+T4G_WEBHOOK_URL=https://app.token-for-good.com/api/webhooks/dazno
 ```
 
 ---
@@ -375,7 +375,7 @@ T4G_WEBHOOK_URL=https://t4g.dazno.de/api/webhooks/dazno
 - [ ] Recevoir `T4G_WEBHOOK_SECRET` de l'équipe Token4Good
 - [ ] Stocker les secrets de manière sécurisée (vault, secrets manager)
 - [ ] Implémenter le calcul de signature HMAC-SHA256
-- [ ] Configurer l'URL webhook : `https://t4g.dazno.de/api/webhooks/dazno`
+- [ ] Configurer l'URL webhook : `https://app.token-for-good.com/api/webhooks/dazno`
 - [ ] Tester l'envoi d'un webhook de test
 - [ ] Implémenter le retry logic avec exponential backoff
 - [ ] Configurer le monitoring et les alertes
@@ -410,7 +410,7 @@ async function sendWebhookToToken4Good(event) {
   const payload = {
     id: crypto.randomUUID(),
     timestamp: new Date().toISOString(),
-    source: "dazno.de",
+    source: "token-for-good.com",
     ...event
   };
 

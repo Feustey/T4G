@@ -61,7 +61,7 @@ send_webhook() {
 PAYLOAD_USER_CREATED='{
   "id": "test_webhook_001",
   "timestamp": "2025-10-15T10:00:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.created",
   "user_id": "test_user_123",
   "email": "test@example.com"
@@ -75,7 +75,7 @@ send_webhook "user.created" "$PAYLOAD_USER_CREATED" "Création d'utilisateur"
 PAYLOAD_PAYMENT_RECEIVED='{
   "id": "test_webhook_002",
   "timestamp": "2025-10-15T10:05:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_received",
   "user_id": "test_user_123",
   "amount_msat": 50000,
@@ -90,7 +90,7 @@ send_webhook "lightning.payment_received" "$PAYLOAD_PAYMENT_RECEIVED" "Paiement 
 PAYLOAD_PAYMENT_SENT='{
   "id": "test_webhook_003",
   "timestamp": "2025-10-15T10:10:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "lightning.payment_sent",
   "user_id": "test_user_123",
   "amount_msat": 20000,
@@ -105,7 +105,7 @@ send_webhook "lightning.payment_sent" "$PAYLOAD_PAYMENT_SENT" "Paiement Lightnin
 PAYLOAD_BALANCE_UPDATED='{
   "id": "test_webhook_004",
   "timestamp": "2025-10-15T10:15:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "t4g.balance_updated",
   "user_id": "test_user_123",
   "new_balance": 3500
@@ -119,7 +119,7 @@ send_webhook "t4g.balance_updated" "$PAYLOAD_BALANCE_UPDATED" "Mise à jour sold
 PAYLOAD_LEVEL_UP='{
   "id": "test_webhook_005",
   "timestamp": "2025-10-15T10:20:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "gamification.level_up",
   "user_id": "test_user_123",
   "new_level": 7,
@@ -134,7 +134,7 @@ send_webhook "gamification.level_up" "$PAYLOAD_LEVEL_UP" "Level up gamification"
 PAYLOAD_USER_UPDATED='{
   "id": "test_webhook_006",
   "timestamp": "2025-10-15T10:25:00Z",
-  "source": "dazno.de",
+  "source": "token-for-good.com",
   "event_type": "user.updated",
   "user_id": "test_user_123"
 }'
@@ -145,7 +145,7 @@ send_webhook "user.updated" "$PAYLOAD_USER_UPDATED" "Mise à jour utilisateur"
 # Test 7: Invalid Signature (Négatif)
 # ============================================
 echo -e "${YELLOW}🧪 Test: Signature invalide (test négatif)${NC}"
-INVALID_PAYLOAD='{"id":"test","timestamp":"2025-10-15T10:30:00Z","source":"dazno.de","event_type":"user.created","user_id":"test","email":"test@test.com"}'
+INVALID_PAYLOAD='{"id":"test","timestamp":"2025-10-15T10:30:00Z","source":"token-for-good.com","event_type":"user.created","user_id":"test","email":"test@test.com"}'
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
     -H "Content-Type: application/json" \

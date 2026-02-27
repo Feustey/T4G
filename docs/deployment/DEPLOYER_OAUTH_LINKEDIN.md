@@ -1,6 +1,6 @@
 # 🚀 Déployer l'OAuth LinkedIn - Guide Rapide (10 minutes)
 
-**Objectif :** Faire fonctionner le bouton "Login with LinkedIn" sur https://t4g.dazno.de/login
+**Objectif :** Faire fonctionner le bouton "Login with LinkedIn" sur https://app.token-for-good.com/login
 
 ---
 
@@ -13,7 +13,7 @@
 3. Remplissez :
    - **App name:** `Token4Good`
    - **LinkedIn Page:** Sélectionnez votre page entreprise
-   - **Privacy policy URL:** `https://t4g.dazno.de/privacy`
+   - **Privacy policy URL:** `https://app.token-for-good.com/privacy`
    - **App logo:** Téléchargez votre logo
 4. Acceptez les conditions et cliquez **"Create app"**
 
@@ -30,7 +30,7 @@
 2. Dans la section **"OAuth 2.0 settings"**
 3. Sous **"Authorized redirect URLs for your app"**, ajoutez :
    ```
-   https://t4g.dazno.de/auth/callback/linkedin
+   https://app.token-for-good.com/auth/callback/linkedin
    ```
 4. Pour le développement local, ajoutez aussi :
    ```
@@ -61,7 +61,7 @@
 | `LINKEDIN_CLIENT_ID` | `78...` (votre Client ID) | Production |
 | `LINKEDIN_CLIENT_SECRET` | `xxx...` (votre Client Secret) | Production |
 | `NEXT_PUBLIC_LINKEDIN_CLIENT_ID` | `78...` (même que ci-dessus) | Production |
-| `NEXT_PUBLIC_APP_URL` | `https://t4g.dazno.de` | Production |
+| `NEXT_PUBLIC_APP_URL` | `https://app.token-for-good.com` | Production |
 
 5. Cliquez **"Save"** pour chaque variable
 
@@ -79,7 +79,7 @@ vercel env add NEXT_PUBLIC_LINKEDIN_CLIENT_ID production
 # Entrez votre Client ID quand demandé
 
 vercel env add NEXT_PUBLIC_APP_URL production
-# Entrez: https://t4g.dazno.de
+# Entrez: https://app.token-for-good.com
 ```
 
 ---
@@ -112,7 +112,7 @@ vercel --prod
 
 ### 4.1 Test Rapide
 
-1. Ouvrez https://t4g.dazno.de/login
+1. Ouvrez https://app.token-for-good.com/login
 2. Cliquez sur **"Login with LinkedIn"**
 3. Vous devriez être redirigé vers LinkedIn
 4. Autorisez l'application
@@ -150,7 +150,7 @@ vercel logs --follow
 1. Allez sur https://www.linkedin.com/developers/apps
 2. Sélectionnez votre app
 3. Onglet "Auth" → "Authorized redirect URLs"
-4. Vérifiez que `https://t4g.dazno.de/auth/callback/linkedin` est bien ajoutée
+4. Vérifiez que `https://app.token-for-good.com/auth/callback/linkedin` est bien ajoutée
 5. **Attention :** Pas de slash final, et HTTPS obligatoire en production
 
 ### Erreur : "Échec échange token LinkedIn"
@@ -182,11 +182,11 @@ Avant de considérer que c'est terminé, vérifiez :
 
 - [ ] Application LinkedIn créée et validée
 - [ ] Produit "Sign In with LinkedIn using OpenID Connect" activé
-- [ ] Redirect URI `https://t4g.dazno.de/auth/callback/linkedin` ajoutée
+- [ ] Redirect URI `https://app.token-for-good.com/auth/callback/linkedin` ajoutée
 - [ ] `LINKEDIN_CLIENT_ID` ajouté sur Vercel (Production)
 - [ ] `LINKEDIN_CLIENT_SECRET` ajouté sur Vercel (Production)
 - [ ] `NEXT_PUBLIC_LINKEDIN_CLIENT_ID` ajouté sur Vercel (Production)
-- [ ] `NEXT_PUBLIC_APP_URL` = `https://t4g.dazno.de` sur Vercel
+- [ ] `NEXT_PUBLIC_APP_URL` = `https://app.token-for-good.com` sur Vercel
 - [ ] Code déployé sur Vercel
 - [ ] Test complet du flow réussi
 - [ ] Utilisateur créé dans la base de données
@@ -197,7 +197,7 @@ Avant de considérer que c'est terminé, vérifiez :
 
 ## 🎉 Succès !
 
-Si tous les tests passent, l'authentification LinkedIn est maintenant fonctionnelle sur **https://t4g.dazno.de/login** ! 🎊
+Si tous les tests passent, l'authentification LinkedIn est maintenant fonctionnelle sur **https://app.token-for-good.com/login** ! 🎊
 
 ### Prochaines Étapes (Optionnel)
 

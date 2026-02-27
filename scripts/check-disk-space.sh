@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Token4Good - Monitoring de l'espace disque
-# Usage: ./check-disk-space.sh [--alert-email admin@dazno.de]
+# Usage: ./check-disk-space.sh [--alert-email admin@token-for-good.com]
 #
 
 # Seuil d'alerte (en pourcentage)

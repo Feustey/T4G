@@ -30,7 +30,7 @@ T4G_WEBHOOK_SECRET=<votre_secret_généré>
 Partager :
 - `T4G_API_KEY`
 - `T4G_WEBHOOK_SECRET`
-- URL webhook : `https://t4g.dazno.de/api/webhooks/dazno`
+- URL webhook : `https://app.token-for-good.com/api/webhooks/dazno`
 
 ### 4. Tester localement
 
@@ -50,7 +50,7 @@ Les webhooks apparaîtront dans les logs du backend :
 
 ```
 INFO Webhook signature vérifiée avec succès
-INFO Traitement webhook test_webhook_001 depuis dazno.de
+INFO Traitement webhook test_webhook_001 depuis token-for-good.com
 INFO Utilisateur Dazno créé: test_user_123 (test@example.com)
 ```
 
@@ -69,7 +69,7 @@ Vous recevrez :
 ```bash
 T4G_API_KEY=<reçu_de_token4good>
 T4G_WEBHOOK_SECRET=<reçu_de_token4good>
-T4G_WEBHOOK_URL=https://t4g.dazno.de/api/webhooks/dazno
+T4G_WEBHOOK_URL=https://app.token-for-good.com/api/webhooks/dazno
 ```
 
 ### 3. Implémenter l'envoi de webhook
@@ -84,7 +84,7 @@ async function sendWebhook(event) {
   const payload = {
     id: crypto.randomUUID(),
     timestamp: new Date().toISOString(),
-    source: "dazno.de",
+    source: "token-for-good.com",
     ...event
   };
   
@@ -117,11 +117,11 @@ sendWebhook({
 
 ```bash
 # Test avec curl
-curl -X POST https://t4g.dazno.de/api/webhooks/dazno \
+curl -X POST https://app.token-for-good.com/api/webhooks/dazno \
   -H "Content-Type: application/json" \
   -H "x-api-key: $T4G_API_KEY" \
   -H "x-t4g-signature: sha256=<calculer_signature>" \
-  -d '{"id":"test","timestamp":"2025-10-15T10:00:00Z","source":"dazno.de","event_type":"user.created","user_id":"test","email":"test@test.com"}'
+  -d '{"id":"test","timestamp":"2025-10-15T10:00:00Z","source":"token-for-good.com","event_type":"user.created","user_id":"test","email":"test@test.com"}'
 ```
 
 ---

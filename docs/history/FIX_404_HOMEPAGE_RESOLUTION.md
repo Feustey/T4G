@@ -7,7 +7,7 @@
 
 ## 🎯 Problème Identifié
 
-Erreur **404 sur la page d'accueil** de `t4g.dazno.de` causée par des **conflits de configuration de routing** entre :
+Erreur **404 sur la page d'accueil** de `app.token-for-good.com` causée par des **conflits de configuration de routing** entre :
 
 1. **Next.js i18n** (configuré dans `next.config.js`)
 2. **Redirections manuelles** dans `vercel.json`
@@ -144,15 +144,15 @@ git push origin main
 4. **Vérification post-déploiement**
 ```bash
 # Test de la page d'accueil
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 # Devrait retourner HTTP 200
 
 # Test de la redirection vers login (si non authentifié)
-curl -L https://t4g.dazno.de/
+curl -L https://app.token-for-good.com/
 # Devrait rediriger vers /fr/login
 
 # Test backend health
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 # Devrait retourner les infos de santé du backend
 ```
 
@@ -161,7 +161,7 @@ curl https://t4g.dazno.de/health
 ## 📊 Architecture de Routing (Corrigée)
 
 ```
-Browser Request: https://t4g.dazno.de/
+Browser Request: https://app.token-for-good.com/
     ↓
 Vercel Edge Network
     ↓
@@ -239,9 +239,9 @@ Il existe plusieurs fichiers `next.config.*.js` dans le projet :
 Assurez-vous que ces variables sont configurées en **Production** :
 ```bash
 NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.dazno.de/api/verify
+NEXT_PUBLIC_DAZNO_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.token-for-good.com/api/verify
 ```
 
 ---

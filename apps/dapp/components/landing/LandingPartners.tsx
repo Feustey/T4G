@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 const partners = [
-  { name: 'Daznode', href: 'https://dazno.de', src: '/landing/images/68dd52b64caafaf589da8e54_logo_daznode.png', height: 100 },
+  { name: 'Daznode', href: 'https://token-for-good.com', src: '/landing/images/68dd52b64caafaf589da8e54_logo_daznode.png', height: 100 },
   { name: 'Inoval', href: 'https://inoval.io', src: '/landing/images/6829aacc00d93f05c170ee5d_64819951ddb9563d1fad1713_INOVAL_logo_RVB-500px.png', height: 100 },
   { name: 'Bitcoin Meetup Nantes', href: 'https://bit.ly/NantesBitcoin', src: '/landing/images/6829aa7694b5a7d4e0195211_Bitcoin%20Meetup.jpg', height: 100 },
   { name: 'Blockchain for Good', href: 'https://blockchainforgood.fr/', src: '/landing/images/6829aaff379497ff57cdd41f_Blockchain_for_Good.svg', height: 70 },

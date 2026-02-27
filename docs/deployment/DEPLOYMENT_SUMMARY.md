@@ -9,7 +9,7 @@
 ## ✅ Résumé exécutif
 
 - Backend Rust opérationnel sur Railway (service `token4good-backend`)
-- Frontend Next.js 13 stable sur Vercel (`token4good.vercel.app` + `t4g.dazno.de`)
+- Frontend Next.js 13 stable sur Vercel (`token4good.vercel.app` + `app.token-for-good.com`)
 - PostgreSQL managé par Railway avec sauvegardes quotidiennes
 - Intégrations OAuth (t4g, LinkedIn) et Dazno 100% fonctionnelles
 - Nœud Lightning (LND) & stockage RGB gérés sur VPS dédié
@@ -66,7 +66,7 @@ curl https://<backend>.up.railway.app/health
 
 # Frontend
 curl https://token4good.vercel.app/api/health
-curl https://t4g.dazno.de/api/health
+curl https://app.token-for-good.com/api/health
 
 # Script santé complet
 ./token4good-backend/test-health.sh https://<backend>.up.railway.app
@@ -89,7 +89,7 @@ curl https://t4g.dazno.de/api/health
 
 - Railway : `railway logs --follow`, métriques dashboard, webhooks → Slack (`RAILWAY_WEBHOOK_SETUP.md`)
 - Vercel : `vercel logs`, Analytics dashboard
-- Uptime : surveiller `https://<backend>/health`, `https://t4g.dazno.de/api/health`
+- Uptime : surveiller `https://<backend>/health`, `https://app.token-for-good.com/api/health`
 
 ---
 

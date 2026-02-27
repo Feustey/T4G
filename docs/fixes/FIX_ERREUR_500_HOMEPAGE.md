@@ -8,7 +8,7 @@
 ## 🔍 Problème Identifié
 
 ### Symptômes
-- URL : `https://t4g.dazno.de/`
+- URL : `https://app.token-for-good.com/`
 - Erreur : **500 Internal Server Error**
 - La page d'accueil ne se chargeait pas
 
@@ -114,13 +114,13 @@ Route (pages)                              Size     First Load JS
 
 ### Test 1 : Vérification du statut HTTP
 ```bash
-curl -I https://t4g.dazno.de
+curl -I https://app.token-for-good.com
 ```
 **Résultat :** ✅ **HTTP/2 200** (avant : 500)
 
 ### Test 2 : Vérification de la redirection
 ```bash
-curl -L https://t4g.dazno.de
+curl -L https://app.token-for-good.com
 ```
 **Résultat :** ✅ La page se charge correctement et redirige vers `/login`
 
@@ -145,7 +145,7 @@ curl https://apirust-production.up.railway.app/health
 
 ## 🔗 Liens Utiles
 
-- **Frontend Production :** https://t4g.dazno.de
+- **Frontend Production :** https://app.token-for-good.com
 - **Backend Production :** https://apirust-production.up.railway.app
 - **Vercel Dashboard :** https://vercel.com/feusteys-projects/t4-g
 - **Railway Dashboard :** https://railway.app

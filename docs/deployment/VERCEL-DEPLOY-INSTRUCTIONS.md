@@ -28,8 +28,8 @@ NEXTAUTH_SECRET=your-super-secret-jwt-key-min-32-chars
 NEXT_PUBLIC_API_URL=https://token4good-backend-production.up.railway.app/api
 
 # Dazno Integration  
-NEXT_PUBLIC_DAZNO_API_URL=https://dazno.de/api
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://api.dazno.de/users
+NEXT_PUBLIC_DAZNO_API_URL=https://token-for-good.com/api
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://api.token-for-good.com/users
 DAZNO_CLIENT_ID=token4good-production
 DAZNO_CLIENT_SECRET=your-dazno-secret
 
@@ -116,7 +116,7 @@ NODE_ENV=production
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://dazno.de" }
+        { "key": "Access-Control-Allow-Origin", "value": "https://token-for-good.com" }
       ]
     }
   ]

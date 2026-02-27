@@ -140,7 +140,7 @@ Créez des liens de paiement Lightning simplifiés avec QR code.
 ```json
 {
   "lnurl": "LNURL1DP68GURN8GHJ7MRWW4EXCTNXD9SHG6NPVCHXXMMD9AKXUATJDSKHW6T5DPJ8YCTH8AEK2UMND9HKU0FHXGCNJV3JRQCNPVEMPJCMPWFSKVATZV3JRQCNPVEMPJCMPWFSKVATZV3JRQCNPVEMPJCMPWFSKVATZV3JRQCNPVEMPJCMPWFSKVATZV3JR5CT8",
-  "callback": "https://api.dazno.de/lnurl/pay/callback/abc123",
+  "callback": "https://api.token-for-good.com/lnurl/pay/callback/abc123",
   "min_sendable": 1000,
   "max_sendable": 100000,
   "metadata": "Paiement service Token4Good",
@@ -176,7 +176,7 @@ Créez des liens de retrait Lightning pour permettre aux utilisateurs de retirer
 ```json
 {
   "lnurl": "LNURL1DP68GURN8GHJ7MRWW4EXCTNXD9SHG6NPVCHXXMMD9AKXUATJDSKHW...",
-  "callback": "https://api.dazno.de/lnurl/withdraw/callback/xyz789",
+  "callback": "https://api.token-for-good.com/lnurl/withdraw/callback/xyz789",
   "k1": "secret_key_k1",
   "min_withdrawable": 10000,
   "max_withdrawable": 500000,

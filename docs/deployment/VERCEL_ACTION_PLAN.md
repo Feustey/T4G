@@ -57,8 +57,8 @@ Dans **Settings > Environment Variables**, vérifiez que ces variables existent 
 | Variable | Exemple de Valeur |
 |----------|-------------------|
 | `NEXT_PUBLIC_API_URL` | `https://apirust-production.up.railway.app` |
-| `NEXT_PUBLIC_DAZNO_API_URL` | `https://api.dazno.de/api/v1` |
-| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://api.dazno.de/api/v1/users` |
+| `NEXT_PUBLIC_DAZNO_API_URL` | `https://api.token-for-good.com/api/v1` |
+| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://api.token-for-good.com/api/v1/users` |
 | `NODE_ENV` | `production` |
 | `SKIP_ENV_VALIDATION` | `true` |
 
@@ -222,10 +222,10 @@ Avant de fermer ce document, vérifiez :
 
 ### Configuration Domaine Custom
 
-Si vous voulez configurer `t4g.dazno.de` :
+Si vous voulez configurer `app.token-for-good.com` :
 
 1. **Vercel Dashboard** → Settings → Domains
-2. Add Domain : `t4g.dazno.de`
+2. Add Domain : `app.token-for-good.com`
 3. **DNS** (chez votre registrar) :
    ```
    Type: CNAME

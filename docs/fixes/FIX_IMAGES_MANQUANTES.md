@@ -124,14 +124,14 @@ git commit -m "fix: Désactiver output standalone pour Vercel - permet la copie 
 
 Une fois déployé, vérifier que les images sont bien visibles :
 
-1. **Page Landing:** `https://t4g.dazno.de/landing`
+1. **Page Landing:** `https://app.token-for-good.com/landing`
    - ✅ Logo T4G visible
    - ✅ Images hero visibles
    - ✅ Illustrations de contenu visibles
 
 2. **Test des URLs d'images:**
    ```bash
-   curl -I https://t4g.dazno.de/landing/images/64497bb83dee18517f47a10c_T4G.webp
+   curl -I https://app.token-for-good.com/landing/images/64497bb83dee18517f47a10c_T4G.webp
    ```
    Doit retourner **200 OK**
 

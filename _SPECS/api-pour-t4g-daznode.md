@@ -1,5 +1,5 @@
-# 📘 Guide Technique - API Token4Good (T4G) pour t4g.dazno.de
-> Documentation pour les équipes dazno.de
+# 📘 Guide Technique - API Token4Good (T4G) pour app.token-for-good.com
+> Documentation pour les équipes token-for-good.com
 > Dernière mise à jour: 7 janvier 2025
 
 ## 📋 Table des Matières
@@ -33,12 +33,12 @@ Token4Good (T4G) est le système de tokens d'entraide et de mentoring de l'écos
 ### Base URL
 
 ```
-Production:  https://t4g.dazno.de
-API Base:    https://api.dazno.de/api/v1/token4good
-Alternative: https://t4g.dazno.de/api/v1/token4good
+Production:  https://app.token-for-good.com
+API Base:    https://api.token-for-good.com/api/v1/token4good
+Alternative: https://app.token-for-good.com/api/v1/token4good
 ```
 
-**Note**: `t4g.dazno.de` est un proxy vers l'API MCP principale qui expose les endpoints Token4Good.
+**Note**: `app.token-for-good.com` est un proxy vers l'API MCP principale qui expose les endpoints Token4Good.
 
 ### Format des Réponses
 
@@ -74,8 +74,8 @@ Le token JWT doit contenir au minimum :
 {
   "tenant_id": "votre_tenant_id",
   "sub": "user_id_ou_tenant_id",
-  "iss": "app.dazno.de",
-  "aud": "api.dazno.de",
+  "iss": "app.token-for-good.com",
+  "aud": "api.token-for-good.com",
   "exp": 1234567890
 }
 ```
@@ -96,26 +96,26 @@ python3 generate_dazno_token.py --user-id t4g_user_001 --tenant-id t4g_tenant_00
 
 Ces endpoints peuvent être appelés sans JWT :
 
-- `GET /health` - Health check (via t4g.dazno.de ou api.dazno.de)
+- `GET /health` - Health check (via app.token-for-good.com ou api.token-for-good.com)
 - `GET /api/v1/token4good/marketplace/stats` - Statistiques publiques de la marketplace
 
 ### Test de Connexion Rapide
 
 ```bash
 # Test de santé
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 
 # Test avec authentification
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-     https://t4g.dazno.de/api/v1/token4good/admin/system/status
+     https://app.token-for-good.com/api/v1/token4good/admin/system/status
 ```
 
 ### CORS Configuration
 
-Les origines autorisées pour `t4g.dazno.de` :
-- `https://t4g.dazno.de`
-- `https://app.dazno.de`
-- `https://dazno.de`
+Les origines autorisées pour `app.token-for-good.com` :
+- `https://app.token-for-good.com`
+- `https://app.token-for-good.com`
+- `https://token-for-good.com`
 
 ---
 
@@ -126,7 +126,7 @@ Les origines autorisées pour `t4g.dazno.de` :
 #### Créer un Profil Utilisateur
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/users" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/users" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -156,14 +156,14 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/users" \
 #### Obtenir un Profil
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/users/t4g_user_001" \
+curl "https://app.token-for-good.com/api/v1/token4good/users/t4g_user_001" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 #### Statistiques Utilisateur
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/users/t4g_user_001/statistics" \
+curl "https://app.token-for-good.com/api/v1/token4good/users/t4g_user_001/statistics" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -179,14 +179,14 @@ curl "https://t4g.dazno.de/api/v1/token4good/users/t4g_user_001/statistics" \
 #### Opportunités de Gains
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/users/t4g_user_001/opportunities" \
+curl "https://app.token-for-good.com/api/v1/token4good/users/t4g_user_001/opportunities" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 #### Leaderboard Communautaire
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/leaderboard?limit=10" \
+curl "https://app.token-for-good.com/api/v1/token4good/leaderboard?limit=10" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -197,7 +197,7 @@ curl "https://t4g.dazno.de/api/v1/token4good/leaderboard?limit=10" \
 #### Attribuer des Tokens
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/tokens/award" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/tokens/award" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -233,7 +233,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/tokens/award" \
 #### Solde de Tokens
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/tokens/t4g_user_001/balance" \
+curl "https://app.token-for-good.com/api/v1/token4good/tokens/t4g_user_001/balance" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -251,7 +251,7 @@ curl "https://t4g.dazno.de/api/v1/token4good/tokens/t4g_user_001/balance" \
 #### Historique des Transactions
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/tokens/t4g_user_001/transactions?limit=50" \
+curl "https://app.token-for-good.com/api/v1/token4good/tokens/t4g_user_001/transactions?limit=50" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -262,7 +262,7 @@ curl "https://t4g.dazno.de/api/v1/token4good/tokens/t4g_user_001/transactions?li
 #### Créer une Session
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/mentoring/sessions" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -283,7 +283,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions" \
 #### Compléter une Session
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions/complete" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/mentoring/sessions/complete" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -300,11 +300,11 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions/complete
 
 ```bash
 # En tant que mentor
-curl "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions/user_001?as_mentor=true" \
+curl "https://app.token-for-good.com/api/v1/token4good/mentoring/sessions/user_001?as_mentor=true" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # En tant que mentee
-curl "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions/user_001?as_mentor=false" \
+curl "https://app.token-for-good.com/api/v1/token4good/mentoring/sessions/user_001?as_mentor=false" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -315,7 +315,7 @@ curl "https://t4g.dazno.de/api/v1/token4good/mentoring/sessions/user_001?as_ment
 #### Créer un Service
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/services" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/marketplace/services" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -339,7 +339,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/services" \
 #### Rechercher des Services
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/search" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/marketplace/search" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -353,7 +353,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/search" \
 #### Réserver un Service
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/book" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/marketplace/book" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -367,7 +367,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/book" \
 #### Compléter une Réservation
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/bookings/complete" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/marketplace/bookings/complete" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -383,14 +383,14 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/marketplace/bookings/comple
 #### Recommandations Personnalisées
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/marketplace/recommendations/user_001?limit=5" \
+curl "https://app.token-for-good.com/api/v1/token4good/marketplace/recommendations/user_001?limit=5" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 #### Statistiques Marketplace
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/marketplace/stats" \
+curl "https://app.token-for-good.com/api/v1/token4good/marketplace/stats" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -401,7 +401,7 @@ curl "https://t4g.dazno.de/api/v1/token4good/marketplace/stats" \
 #### Bonus Hebdomadaires
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/admin/rewards/weekly-bonuses" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/admin/rewards/weekly-bonuses" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -410,7 +410,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/admin/rewards/weekly-bonuse
 #### Statut Système T4G
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/admin/system/status" \
+curl "https://app.token-for-good.com/api/v1/token4good/admin/system/status" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -431,7 +431,7 @@ Token4Good inclut une intégration complète avec Lightning Network pour permett
 ### 💳 Créer une Facture Lightning
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/lightning/invoice/create" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/lightning/invoice/create" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -457,7 +457,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/lightning/invoice/create" \
 ### 💰 Solde Lightning
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/lightning/balance" \
+curl "https://app.token-for-good.com/api/v1/token4good/lightning/balance" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -475,7 +475,7 @@ curl "https://t4g.dazno.de/api/v1/token4good/lightning/balance" \
 ### 💸 Payer une Facture Lightning
 
 ```bash
-curl -X POST "https://t4g.dazno.de/api/v1/token4good/lightning/invoice/pay" \
+curl -X POST "https://app.token-for-good.com/api/v1/token4good/lightning/invoice/pay" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -486,7 +486,7 @@ curl -X POST "https://t4g.dazno.de/api/v1/token4good/lightning/invoice/pay" \
 ### ✅ Vérifier un Paiement
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/lightning/invoice/check/abc123..." \
+curl "https://app.token-for-good.com/api/v1/token4good/lightning/invoice/check/abc123..." \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -507,21 +507,21 @@ curl "https://t4g.dazno.de/api/v1/token4good/lightning/invoice/check/abc123..." 
 ### 🌐 Informations Nœud Lightning
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/lightning/node/info" \
+curl "https://app.token-for-good.com/api/v1/token4good/lightning/node/info" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 🔗 Canaux Lightning
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/lightning/channels" \
+curl "https://app.token-for-good.com/api/v1/token4good/lightning/channels" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 📊 Statut Lightning
 
 ```bash
-curl "https://t4g.dazno.de/api/v1/token4good/lightning/status" \
+curl "https://app.token-for-good.com/api/v1/token4good/lightning/status" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -538,7 +538,7 @@ from typing import Optional, Dict, List
 class T4GClient:
     """Client Python pour l'API Token4Good"""
     
-    def __init__(self, base_url: str = "https://t4g.dazno.de", token: str = None):
+    def __init__(self, base_url: str = "https://app.token-for-good.com", token: str = None):
         self.base_url = base_url
         self.token = token
         self.headers = {
@@ -626,7 +626,7 @@ class T4GClient {
   private baseUrl: string;
   private token: string | null;
   
-  constructor(baseUrl: string = "https://t4g.dazno.de", token?: string) {
+  constructor(baseUrl: string = "https://app.token-for-good.com", token?: string) {
     this.baseUrl = baseUrl;
     this.token = token || null;
   }
@@ -700,7 +700,7 @@ class T4GClient {
 }
 
 // Utilisation
-const client = new T4GClient("https://t4g.dazno.de", "votre_jwt_token");
+const client = new T4GClient("https://app.token-for-good.com", "votre_jwt_token");
 const user = await client.createUser("user_001", "john_doe", "john@example.com");
 const balance = await client.getUserBalance("user_001");
 ```
@@ -979,9 +979,9 @@ except HTTPError as e:
 
 ## ❓ FAQ
 
-### Q: Quelle est la différence entre t4g.dazno.de et api.dazno.de ?
+### Q: Quelle est la différence entre app.token-for-good.com et api.token-for-good.com ?
 
-**R:** `t4g.dazno.de` est un proxy/alias spécifique pour Token4Good qui redirige vers `api.dazno.de`. Les deux URLs fonctionnent pour accéder aux endpoints T4G, mais `t4g.dazno.de` est optimisé pour l'application Token4Good frontend.
+**R:** `app.token-for-good.com` est un proxy/alias spécifique pour Token4Good qui redirige vers `api.token-for-good.com`. Les deux URLs fonctionnent pour accéder aux endpoints T4G, mais `app.token-for-good.com` est optimisé pour l'application Token4Good frontend.
 
 ### Q: Comment obtenir des tokens T4G ?
 
@@ -1040,17 +1040,17 @@ except HTTPError as e:
 
 ## 📞 Support & Contact
 
-- **Email Support**: support@dazno.de
-- **Website**: https://dazno.de
+- **Email Support**: support@token-for-good.com
+- **Website**: https://token-for-good.com
 - **Documentation Technique**: Cette documentation
-- **T4G Dashboard**: https://t4g.dazno.de
-- **Issues Techniques**: Contactez l'équipe DevOps dazno.de
+- **T4G Dashboard**: https://app.token-for-good.com
+- **Issues Techniques**: Contactez l'équipe DevOps token-for-good.com
 
 ---
 
 **Document Version**: 1.0  
 **Last Updated**: 7 janvier 2025  
-**Maintained by**: Équipe Token4Good dazno.de
+**Maintained by**: Équipe Token4Good token-for-good.com
 
 ---
 

@@ -50,8 +50,8 @@ Dans **Settings > Environment Variables**, ajoutez :
 | Variable | Value | Environment |
 |----------|-------|-------------|
 | `NEXT_PUBLIC_API_URL` | `https://apirust-production.up.railway.app` | Production |
-| `NEXT_PUBLIC_DAZNO_API_URL` | `https://api.dazno.de/api/v1` | Production |
-| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://api.dazno.de/api/v1/users` | Production |
+| `NEXT_PUBLIC_DAZNO_API_URL` | `https://api.token-for-good.com/api/v1` | Production |
+| `NEXT_PUBLIC_DAZNO_USERS_API_URL` | `https://api.token-for-good.com/api/v1/users` | Production |
 | `NODE_ENV` | `production` | Production |
 | `SKIP_ENV_VALIDATION` | `true` | Production |
 
@@ -149,5 +149,5 @@ curl https://votre-domaine.vercel.app/api/backend/health
 
 Une fois le déploiement réussi, mettez à jour le domaine custom si nécessaire :
 
-**Settings > Domains** : Ajouter `t4g.dazno.de` ou votre domaine personnalisé
+**Settings > Domains** : Ajouter `app.token-for-good.com` ou votre domaine personnalisé
 

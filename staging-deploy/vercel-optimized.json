@@ -55,7 +55,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://dazno.de"
+          "value": "https://token-for-good.com"
         },
         {
           "key": "Access-Control-Allow-Methods",

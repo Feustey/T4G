@@ -8,7 +8,7 @@
 ## 🎯 Problème Résolu
 
 ### ❌ Problème Initial
-**Erreur 404 sur la page d'accueil** de `t4g.dazno.de`
+**Erreur 404 sur la page d'accueil** de `app.token-for-good.com`
 
 ### ✅ Cause Identifiée
 Conflits de configuration entre :
@@ -107,15 +107,15 @@ Le push vers `main` déclenchera automatiquement un déploiement sur Vercel
 #### 3. Vérification Post-Déploiement
 ```bash
 # Test page d'accueil
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 # Attendu: HTTP 200
 
 # Test redirection login
-curl -L https://t4g.dazno.de/
+curl -L https://app.token-for-good.com/
 # Attendu: Redirection vers /fr/login (si non authentifié)
 
 # Test backend
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 # Attendu: JSON status du backend
 ```
 
@@ -125,7 +125,7 @@ curl https://t4g.dazno.de/health
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  Browser: https://t4g.dazno.de/                │
+│  Browser: https://app.token-for-good.com/                │
 └──────────────────┬──────────────────────────────┘
                    │
                    ↓
@@ -180,7 +180,7 @@ curl https://t4g.dazno.de/health
 ## 🔧 Services en Production
 
 ### Frontend (Next.js) - Vercel
-- **URL :** https://t4g.dazno.de
+- **URL :** https://app.token-for-good.com
 - **Status :** ✅ Build local validé, prêt pour déploiement
 - **Framework :** Next.js 14.2.33
 - **i18n :** Français (défaut), Anglais
@@ -204,9 +204,9 @@ curl https://t4g.dazno.de/health
 ### Vercel - Production
 ```bash
 NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.dazno.de/api
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.dazno.de/api/verify
+NEXT_PUBLIC_DAZNO_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://www.token-for-good.com/api
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.token-for-good.com/api/verify
 ```
 
 **Status :** ✅ Configurées (vérifier sur le dashboard Vercel)
@@ -219,9 +219,9 @@ NEXT_PUBLIC_DAZNO_VERIFY_URL=https://www.dazno.de/api/verify
 
 | Métrique | Objectif | Validation |
 |----------|----------|------------|
-| Page d'accueil | HTTP 200 | `curl -I https://t4g.dazno.de/` |
+| Page d'accueil | HTTP 200 | `curl -I https://app.token-for-good.com/` |
 | Redirection locale | / → /fr | Automatique Next.js i18n |
-| Backend health | HTTP 200 | `curl https://t4g.dazno.de/health` |
+| Backend health | HTTP 200 | `curl https://app.token-for-good.com/health` |
 | Build time | < 3 minutes | Dashboard Vercel |
 | TTFB | < 500ms | DevTools Network |
 
@@ -327,12 +327,12 @@ railway rollback --environment production
 Après le déploiement sur Vercel :
 
 ```
-✅ https://t4g.dazno.de/              → Contenu en français (locale par défaut)
-✅ https://t4g.dazno.de/fr            → Contenu en français
-✅ https://t4g.dazno.de/en            → Contenu en anglais
-✅ https://t4g.dazno.de/fr/login      → Page de login en français
-✅ https://t4g.dazno.de/fr/dashboard  → Dashboard en français (si authentifié)
-✅ https://t4g.dazno.de/health        → Backend health check (proxy)
+✅ https://app.token-for-good.com/              → Contenu en français (locale par défaut)
+✅ https://app.token-for-good.com/fr            → Contenu en français
+✅ https://app.token-for-good.com/en            → Contenu en anglais
+✅ https://app.token-for-good.com/fr/login      → Page de login en français
+✅ https://app.token-for-good.com/fr/dashboard  → Dashboard en français (si authentifié)
+✅ https://app.token-for-good.com/health        → Backend health check (proxy)
 ```
 
 **Redirection automatique :**

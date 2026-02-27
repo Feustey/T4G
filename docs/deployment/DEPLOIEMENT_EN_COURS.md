@@ -73,9 +73,9 @@ Le build échoue sur Vercel sans message d'erreur détaillé. Plusieurs solution
    Toutes ces variables doivent être présentes en **Production**:
    ```
    NEXT_PUBLIC_API_URL=https://apirust-production.up.railway.app
-   NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de
-   NEXT_PUBLIC_DAZNO_USERS_API_URL=https://dazno.de/api
-   NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+   NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com
+   NEXT_PUBLIC_DAZNO_USERS_API_URL=https://token-for-good.com/api
+   NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
    SKIP_ENV_VALIDATION=true
    ```
 
@@ -132,7 +132,7 @@ vercel --prebuilt --prod
 
 ---
 
-## 🌐 Configuration du Domaine t4g.dazno.de
+## 🌐 Configuration du Domaine app.token-for-good.com
 
 **Une fois le déploiement Vercel réussi:**
 
@@ -140,17 +140,17 @@ vercel --prebuilt --prod
 
 ```bash
 cd /Users/stephanecourant/Documents/DAZ/_T4G/T4G/apps/dapp
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 **Ou via le Dashboard:**
 - Settings → Domains → Add
-- Entrer: `t4g.dazno.de`
+- Entrer: `app.token-for-good.com`
 - Suivre les instructions
 
-### 2. Configurer le DNS chez dazno.de
+### 2. Configurer le DNS chez token-for-good.com
 
-Dans votre provider DNS (où dazno.de est géré):
+Dans votre provider DNS (où token-for-good.com est géré):
 
 ```
 Type: CNAME
@@ -162,16 +162,16 @@ TTL: 3600
 ### 3. Attendre la Propagation
 
 - La propagation DNS prend généralement 5-30 minutes
-- Vérifier avec: `nslookup t4g.dazno.de`
+- Vérifier avec: `nslookup app.token-for-good.com`
 
 ### 4. Tester
 
 ```bash
 # Health check
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 
 # Page d'accueil
-curl https://t4g.dazno.de/
+curl https://app.token-for-good.com/
 ```
 
 ---
@@ -307,7 +307,7 @@ railway status --environment production
 │  Frontend Build:     ✅ FONCTIONNE EN LOCAL         │
 │  Frontend Deploy:    ⏳ ERREUR VERCEL (à résoudre)  │
 │                                                     │
-│  Domaine t4g.dazno.de: ⏳ ATTEND DÉPLOIEMENT        │
+│  Domaine app.token-for-good.com: ⏳ ATTEND DÉPLOIEMENT        │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```

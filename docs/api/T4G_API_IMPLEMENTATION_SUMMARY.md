@@ -258,7 +258,7 @@ curl "http://localhost:3000/api/v1/token4good/tokens/user_001/balance" \
 
 Les endpoints T4G sont maintenant disponibles sous:
 ```
-Production:  https://t4g.dazno.de/api/v1/token4good/*
+Production:  https://app.token-for-good.com/api/v1/token4good/*
 Local:       http://localhost:3000/api/v1/token4good/*
 ```
 

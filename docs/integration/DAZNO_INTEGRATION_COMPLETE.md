@@ -8,7 +8,7 @@
 
 ## 🎯 Résumé Exécutif
 
-L'intégration de l'API Dazno (api.dazno.de) pour Token4Good est maintenant **complète à 100%**, incluant tous les endpoints LNBits et fonctionnalités avancées.
+L'intégration de l'API Dazno (api.token-for-good.com) pour Token4Good est maintenant **complète à 100%**, incluant tous les endpoints LNBits et fonctionnalités avancées.
 
 ### Progression
 

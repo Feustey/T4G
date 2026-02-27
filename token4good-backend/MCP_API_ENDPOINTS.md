@@ -2,10 +2,10 @@
 
 ## Vue d'ensemble
 
-Ce document décrit les nouveaux endpoints MCP API v1 implémentés dans le backend Token4Good pour l'intégration avec l'API Dazno Lightning sur `api.dazno.de/api/v1/`.
+Ce document décrit les nouveaux endpoints MCP API v1 implémentés dans le backend Token4Good pour l'intégration avec l'API Dazno Lightning sur `api.token-for-good.com/api/v1/`.
 
 **Date d'implémentation**: 2025-01-27  
-**Base URL**: `https://api.dazno.de/api/v1/`
+**Base URL**: `https://api.token-for-good.com/api/v1/`
 
 ## Architecture
 
@@ -329,7 +329,7 @@ Les anciens endpoints Lightning (`/api/dazno/lightning/*`) restent disponibles p
 Les endpoints MCP utilisent les variables d'environnement suivantes :
 
 ```bash
-DAZNO_LIGHTNING_API_URL=https://api.dazno.de  # Par défaut
+DAZNO_LIGHTNING_API_URL=https://api.token-for-good.com  # Par défaut
 DAZNO_API_KEY=your_api_key_here               # Optionnel
 ```
 

@@ -172,25 +172,25 @@ https://app.token-for-good.com/login?token=JWT_TOKEN
 
 # APIs Dazno requises :
 
-## 1. Gestion Users/Sessions (dazno.de/api)
-POST https://dazno.de/api/auth/verify-session
+## 1. Gestion Users/Sessions (token-for-good.com/api)
+POST https://token-for-good.com/api/auth/verify-session
 Authorization: Bearer JWT_TOKEN
 Response: {
   "authenticated": true,
   "user": { "id", "email", "name" }
 }
 
-GET https://dazno.de/api/users/:id/tokens/t4g
+GET https://token-for-good.com/api/users/:id/tokens/t4g
 Authorization: Bearer JWT_TOKEN
 Response: {
   "t4g_balance": 1000,
   "last_updated": "2023-..."
 }
 
-## 2. Lightning Network (api.dazno.de)
+## 2. Lightning Network (api.token-for-good.com)
 
 ### Endpoints Legacy
-POST https://api.dazno.de/lightning/invoice
+POST https://api.token-for-good.com/lightning/invoice
 Authorization: Bearer JWT_TOKEN
 Body: {
   "amount_msat": 1000,
@@ -198,7 +198,7 @@ Body: {
   "user_id": "user123"
 }
 
-POST https://api.dazno.de/lightning/pay
+POST https://api.token-for-good.com/lightning/pay
 Authorization: Bearer JWT_TOKEN
 Body: {
   "payment_request": "lnbc...",

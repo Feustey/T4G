@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script de correction pour l'erreur 502 sur t4g.dazno.de
+# Script de correction pour l'erreur 502 sur app.token-for-good.com
 # À exécuter sur le serveur : ssh root@147.79.101.32
 #
 
@@ -105,10 +105,10 @@ echo "------------------------------------"
 
 BACKUP_DIR="/var/backups/nginx"
 mkdir -p "$BACKUP_DIR"
-BACKUP_FILE="$BACKUP_DIR/t4g.dazno.de.$(date +%Y%m%d_%H%M%S).conf"
+BACKUP_FILE="$BACKUP_DIR/app.token-for-good.com.$(date +%Y%m%d_%H%M%S).conf"
 
-if [ -f /etc/nginx/sites-available/t4g.dazno.de ]; then
-    cp /etc/nginx/sites-available/t4g.dazno.de "$BACKUP_FILE"
+if [ -f /etc/nginx/sites-available/app.token-for-good.com ]; then
+    cp /etc/nginx/sites-available/app.token-for-good.com "$BACKUP_FILE"
     log_success "Backup créé: $BACKUP_FILE"
 else
     log_warning "Fichier de config non trouvé, création d'une nouvelle config"
@@ -120,15 +120,15 @@ echo ""
 log_info "Étape 5: Configuration Nginx optimisée"
 echo "---------------------------------------"
 
-cat > /etc/nginx/sites-available/t4g.dazno.de << 'NGINX_CONFIG_EOF'
+cat > /etc/nginx/sites-available/app.token-for-good.com << 'NGINX_CONFIG_EOF'
 # Token4Good - Configuration Nginx
-# Cohabitation avec MCP (api.dazno.de)
+# Cohabitation avec MCP (api.token-for-good.com)
 
 # Redirect HTTP to HTTPS
 server {
     listen 80;
     listen [::]:80;
-    server_name t4g.dazno.de;
+    server_name app.token-for-good.com;
     
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -143,11 +143,11 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name t4g.dazno.de;
+    server_name app.token-for-good.com;
 
     # SSL Certificates
-    ssl_certificate /etc/letsencrypt/live/t4g.dazno.de/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/t4g.dazno.de/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/app.token-for-good.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.token-for-good.com/privkey.pem;
     
     # SSL Configuration
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -232,7 +232,7 @@ echo ""
 log_info "Étape 6: Activation du site"
 echo "----------------------------"
 
-ln -sf /etc/nginx/sites-available/t4g.dazno.de /etc/nginx/sites-enabled/t4g.dazno.de
+ln -sf /etc/nginx/sites-available/app.token-for-good.com /etc/nginx/sites-enabled/app.token-for-good.com
 log_success "Site activé"
 echo ""
 
@@ -248,7 +248,7 @@ else
     echo ""
     log_error "Restauration de la backup"
     if [ -f "$BACKUP_FILE" ]; then
-        cp "$BACKUP_FILE" /etc/nginx/sites-available/t4g.dazno.de
+        cp "$BACKUP_FILE" /etc/nginx/sites-available/app.token-for-good.com
         log_success "Backup restaurée"
     fi
     exit 1
@@ -279,7 +279,7 @@ else
 fi
 
 # Test public (depuis le serveur lui-même)
-PUBLIC_TEST=$(curl -s -o /dev/null -w "%{http_code}" https://t4g.dazno.de/ 2>/dev/null || echo "000")
+PUBLIC_TEST=$(curl -s -o /dev/null -w "%{http_code}" https://app.token-for-good.com/ 2>/dev/null || echo "000")
 if [ "$PUBLIC_TEST" == "200" ] || [ "$PUBLIC_TEST" == "307" ] || [ "$PUBLIC_TEST" == "301" ]; then
     log_success "Test public: OK ($PUBLIC_TEST)"
 else
@@ -289,7 +289,7 @@ else
 fi
 
 # Test backend
-BACKEND_TEST=$(curl -s -o /dev/null -w "%{http_code}" https://t4g.dazno.de/health 2>/dev/null || echo "000")
+BACKEND_TEST=$(curl -s -o /dev/null -w "%{http_code}" https://app.token-for-good.com/health 2>/dev/null || echo "000")
 if [ "$BACKEND_TEST" == "200" ]; then
     log_success "Test backend: OK ($BACKEND_TEST)"
 else
@@ -308,10 +308,10 @@ echo "  - Backend health:  $BACKEND_TEST"
 echo ""
 
 if [ "$PUBLIC_TEST" == "200" ] || [ "$PUBLIC_TEST" == "307" ] || [ "$PUBLIC_TEST" == "301" ]; then
-    log_success "🎉 Le site t4g.dazno.de fonctionne !"
+    log_success "🎉 Le site app.token-for-good.com fonctionne !"
     echo ""
     echo "Testez depuis votre navigateur:"
-    echo "  https://t4g.dazno.de/"
+    echo "  https://app.token-for-good.com/"
 else
     log_error "Le problème persiste"
     echo ""

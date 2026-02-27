@@ -2,7 +2,7 @@
 
 ## 📋 Vue d'ensemble
 
-Le système de fallback permet à l'application de continuer à fonctionner même lorsque l'API backend (`api.dazno.de`) est indisponible. Il utilise un cache local (LocalStorage) et des données de fallback pour offrir une expérience utilisateur dégradée mais fonctionnelle.
+Le système de fallback permet à l'application de continuer à fonctionner même lorsque l'API backend (`api.token-for-good.com`) est indisponible. Il utilise un cache local (LocalStorage) et des données de fallback pour offrir une expérience utilisateur dégradée mais fonctionnelle.
 
 ## 🏗️ Architecture
 
@@ -316,12 +316,12 @@ Exemple de logs :
 Aucune configuration supplémentaire nécessaire. Le système fonctionne automatiquement en :
 
 - **Développement** : `http://localhost:3000`
-- **Production** : `https://api.dazno.de`
+- **Production** : `https://api.token-for-good.com`
 
 Variables d'environnement à configurer :
 
 ```env
-NEXT_PUBLIC_API_URL=https://api.dazno.de
+NEXT_PUBLIC_API_URL=https://api.token-for-good.com
 ```
 
 ## 📚 Ressources

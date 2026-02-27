@@ -36,7 +36,7 @@ Chaque push sur `main` déclenche automatiquement:
 - ✅ Tests automatiques
 - ✅ Rollback si échec
 
-**Production:** https://t4g.dazno.de
+**Production:** https://app.token-for-good.com
 ```
 
 ## 🎨 Styles Alternatifs

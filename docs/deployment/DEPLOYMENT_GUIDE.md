@@ -16,7 +16,7 @@ Utilisateurs ──▶ Vercel (Next.js) ──▶ Railway (Rust API) ──▶ R
 ```
 
 - **Backend** : `token4good-backend` compilé via Railway, exposé en HTTPS
-- **Frontend** : Next.js 13 déployé sur Vercel (`token4good.vercel.app` / `t4g.dazno.de`)
+- **Frontend** : Next.js 13 déployé sur Vercel (`token4good.vercel.app` / `app.token-for-good.com`)
 - **Base de données** : PostgreSQL managé par Railway (backups quotidiens)
 - **Lightning / RGB** : nœud LND + stockage RGB sur un VPS séparé
 
@@ -70,7 +70,7 @@ railway status
 | `JWT_SECRET` | Token 32+ chars (`openssl rand -base64 32`) |
 | `RGB_NETWORK` | `mainnet` / `testnet` |
 | `LND_REST_HOST` / `LND_MACAROON_PATH` / `LND_TLS_CERT_PATH` | Connexion Lightning |
-| `DAZNO_API_URL` | `https://dazno.de` |
+| `DAZNO_API_URL` | `https://token-for-good.com` |
 | `ALLOWED_ORIGINS` | URLs autorisées (Vercel + Dazno) |
 
 ```
@@ -141,9 +141,9 @@ curl https://token4good.vercel.app/api/health
 
 ### 3.5 Domaine personnalisé
 
-1. Ajouter `t4g.dazno.de` sur Vercel (Project Settings → Domains)  
+1. Ajouter `app.token-for-good.com` sur Vercel (Project Settings → Domains)  
 2. Créer un enregistrement DNS `CNAME t4g → cname.vercel-dns.com`  
-3. Vérifier propagation : `dig t4g.dazno.de +short`
+3. Vérifier propagation : `dig app.token-for-good.com +short`
 
 ---
 

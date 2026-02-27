@@ -215,7 +215,7 @@ curl https://apirust-production.up.railway.app/api/health
 | Database PostgreSQL | ✅ Opérationnelle | Supabase via Railway | Aucune |
 | Variables ENV | ✅ Configurées | - | Aucune |
 | Frontend Vercel | ❌ Bloqué | - | Migration next-auth |
-| DNS t4g.dazno.de | ⏳ En attente | - | Après déploiement frontend |
+| DNS app.token-for-good.com | ⏳ En attente | - | Après déploiement frontend |
 
 ---
 

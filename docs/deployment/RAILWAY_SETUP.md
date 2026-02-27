@@ -56,8 +56,8 @@ Ouvrir `railway open` → onglet **Variables** (ou via CLI `railway variables se
 | Lightning | `LND_REST_HOST` | `https://<votre-node>:8080` |
 | | `LND_MACAROON_PATH` | contenu base64 du macaroon admin |
 | | `LND_TLS_CERT_PATH` | contenu base64 du certificat |
-| Dazno | `DAZNO_LIGHTNING_API_URL` | `https://api.dazno.de` |
-| | `DAZNO_USERS_API_URL` | `https://dazno.de/api` |
+| Dazno | `DAZNO_LIGHTNING_API_URL` | `https://api.token-for-good.com` |
+| | `DAZNO_USERS_API_URL` | `https://token-for-good.com/api` |
 | | `DAZNO_API_KEY` | API key fournie par Dazno |
 | Webhooks | `T4G_API_KEY` | clé partagée pour authentifier les webhooks entrants |
 | | `T4G_WEBHOOK_SECRET` | secret Stripe/Dazno si utilisé |

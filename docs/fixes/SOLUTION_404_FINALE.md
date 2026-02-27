@@ -1,4 +1,4 @@
-# 🔧 Solution 404 sur t4g.dazno.de - Diagnostic Final
+# 🔧 Solution 404 sur app.token-for-good.com - Diagnostic Final
 
 **Date:** 16 janvier 2026  
 **Status:** ⏳ Configuration i18n ajoutée | Déploiement Vercel échoué
@@ -7,7 +7,7 @@
 
 ## 🎯 Problème Identifié
 
-La 404 sur `t4g.dazno.de` est causée par **2 configurations manquantes** :
+La 404 sur `app.token-for-good.com` est causée par **2 configurations manquantes** :
 
 ### 1. Configuration i18n dans next.config.js ✅ CORRIGÉ
 
@@ -48,7 +48,7 @@ i18n: {
 Error: Your project's latest production deployment has errored.
 ```
 
-Le build échoue sur Vercel, empêchant l'ajout du domaine `t4g.dazno.de`.
+Le build échoue sur Vercel, empêchant l'ajout du domaine `app.token-for-good.com`.
 
 ### Diagnostic
 
@@ -170,13 +170,13 @@ npm start
 
 ```bash
 # Health check backend
-curl https://t4g.dazno.de/health
+curl https://app.token-for-good.com/health
 
 # Page d'accueil
-curl -L https://t4g.dazno.de/
+curl -L https://app.token-for-good.com/
 
 # Login
-curl https://t4g.dazno.de/fr/login
+curl https://app.token-for-good.com/fr/login
 ```
 
 ---
@@ -256,7 +256,7 @@ vercel --prebuilt --prod
 
 **Si prebuilt réussit:**
 ```bash
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 ---
@@ -266,7 +266,7 @@ vercel domains add t4g.dazno.de
 Une fois le build réussi et le domaine ajouté:
 
 ```
-Provider DNS: (où dazno.de est géré)
+Provider DNS: (où token-for-good.com est géré)
 Type: CNAME
 Name: t4g
 Value: cname.vercel-dns.com
@@ -275,10 +275,10 @@ TTL: 3600
 
 **Vérification:**
 ```bash
-nslookup t4g.dazno.de
+nslookup app.token-for-good.com
 # Devrait pointer vers Vercel
 
-curl https://t4g.dazno.de/
+curl https://app.token-for-good.com/
 # Devrait afficher l'application
 ```
 
@@ -297,7 +297,7 @@ curl https://t4g.dazno.de/
 ## ⏳ Ce Qui Reste
 
 - ⏳ Résoudre l'erreur de build Vercel
-- ⏳ Ajouter le domaine t4g.dazno.de
+- ⏳ Ajouter le domaine app.token-for-good.com
 - ⏳ Configurer le DNS
 - ⏳ Tester l'application en production
 

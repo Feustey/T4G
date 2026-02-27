@@ -25,7 +25,7 @@ Implémentation complète de **deux intégrations API majeures** pour le backend
 - Node Information (2 endpoints)
 - Lightning Network Analysis (2 endpoints)
 
-**Base**: `https://api.dazno.de/api/v1/`  
+**Base**: `https://api.token-for-good.com/api/v1/`  
 **Router**: `/api/dazno/v1/*`
 
 ### Token4Good API (26 endpoints)
@@ -36,7 +36,7 @@ Implémentation complète de **deux intégrations API majeures** pour le backend
 - Administration (2 endpoints)
 - Lightning Integration (7 endpoints)
 
-**Base**: `https://t4g.dazno.de`  
+**Base**: `https://app.token-for-good.com`  
 **Router**: `/api/v1/token4good/*`
 
 ---

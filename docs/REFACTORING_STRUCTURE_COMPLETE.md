@@ -17,7 +17,7 @@ Ce document résume le grand nettoyage et la réorganisation du repository Token
   - `/apps/dapp/vercel.json`
   - `/vercel-optimized.json`
 - ✅ **Conservé** : `/vercel.json` (unifié)
-  - Origine CORS unifiée : `https://t4g.dazno.de`
+  - Origine CORS unifiée : `https://app.token-for-good.com`
   - Configuration Next.js framework
   - Rewrites vers backend Rust Railway
 

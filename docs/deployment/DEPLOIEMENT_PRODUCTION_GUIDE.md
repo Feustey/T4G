@@ -71,7 +71,7 @@ LND_MACAROON_PATH=<votre-macaroon-base64>
 LND_TLS_CERT_PATH=<votre-cert-base64>
 
 # === Dazno Integration ===
-DAZNO_API_URL=https://api.dazno.de
+DAZNO_API_URL=https://api.token-for-good.com
 
 # === Server Configuration ===
 HOST=0.0.0.0
@@ -79,7 +79,7 @@ PORT=3000
 RUST_LOG=info,token4good_backend=debug
 
 # === CORS ===
-ALLOWED_ORIGINS=https://t4g.dazno.de,https://token4good.vercel.app
+ALLOWED_ORIGINS=https://app.token-for-good.com,https://token4good.vercel.app
 ```
 
 ### Comment générer JWT_SECRET
@@ -103,7 +103,7 @@ Copiez le résultat et collez-le comme valeur de `JWT_SECRET` dans Railway.
 NEXT_PUBLIC_API_URL=https://VOTRE-URL-RAILWAY.up.railway.app
 
 # === OAuth Providers ===
-NEXT_PUBLIC_DAZNO_VERIFY_URL=https://dazno.de/api/auth/verify-session
+NEXT_PUBLIC_DAZNO_VERIFY_URL=https://token-for-good.com/api/auth/verify-session
 
 # === Supabase (si utilisé) ===
 NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co

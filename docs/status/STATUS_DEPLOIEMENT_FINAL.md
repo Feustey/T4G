@@ -221,7 +221,7 @@ vercel --prod --yes
 2. **Vérifier Output Directory** = `.next`
 3. **Redéployer** depuis le dashboard
 4. **Tester** l'application complète
-5. **Configurer DNS** t4g.dazno.de
+5. **Configurer DNS** app.token-for-good.com
 
 **Temps estimé:** 10 minutes
 

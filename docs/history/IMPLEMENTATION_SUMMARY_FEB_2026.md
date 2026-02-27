@@ -563,7 +563,7 @@ let tokens_exchanged = sqlx::query_scalar::<_, Option<i64>>(
 
 **Services Opérationnels** :
 - ✅ Backend Rust (Railway) : https://apirust-production.up.railway.app
-- ✅ Frontend Next.js (Vercel) : https://t4g.dazno.de
+- ✅ Frontend Next.js (Vercel) : https://app.token-for-good.com
 - ✅ PostgreSQL Database : Opérationnelle
 - ✅ Lightning Network via Dazno API : Opérationnelle
 - ✅ RGB Protocol : Opérationnelle

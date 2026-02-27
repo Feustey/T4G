@@ -128,8 +128,8 @@ DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.glikbylflheewbonytev.supab
 NEXTAUTH_URL=https://app.token-for-good.com
 NEXTAUTH_SECRET=your-super-secret-key-minimum-32-characters
 NEXT_PUBLIC_API_URL=https://token4good-backend-production.up.railway.app
-NEXT_PUBLIC_DAZNO_API_URL=https://api.dazno.de
-NEXT_PUBLIC_DAZNO_USERS_API_URL=https://dazno.de/api
+NEXT_PUBLIC_DAZNO_API_URL=https://api.token-for-good.com
+NEXT_PUBLIC_DAZNO_USERS_API_URL=https://token-for-good.com/api
 NODE_ENV=production
 ```
 

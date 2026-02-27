@@ -210,7 +210,7 @@ apps/dapp/contexts/AuthContext.tsx # ✅ JWT fonctionnel
 ./scripts/deploy-vercel.sh production
 
 # 3. DNS Configuration
-vercel domains add t4g.dazno.de
+vercel domains add app.token-for-good.com
 ```
 
 **Note:** Le déploiement est **optionnel** si vous préférez utiliser Hostinger VPS (déjà configuré selon les règles).

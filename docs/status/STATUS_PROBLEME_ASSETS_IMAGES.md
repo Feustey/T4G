@@ -26,15 +26,15 @@
 
 ```bash
 # Page d'accueil
-curl -I https://t4g.dazno.de
+curl -I https://app.token-for-good.com
 # Résultat : HTTP/2 200 ✅
 
 # Favicon
-curl -I https://t4g.dazno.de/favicon.ico
+curl -I https://app.token-for-good.com/favicon.ico
 # Résultat : HTTP/2 404 ❌
 
 # Image via Next.js
-curl -I "https://t4g.dazno.de/_next/image?url=%2Fassets%2Fimages%2Fpng%2Fspinner.png&w=256&q=75"
+curl -I "https://app.token-for-good.com/_next/image?url=%2Fassets%2Fimages%2Fpng%2Fspinner.png&w=256&q=75"
 # Résultat : HTTP/2 400 ❌
 ```
 

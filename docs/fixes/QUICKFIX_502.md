@@ -1,4 +1,4 @@
-# ⚡ Quick Fix - Erreur 502 sur t4g.dazno.de
+# ⚡ Quick Fix - Erreur 502 sur app.token-for-good.com
 
 **3 commandes pour corriger le problème**
 
@@ -14,7 +14,7 @@ scp scripts/fix-t4g-502.sh root@147.79.101.32:/tmp/
 ssh root@147.79.101.32 'bash /tmp/fix-t4g-502.sh'
 
 # 3. Tester
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 ```
 
 ---
@@ -33,7 +33,7 @@ sleep 5 && \
 nginx -t && \
 systemctl reload nginx && \
 echo "✅ Correction appliquée" && \
-curl -I https://t4g.dazno.de/
+curl -I https://app.token-for-good.com/
 ```
 
 ---
@@ -44,7 +44,7 @@ Le site devrait maintenant retourner :
 - **Code 200** ou **307** (au lieu de 502)
 - Page d'accueil visible dans le navigateur
 
-Ouvrez : **https://t4g.dazno.de/**
+Ouvrez : **https://app.token-for-good.com/**
 
 ---
 

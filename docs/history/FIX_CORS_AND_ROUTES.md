@@ -27,7 +27,7 @@ fn build_cors_layer() -> CorsLayer {
         "http://localhost:4200".parse().unwrap(),           // Dev frontend
         "http://localhost:3000".parse().unwrap(),           // Dev backend
         "https://token4good.vercel.app".parse().unwrap(),   // Production
-        "https://t4g.dazno.de".parse().unwrap(),            // Production alternative
+        "https://app.token-for-good.com".parse().unwrap(),            // Production alternative
     ];
 
     CorsLayer::new()

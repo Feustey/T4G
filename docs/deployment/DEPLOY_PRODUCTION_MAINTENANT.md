@@ -67,11 +67,11 @@ railway variables set LND_MACAROON_PATH="<base64-macaroon>"
 railway variables set LND_TLS_CERT_PATH="<base64-cert>"
 
 # Dazno
-railway variables set DAZNO_API_URL="https://api.dazno.de"
-railway variables set DAZNO_USERS_API_URL="https://dazno.de/api"
+railway variables set DAZNO_API_URL="https://api.token-for-good.com"
+railway variables set DAZNO_USERS_API_URL="https://token-for-good.com/api"
 
 # CORS
-railway variables set ALLOWED_ORIGINS="https://t4g.dazno.de,https://dazno.de"
+railway variables set ALLOWED_ORIGINS="https://app.token-for-good.com,https://token-for-good.com"
 ```
 
 ### 5. Déployer le backend

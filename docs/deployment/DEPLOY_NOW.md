@@ -74,7 +74,7 @@ crontab -e
 
 # Ajouter ces 2 lignes:
 0 4 * * 0 /root/cleanup-disk.sh >> /var/log/disk-cleanup.log 2>&1
-0 * * * * /root/check-disk-space.sh --alert-email admin@dazno.de
+0 * * * * /root/check-disk-space.sh --alert-email admin@token-for-good.com
 
 # Sauvegarder: Ctrl+X puis Y (si nano) ou :wq (si vim)
 
