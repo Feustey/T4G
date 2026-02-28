@@ -723,6 +723,11 @@
             "iconName": "questionMarkCircle"
           },
           {
+            "link": "/contact",
+            "label": "Contact",
+            "iconName": "arrowRight"
+          },
+          {
             "link": "https://www.token-for-good.com/legal-mention",
             "label": "Legal mentions",
             "iconName": "arrowRight"
