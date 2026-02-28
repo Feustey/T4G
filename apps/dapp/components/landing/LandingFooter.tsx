@@ -60,6 +60,12 @@ export function LandingFooter() {
           </div>
           <nav className="flex flex-wrap gap-4 justify-center items-center">
             <Link
+              href="/about"
+              className="text-gray-400 hover:text-white font-medium transition-colors"
+            >
+              À propos
+            </Link>
+            <Link
               href="/contact"
               className="text-gray-400 hover:text-white font-medium transition-colors"
             >
