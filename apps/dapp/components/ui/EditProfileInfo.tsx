@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LangType } from '../../lib/shared-types';
 import { Avatar, AddStudies, AddExperiences } from '..';
 import { TextInput, Button } from '..';
+import useSwr from 'swr';
 import {
   setUserCV,
   setUserAvatar,
@@ -13,7 +14,6 @@ import {
   resizeFile,
 } from '../../services';
 import { apiClient } from '../../services/apiClient';
-import { apiFetcher } from '../../services/config';
 
 export interface EditProfileInfoProps {
   lang: LangType;
@@ -39,6 +39,11 @@ type ProfileState = {
   yearTo: number | null;
   isCurrent: boolean;
   dateError: boolean;
+  is_mentor_active: boolean;
+  mentor_bio: string;
+  mentor_topics: string[];
+  learning_topics: string[];
+  mentor_tokens_per_hour: number | null;
 };
 
 type Action =
@@ -76,6 +81,11 @@ const initialState: ProfileState = {
   yearTo: null,
   isCurrent: false,
   dateError: false,
+  is_mentor_active: false,
+  mentor_bio: '',
+  mentor_topics: [],
+  learning_topics: [],
+  mentor_tokens_per_hour: null,
 };
 
 export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
@@ -101,7 +111,7 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
       try {
         const [avatar, cv, experiences] = await Promise.allSettled([
           getUserAvatar(user.id),
-          apiFetcher<any>('/users/me/cv'),
+          apiClient.getCurrentUserCV(),
           getUserExperience(),
         ]);
 
@@ -139,6 +149,11 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
             monthTo: toDate ? toDate.getMonth() + 1 : null,
             yearTo: toDate ? toDate.getFullYear() : null,
             isCurrent: exp?.isCurrent || false,
+            is_mentor_active: user.is_mentor_active ?? false,
+            mentor_bio: user.mentor_bio ?? '',
+            mentor_topics: user.mentor_topics ?? [],
+            learning_topics: user.learning_topics ?? [],
+            mentor_tokens_per_hour: user.mentor_tokens_per_hour ?? null,
           },
         });
       } catch (error) {
@@ -172,6 +187,12 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
   const isAlumni =
     userRole === 'alumni' || userRole === 'mentor' || userRole === 'service_provider';
 
+  const { data: learningTopics = [] } = useSwr(
+    'learning-topics',
+    () => apiClient.getLearningTopics(),
+    { revalidateOnFocus: false }
+  );
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -184,7 +205,12 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
           firstname: state.firstname,
           lastname: state.lastname,
           bio: state.bio,
-        }),
+          is_mentor_active: state.is_mentor_active,
+          mentor_bio: state.mentor_bio || undefined,
+          mentor_topics: state.mentor_topics,
+          learning_topics: state.learning_topics,
+          mentor_tokens_per_hour: state.mentor_tokens_per_hour ?? undefined,
+        } as any),
         setUserCV({
           program: state.program,
           topic: state.topic,
@@ -347,6 +373,118 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang }) => {
           />
         </section>
       )}
+
+      {/* Section Profil Mentor */}
+      <section className="EditProfileInfo__section" id="mentor">
+        <h3 className="heading-3 EditProfileInfo__section-title">
+          Profil Mentor
+        </h3>
+        <div className="u-d--flex u-align-items-center u-gap--s" style={{ marginBottom: 16 }}>
+          <input
+            type="checkbox"
+            id="is_mentor_active"
+            checked={state.is_mentor_active}
+            onChange={(e) => handleChange(e.target.checked, 'is_mentor_active')}
+          />
+          <label htmlFor="is_mentor_active" style={{ cursor: 'pointer', fontWeight: 500 }}>
+            Activer mon profil mentor (proposer des sessions)
+          </label>
+        </div>
+        {state.is_mentor_active && (
+          <>
+            <div className="EditProfileInfo__bio u-margin-top--s">
+              <label className="form-label" htmlFor="mentor_bio">
+                Bio mentor
+              </label>
+              <textarea
+                id="mentor_bio"
+                className="form-control EditProfileInfo__textarea"
+                rows={3}
+                value={state.mentor_bio}
+                placeholder="Présente ton expertise et ce que tu peux apporter en mentoring..."
+                onChange={(e) => handleChange(e.target.value, 'mentor_bio')}
+              />
+            </div>
+            <div className="u-margin-top--s">
+              <label className="form-label">Thèmes enseignés</label>
+              <div className="u-d--flex u-flex-wrap u-gap--xs" style={{ gap: 8, marginTop: 8 }}>
+                {learningTopics.map((t: { slug: string; name: string }) => (
+                  <button
+                    key={t.slug}
+                    type="button"
+                    onClick={() => {
+                      const next = state.mentor_topics.includes(t.slug)
+                        ? state.mentor_topics.filter((s) => s !== t.slug)
+                        : [...state.mentor_topics, t.slug];
+                      dispatch({ type: 'UPDATE_FIELD', field: 'mentor_topics', value: next });
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: 999,
+                      border: `2px solid ${state.mentor_topics.includes(t.slug) ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                      background: state.mentor_topics.includes(t.slug) ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                    }}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="u-margin-top--s">
+              <label className="form-label" htmlFor="mentor_tokens_per_hour">
+                Tarif par défaut (T4G/heure)
+              </label>
+              <input
+                id="mentor_tokens_per_hour"
+                type="number"
+                min={0}
+                className="form-control"
+                value={state.mentor_tokens_per_hour ?? ''}
+                placeholder="60"
+                onChange={(e) => {
+                  const v = e.target.value ? parseInt(e.target.value, 10) : null;
+                  handleChange(v, 'mentor_tokens_per_hour');
+                }}
+              />
+              <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 4 }}>
+                1 T4G ≈ 15 min d&apos;expertise
+              </p>
+            </div>
+          </>
+        )}
+        <div className="u-margin-top--m">
+          <label className="form-label">Thèmes d&apos;apprentissage</label>
+          <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 8 }}>
+            Sur quels sujets veux-tu progresser ?
+          </p>
+          <div className="u-d--flex u-flex-wrap u-gap--xs" style={{ gap: 8 }}>
+            {learningTopics.map((t: { slug: string; name: string }) => (
+              <button
+                key={t.slug}
+                type="button"
+                onClick={() => {
+                  const next = state.learning_topics.includes(t.slug)
+                    ? state.learning_topics.filter((s) => s !== t.slug)
+                    : [...state.learning_topics, t.slug];
+                  dispatch({ type: 'UPDATE_FIELD', field: 'learning_topics', value: next });
+                }}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 999,
+                  border: `2px solid ${state.learning_topics.includes(t.slug) ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                  background: state.learning_topics.includes(t.slug) ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                }}
+              >
+                {t.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Actions */}
       <div className="EditProfileInfo__actions">

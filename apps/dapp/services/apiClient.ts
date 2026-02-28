@@ -177,6 +177,14 @@ class APIClient {
     return this.request<User>('/api/users/me');
   }
 
+  async getCurrentUserCV() {
+    return this.request<{ program?: string; topic?: string; school?: string; graduatedYear?: string; experiences?: unknown[] }>('/api/users/me/cv');
+  }
+
+  async getUserCV(userId: string) {
+    return this.request<{ program?: string; topic?: string; school?: string; graduatedYear?: string; experiences?: unknown[] }>(`/api/users/${userId}/cv`);
+  }
+
   async createUser(userData: CreateUserRequest) {
     return this.request<User>('/api/users', {
       method: 'POST',

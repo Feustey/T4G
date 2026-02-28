@@ -60,7 +60,7 @@ const Page: React.FC<Components.Profile.Page.Props> & AuthPageType = ({
 export default Page;
 
 Page.auth = true;
-Page.role = ['ALUMNI', 'STUDENT', 'SERVICE_PROVIDER'];
+Page.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export const getServerSideProps = () => ({ props: {} });
 

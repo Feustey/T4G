@@ -7,7 +7,7 @@ import type { User } from 'apps/dapp/services/apiClient';
 /** User shape for directory/cards - API may return avatar (legacy) or avatar_url */
 type UserCardUser = User & { avatar?: string; about?: string };
 import useSwr from 'swr';
-import { apiFetcher } from 'apps/dapp/services/config';
+import { apiClient } from 'apps/dapp/services/apiClient';
 import { Skeleton } from '../shared/Skeleton'; // Supposant que vous avez un composant Skeleton
 
 export interface IUserCard {
@@ -16,6 +16,7 @@ export interface IUserCard {
   categorieName?: string;
   parent?: string;
   isLink: boolean;
+  isMentorActive?: boolean;
 }
 
 export const UserCard: React.FC<IUserCard> = ({
@@ -24,14 +25,15 @@ export const UserCard: React.FC<IUserCard> = ({
   categorieName,
   parent,
   isLink,
+  isMentorActive,
 }) => {
   const { data: cv, error: cvError, isLoading: isCvLoading } = useSwr<UserCVType>(
-    userId ? `/users/${userId}/cv` : null,
-    apiFetcher
+    userId ? ['user-cv', userId] : null,
+    ([_, id]) => apiClient.getUserCV(id as string)
   );
   const { data: user, error: userError, isLoading: isUserLoading } = useSwr<UserCardUser>(
-    userId ? `/users/${userId}` : null,
-    apiFetcher
+    userId ? ['user', userId] : null,
+    ([_, id]) => apiClient.getUser(id)
   );
 
   const isLoading = isCvLoading || isUserLoading;
@@ -66,6 +68,8 @@ export const UserCard: React.FC<IUserCard> = ({
   const aboutParts = user.about?.split('/splitAbout/');
   const emoji = aboutParts && aboutParts.length > 1 ? aboutParts[1] : '✨';
 
+  const showMentorBadge = isMentorActive ?? user?.is_mentor_active;
+
   return (
     <UserCardLink
       user={user}
@@ -95,7 +99,24 @@ export const UserCard: React.FC<IUserCard> = ({
           {capitalise(user.firstname)} {user.lastname?.toUpperCase()}
         </p>
         <p className="c-benefit-card__infos__emoji">{emoji}</p>
-        <p className="c-benefit-card__infos__place">{user.role}</p>
+        <p className="c-benefit-card__infos__place">
+          {user.role}
+          {showMentorBadge && (
+            <span
+              style={{
+                marginLeft: 6,
+                padding: '2px 8px',
+                borderRadius: 999,
+                fontSize: 11,
+                fontWeight: 600,
+                background: 'var(--color-primary-light, #eff6ff)',
+                color: 'var(--color-primary, #2563eb)',
+              }}
+            >
+              Mentor
+            </span>
+          )}
+        </p>
         {isLink && (
           <div className="mt-2">
             <p className="c-benefit-card__infos__job">

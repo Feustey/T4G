@@ -42,6 +42,7 @@ import { alumniServices } from '../data';
 import { getCVServerSide } from '../services/user';
 import { apiClient } from '../services/apiClient';
 import { useAuth } from '../contexts/AuthContext';
+import useSwr from 'swr';
 
 export interface IOnboarding {
   lang: LangType;
@@ -111,12 +112,17 @@ export function Onboarding({
   const [walletStep, setWalletStep] = useState<'idle' | 'creating' | 'done'>('idle');
   const noIndex = useIndexing(false);
 
-  // Étape 0 = sélection rôle (toujours affichée avant les autres étapes)
   const [mentorMode, setMentorMode] = useState<'none' | 'mentee' | 'mentor' | 'both'>('none');
   const [selectedMentorTopics, setSelectedMentorTopics] = useState<string[]>([]);
   const [selectedLearningTopics, setSelectedLearningTopics] = useState<string[]>([]);
 
-  const totalSteps = user?.role === 'alumni' ? 4 : 3; // +1 pour l'étape rôle mentoring
+  const { data: learningTopics = [] } = useSwr(
+    currentStep === 2 ? 'learning-topics' : null,
+    () => apiClient.getLearningTopics(),
+    { revalidateOnFocus: false }
+  );
+
+  const totalSteps = user?.role === 'alumni' ? 5 : 4; // +1 rôle, +1 thèmes, +photo, +studies, +experience(alumni)
 
   // 4. Simplifier la fonction handleChange
   const handleChange = (value: string | boolean | number, id: keyof State) => {
@@ -270,8 +276,8 @@ export function Onboarding({
   }
 
   const stepTitles = user.role === 'alumni'
-    ? ['Rôle', 'Photo', lang.page.onboarding.main.studies.title, lang.page.onboarding.main.experience.title]
-    : ['Rôle', 'Photo', lang.page.onboarding.main.studies.title];
+    ? ['Rôle', 'Thèmes', 'Photo', lang.page.onboarding.main.studies.title, lang.page.onboarding.main.experience.title]
+    : ['Rôle', 'Thèmes', 'Photo', lang.page.onboarding.main.studies.title];
 
   const isLastStep = currentStep === totalSteps;
 
@@ -366,8 +372,83 @@ export function Onboarding({
               </div>
             )}
 
-            {/* Étape 2 : Photo */}
+            {/* Étape 2 : Sélection des thèmes (apprentissage et/ou mentorat) */}
             {currentStep === 2 && (
+              <div className="u-d--flex u-flex-column u-gap--6">
+                <h2 className="u-text--center heading-3">Sur quels sujets veux-tu participer ?</h2>
+                <p className="u-text--center" style={{ color: 'var(--color-text-secondary, #666)', margin: 0 }}>
+                  Sélectionne les thèmes qui t&apos;intéressent. Tu pourras les modifier depuis ton profil.
+                </p>
+                {(mentorMode === 'mentee' || mentorMode === 'both') && (
+                  <div>
+                    <p style={{ fontWeight: 600, marginBottom: 8 }}>Sur quoi veux-tu progresser ?</p>
+                    <div className="u-d--flex u-flex-wrap u-gap--xs" style={{ gap: 8 }}>
+                      {learningTopics.map((topic: { slug: string; name: string }) => (
+                        <button
+                          key={topic.slug}
+                          type="button"
+                          onClick={() => {
+                            setSelectedLearningTopics((prev) =>
+                              prev.includes(topic.slug)
+                                ? prev.filter((s) => s !== topic.slug)
+                                : [...prev, topic.slug]
+                            );
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 999,
+                            border: `2px solid ${selectedLearningTopics.includes(topic.slug) ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                            background: selectedLearningTopics.includes(topic.slug) ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                          }}
+                        >
+                          {topic.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(mentorMode === 'mentor' || mentorMode === 'both') && (
+                  <div>
+                    <p style={{ fontWeight: 600, marginBottom: 8 }}>Sur quoi peux-tu aider ?</p>
+                    <div className="u-d--flex u-flex-wrap u-gap--xs" style={{ gap: 8 }}>
+                      {learningTopics.map((topic: { slug: string; name: string }) => (
+                        <button
+                          key={topic.slug}
+                          type="button"
+                          onClick={() => {
+                            setSelectedMentorTopics((prev) =>
+                              prev.includes(topic.slug)
+                                ? prev.filter((s) => s !== topic.slug)
+                                : [...prev, topic.slug]
+                            );
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 999,
+                            border: `2px solid ${selectedMentorTopics.includes(topic.slug) ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                            background: selectedMentorTopics.includes(topic.slug) ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                          }}
+                        >
+                          {topic.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {mentorMode === 'none' && (
+                  <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                    Retourne à l&apos;étape précédente pour choisir ton mode de participation.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Étape 3 : Photo */}
+            {currentStep === 3 && (
               <div className="u-d--flex u-flex-column u-align-items-center u-gap--6">
                 <Message variant={'info'}>
                   <p>
@@ -398,8 +479,8 @@ export function Onboarding({
               </div>
             )}
 
-            {/* Étape 3 : Formation */}
-            {currentStep === 3 && (
+            {/* Étape 4 : Formation */}
+            {currentStep === 4 && (
               <div className="u-d--flex u-flex-column u-gap--6">
                 <h2 className="u-text--center heading-3">{lang.page.onboarding.main.studies.title}</h2>
                 <AddStudies
@@ -415,8 +496,8 @@ export function Onboarding({
               </div>
             )}
 
-            {/* Étape 4 : Expérience (alumni uniquement) */}
-            {currentStep === 4 && user.role === 'alumni' && (
+            {/* Étape 5 : Expérience (alumni uniquement) */}
+            {currentStep === 5 && user.role === 'alumni' && (
               <div className="u-d--flex u-flex-column u-gap--6">
                 <h2 className="u-text--center heading-3">{lang.page.onboarding.main.experience.title}</h2>
                 <AddExperiences
@@ -471,7 +552,7 @@ export function Onboarding({
                     variant="primary"
                     disabled={
                       (currentStep === 1 && mentorMode === 'none') ||
-                      (currentStep === 3 && !isStudentFormValid)
+                      (currentStep === 4 && !isStudentFormValid)
                     }
                     label="Continuer"
                     lang={lang}

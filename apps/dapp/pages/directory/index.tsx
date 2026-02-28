@@ -14,9 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Image from 'next/image';
 import useSwr, { SWRResponse } from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
-import { User, UserWallet } from '../../lib/types';
-import { __values } from 'tslib';
-import { apiFetcher } from 'apps/dapp/services/config';
+import { apiClient, User } from '../../services/apiClient';
 
 interface IDirectoryPage {
   lang: LangType;
@@ -28,7 +26,7 @@ export function DirectoryPage({
   const { user } = useAuth();
   const categoryName="Directory"
 
-  const { data: users } = useSwr<User[]>('/users', apiFetcher); //TODO error
+  const { data: users } = useSwr<User[]>('/api/users', () => apiClient.getUsers());
 
   //filteredAvailableServices=service
   let filteredTypeUsers =[]
@@ -81,10 +79,10 @@ export function DirectoryPage({
   }
 
   const filteredUsers = filteredTypeUsers
-  .filter((user: User) => {
+  .filter((u: User) => {
     if (searchValue) {
       const distanceLastName = getLevenshteinDistance(
-        user.lastname
+        (u.lastname || '')
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, ''),
@@ -94,7 +92,7 @@ export function DirectoryPage({
           .replace(/[\u0300-\u036f]/g, '')
       );
       const distanceFirstName = getLevenshteinDistance(
-        user.firstname
+        (u.firstname || '')
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, ''),
@@ -103,7 +101,7 @@ export function DirectoryPage({
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
       );
-      const isLastNameIncluded = user.lastname
+      const isLastNameIncluded = (u.lastname || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -115,7 +113,7 @@ export function DirectoryPage({
         );
       
       return (
-        user.firstname
+        (u.firstname || '')
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
@@ -136,36 +134,34 @@ export function DirectoryPage({
 
   let sortedUsers: User[] = filteredUsers;
 
+  const getName = (u: User) => `${u.firstname || ''} ${u.lastname || ''}`.trim();
   switch (sort) {
     case 'YEAR_ASC':
-      sortedUsers = filteredUsers.sort(
+      sortedUsers = [...filteredUsers].sort(
         (a, b) =>
-          Number(a.provider?.graduatedYear) - Number(b.provider?.graduatedYear)
+          Number((a as any).graduated_year) - Number((b as any).graduated_year)
       );
       break;
     case 'YEAR_DESC':
-      sortedUsers = filteredUsers.sort(
+      sortedUsers = [...filteredUsers].sort(
         (a, b) =>
-          Number(b.provider?.graduatedYear) - Number(a.provider?.graduatedYear)
+          Number((b as any).graduated_year) - Number((a as any).graduated_year)
       );
       break;
     case 'ALPHA_ASC':
-      sortedUsers = filteredUsers.sort((a, b) =>
-        a.name.localeCompare(b.name)
+      sortedUsers = [...filteredUsers].sort((a, b) =>
+        getName(a).localeCompare(getName(b))
       );
       break;
     case 'ALPHA_DESC':
-      sortedUsers = filteredUsers.sort((a, b) =>
-        b.name.localeCompare(a.name)
+      sortedUsers = [...filteredUsers].sort((a, b) =>
+        getName(b).localeCompare(getName(a))
       );
       break;
     case 'RATING':
-      sortedUsers = filteredUsers.sort((a, b) => {
-        const averageRatingA = a.rating.length > 0 ? a.rating.reduce((acc, curr) => acc + curr, 0) / a.rating.length : 0;
-        const averageRatingB = b.rating.length > 0 ? b.rating.reduce((acc, curr) => acc + curr, 0) / b.rating.length : 0;
-        
-        return averageRatingB - averageRatingA;
-      });
+      sortedUsers = [...filteredUsers].sort((a, b) =>
+        (b.score ?? 0) - (a.score ?? 0)
+      );
       break;
 
     default:
@@ -239,12 +235,13 @@ export function DirectoryPage({
             style={{ '--grid-min-size': `300px` } as React.CSSProperties}
           >
             {sortedUsers.slice(0,24+incr).map(
-              (user: User, index: number) => (
+              (dirUser: User, index: number) => (
                 <UserCard
                   categorieName={categoryName}
-                  key={index}
-                  userId={user.id}
-                  userRole={user.role}
+                  key={dirUser.id}
+                  userId={dirUser.id}
+                  userRole={dirUser.role}
+                  isMentorActive={dirUser.is_mentor_active}
                   isLink={true}
                   parent="directory"
                 />
@@ -280,7 +277,7 @@ export function DirectoryPage({
 }
 
 DirectoryPage.auth = true;
-DirectoryPage.role = ['ALUMNI', 'STUDENT'];
+DirectoryPage.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export default DirectoryPage;
 
