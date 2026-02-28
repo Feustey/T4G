@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
+import { apiClient } from '../services/apiClient';
 // Note: Supabase OTP désactivé - Utilisation d'OAuth uniquement (t4g, LinkedIn, Dazno)
 // import { createClient } from '@supabase/supabase-js';
 
@@ -13,31 +14,17 @@ export const useOAuth = () => {
 
   /**
    * Vérifier si l'utilisateur a déjà une session Dazno active
+   * Utilise le backend Rust pour vérifier le token (évite le proxy Next.js)
    */
   const checkExistingDaznoSession = async (): Promise<string | null> => {
     try {
-      // Vérifier si on a un token Dazno dans le localStorage
       const daznoToken = localStorage.getItem('dazno_token');
       if (!daznoToken) return null;
 
-      // Utiliser le proxy API pour éviter les erreurs CORS
-      const response = await fetch('/api/auth/dazno-verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: daznoToken }),
-      });
-
-      if (response.ok) {
-        return daznoToken;
-      } else {
-        // Token invalide, le supprimer
-        localStorage.removeItem('dazno_token');
-        return null;
-      }
-    } catch (error) {
-      console.error('Erreur vérification session Dazno:', error);
+      await apiClient.verifyDaznoSession(daznoToken);
+      return daznoToken;
+    } catch {
+      localStorage.removeItem('dazno_token');
       return null;
     }
   };
@@ -105,10 +92,10 @@ export const useOAuth = () => {
 
   /**
    * Authentification avec Dazno (session existante ou nouvelle)
+   * Le backend Rust vérifie le token directement auprès de Dazno
    */
   const loginWithDazno = async (daznoToken?: string) => {
     try {
-      // Si pas de token fourni, vérifier s'il y a une session existante
       let token = daznoToken;
       if (!token) {
         token = await checkExistingDaznoSession();
@@ -118,35 +105,11 @@ export const useOAuth = () => {
         throw new Error('Aucune session Dazno active');
       }
 
-      // Sauvegarder le token
       localStorage.setItem('dazno_token', token);
 
-      // Utiliser le proxy API pour éviter les erreurs CORS
-      const response = await fetch('/api/auth/dazno-verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
+      // Login via backend Rust (vérifie le token Dazno et retourne JWT)
+      await login('dazeno', { token });
 
-      if (!response.ok) {
-        localStorage.removeItem('dazno_token');
-        throw new Error('Token Dazno invalide');
-      }
-
-      const daznoUser = await response.json();
-
-      // Login avec le backend via Dazno
-      await login('dazeno', {
-        token: token,
-        providerUserData: {
-          email: daznoUser.user.email,
-          name: daznoUser.user.name,
-        }
-      });
-
-      // Rediriger vers dashboard
       router.push('/dashboard');
     } catch (error) {
       console.error('Erreur authentification Dazno:', error);

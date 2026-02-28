@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import useSwr from 'swr';
@@ -124,11 +124,22 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Filtre pré-sélectionné depuis l'URL (ex: ?category=lightning_network)
+  // Filtres pré-sélectionnés depuis l'URL (ex: ?category=lightning_network, ?mentor=user_id)
   const initialCategory = typeof router.query.category === 'string' ? router.query.category : '';
+  const initialMentorId = typeof router.query.mentor === 'string' ? router.query.mentor : '';
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
+  const [selectedMentorId, setSelectedMentorId] = useState<string>(initialMentorId);
   const [selectedLevel, setSelectedLevel] = useState<string>('');
+
+  // Synchroniser les filtres quand l'URL change (ex: navigation, lien direct)
+  useEffect(() => {
+    const cat = typeof router.query.category === 'string' ? router.query.category : '';
+    const mid = typeof router.query.mentor === 'string' ? router.query.mentor : '';
+    setSelectedCategory(cat);
+    setSelectedMentorId(mid);
+  }, [router.query.category, router.query.mentor]);
+
   const [selectedFormat, setSelectedFormat] = useState<string>('');
   const [maxCost, setMaxCost] = useState<number>(200);
 
@@ -139,14 +150,15 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
     { revalidateOnFocus: false }
   );
 
-  // Fetch des offres (mock pour l'instant, remplacé quand l'API sera disponible)
+  // Fetch des offres
   const { data: rawOffers = MOCK_OFFERS, isLoading: isLoadingOffers } = useSwr<MentoringOffer[]>(
-    ['/api/mentoring/offers', selectedCategory, selectedLevel, selectedFormat, maxCost],
+    ['/api/mentoring/offers', selectedCategory, selectedLevel, selectedFormat, maxCost, selectedMentorId],
     () => apiClient.getMentoringOffers({
       category: selectedCategory || undefined,
       level: selectedLevel || undefined,
       format: selectedFormat || undefined,
       max_cost: maxCost < 200 ? maxCost : undefined,
+      mentor_id: selectedMentorId || undefined,
     }),
     {
       revalidateOnFocus: false,
@@ -154,16 +166,17 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
     }
   );
 
-  // Filtrage côté client sur les mocks si l'API ne filtre pas encore
+  // Filtrage côté client (pour mocks ou complément API)
   const offers = useMemo(() => {
     return rawOffers.filter((o) => {
       if (selectedCategory && o.topic?.category?.slug !== selectedCategory && !o.topic_slug.includes(selectedCategory)) return false;
       if (selectedLevel && o.target_level !== selectedLevel) return false;
       if (selectedFormat && o.format !== selectedFormat) return false;
+      if (selectedMentorId && o.mentor_id !== selectedMentorId) return false;
       if (o.token_cost > maxCost) return false;
       return true;
     });
-  }, [rawOffers, selectedCategory, selectedLevel, selectedFormat, maxCost]);
+  }, [rawOffers, selectedCategory, selectedLevel, selectedFormat, maxCost, selectedMentorId]);
 
   const isLoading = isLoadingCategories || isLoadingOffers;
 
@@ -309,7 +322,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
             </div>
 
             {/* Reset */}
-            {(selectedCategory || selectedLevel || selectedFormat || maxCost < 200) && (
+            {(selectedCategory || selectedLevel || selectedFormat || maxCost < 200 || selectedMentorId) && (
               <Button
                 variant="ghost"
                 label="Réinitialiser"
@@ -318,6 +331,8 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
                   setSelectedLevel('');
                   setSelectedFormat('');
                   setMaxCost(200);
+                  setSelectedMentorId('');
+                  router.replace('/mentoring/find', undefined, { shallow: true });
                 }}
               />
             )}
@@ -338,7 +353,8 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
               Essaie d&apos;élargir ta recherche ou reviens plus tard.
             </p>
             <Button variant="secondary" label="Réinitialiser les filtres" onClick={() => {
-              setSelectedCategory(''); setSelectedLevel(''); setSelectedFormat(''); setMaxCost(200);
+              setSelectedCategory(''); setSelectedLevel(''); setSelectedFormat(''); setMaxCost(200); setSelectedMentorId('');
+              router.replace('/mentoring/find', undefined, { shallow: true });
             }} />
           </div>
         ) : (

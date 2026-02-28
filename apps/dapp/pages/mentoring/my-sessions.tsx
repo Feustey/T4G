@@ -69,6 +69,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const pastBookings    = myBookings.filter((b) => ['completed', 'auto_completed', 'cancelled', 'disputed'].includes(b.status));
 
   const justCreated = router.query.created === '1';
+  const justUpdated = router.query.updated === '1';
 
   return (
     <>
@@ -98,6 +99,14 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
           <div className="o-card" style={{ borderLeft: '4px solid var(--color-success, #16a34a)', background: '#f0fdf4', padding: '0.75rem 1rem' }}>
             <p style={{ margin: 0, fontWeight: 600, color: '#166534' }}>
               ✅ Ta session a été publiée ! Les membres dont les thèmes correspondent seront notifiés.
+            </p>
+          </div>
+        )}
+        {/* Confirmation de modification */}
+        {justUpdated && (
+          <div className="o-card" style={{ borderLeft: '4px solid var(--color-success, #16a34a)', background: '#f0fdf4', padding: '0.75rem 1rem' }}>
+            <p style={{ margin: 0, fontWeight: 600, color: '#166534' }}>
+              ✅ Ton offre a été mise à jour.
             </p>
           </div>
         )}
@@ -148,7 +157,13 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
                 {/* Ouvertes */}
                 {activeOffers.length > 0 && (
                   <Section title={`Offres publiées (${activeOffers.length})`} accent="#166534">
-                    {activeOffers.map((o) => <OfferCard key={o.id} offer={o} />)}
+                    {activeOffers.map((o) => (
+                      <OfferCard
+                        key={o.id}
+                        offer={o}
+                        onEdit={() => router.push(`/mentoring/offer/${o.id}`)}
+                      />
+                    ))}
                   </Section>
                 )}
 
@@ -255,8 +270,8 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const OfferCard = ({
-  offer, showConfirmCta, onConfirm,
-}: { offer: MentoringOffer; showConfirmCta?: boolean; onConfirm?: () => void }) => (
+  offer, showConfirmCta, onConfirm, onEdit,
+}: { offer: MentoringOffer; showConfirmCta?: boolean; onConfirm?: () => void; onEdit?: () => void }) => (
   <div className="o-card u-d--flex u-flex-column u-gap--s">
     <div className="u-d--flex u-justify-content-between u-align-items-center flex-wrap u-gap--xs">
       <p style={{ margin: 0, fontWeight: 600 }}>{offer.topic_slug}</p>
@@ -271,9 +286,14 @@ const OfferCard = ({
       <span>·</span>
       <span style={{ color: 'var(--app-token-color, #f59e0b)', fontWeight: 600 }}>{offer.token_cost} T4G</span>
     </div>
-    {showConfirmCta && onConfirm && (
-      <Button variant="primary" label="Voir la réservation" onClick={onConfirm} />
-    )}
+    <div className="u-d--flex u-gap--xs">
+      {showConfirmCta && onConfirm && (
+        <Button variant="primary" label="Voir la réservation" onClick={onConfirm} />
+      )}
+      {offer.status === 'open' && onEdit && (
+        <Button variant="secondary" label="Modifier" onClick={onEdit} />
+      )}
+    </div>
   </div>
 );
 

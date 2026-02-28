@@ -51,6 +51,7 @@ pub struct OffersFilter {
     pub level: Option<String>,
     pub format: Option<String>,
     pub max_cost: Option<i32>,
+    pub mentor_id: Option<String>,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }
@@ -103,6 +104,11 @@ pub async fn list_offers(
     if let Some(max) = filters.max_cost {
         sql.push_str(&format!(" AND o.token_cost <= ${}", param_idx));
         params.push(max.to_string());
+        param_idx += 1;
+    }
+    if let Some(ref mid) = filters.mentor_id {
+        sql.push_str(&format!(" AND o.mentor_id = ${}", param_idx));
+        params.push(mid.clone());
         param_idx += 1;
     }
 

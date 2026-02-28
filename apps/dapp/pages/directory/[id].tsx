@@ -1,26 +1,16 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import ConnectedLayout from 'apps/dapp/layouts/ConnectedLayout';
-import {
-  AlumniBenefitPage,
-  Breadcrumb,
-  Icons,
-  StudentBenefitPage,
-} from 'apps/dapp/components';
-import {
-  AuthPageType,
-  LangType,
-  SessionType,
-  UserCVType,
-  UserExperienceType,
-} from 'apps/dapp/types';
+import { Breadcrumb, Icons } from 'apps/dapp/components';
+import { AuthPageType, LangType, UserCVType, UserExperienceType } from 'apps/dapp/types';
 import { capitalise } from 'apps/dapp/services';
 import { useAuth } from '../../contexts/AuthContext';
 import { AppModal } from '../../lib/ui-layouts';
 import useSwr from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
-import { apiFetcher } from 'apps/dapp/services/config';
-import { User } from '../../lib/types';
+import { apiClient, User } from '../../services/apiClient';
+import { Button } from 'apps/dapp/components';
 
 interface IProfilePage {
   lang: LangType;
@@ -34,11 +24,9 @@ export function ProfilePage({
   userId,
 }: IProfilePage & AuthPageType) {
   const { user } = useAuth();
-  const { data: profile } = useSwr<User>(`/users/${userId}`, apiFetcher);
-  const { data: cv } = useSwr<UserCVType>(
-    `/users/${userId}/cv`,
-    apiFetcher
-  );
+  const router = useRouter();
+  const { data: profile } = useSwr<User>(['user', userId], () => apiClient.getUser(userId));
+  const { data: cv } = useSwr<UserCVType>(['user-cv', userId], () => apiClient.getUserCV(userId));
 
   return (
     <>
@@ -75,19 +63,53 @@ export function ProfilePage({
                 <UserCard
                   categorieName={categoryName}
                   userId={profile.id}
-                  userRole={user.role}
+                  userRole={profile.role}
+                  isMentorActive={profile.is_mentor_active}
                   isLink={false}
                   parent="directory"
                 />
               </section>
               <section className="c-student-benefit-page__infos">
-                {profile.about && (
+                {(profile.bio || (profile as { about?: string }).about) && (
                   <div>
                     <h2 className="subtitle heading-4 u-d--flex u-align-items-center u-gap--s u-margin-b--m">
-                      {' '}
                       {Icons.chat} About {capitalise(profile.firstname)}
                     </h2>
-                    <p>{profile.about.split('/splitAbout/')[0]}</p>
+                    <p>{((profile.bio || (profile as { about?: string }).about) ?? '').split('/splitAbout/')[0]}</p>
+                  </div>
+                )}
+
+                {profile.is_mentor_active && (
+                  <div className="u-margin-b--m">
+                    <h2 className="subtitle heading-4 u-d--flex u-align-items-center u-gap--s u-margin-b--m">
+                      {Icons.sparkles} Mentor disponible
+                    </h2>
+                    {profile.mentor_bio && (
+                      <p className="u-margin-b--s">{profile.mentor_bio}</p>
+                    )}
+                    {profile.mentor_topics && profile.mentor_topics.length > 0 && (
+                      <div className="u-d--flex u-flex-wrap u-gap--xs u-margin-b--s">
+                        {profile.mentor_topics.map((slug) => (
+                          <span
+                            key={slug}
+                            style={{
+                              padding: '4px 12px',
+                              borderRadius: 999,
+                              fontSize: 12,
+                              background: 'var(--color-primary-light, #eff6ff)',
+                              color: 'var(--color-primary, #2563eb)',
+                            }}
+                          >
+                            {slug}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <Button
+                      variant="primary"
+                      label="Demander une session de mentoring"
+                      onClick={() => router.push(`/mentoring/find?mentor=${profile.id}`)}
+                    />
                   </div>
                 )}
 
@@ -198,7 +220,7 @@ export function ProfilePage({
 }
 
 ProfilePage.auth = true;
-ProfilePage.role = ['ALUMNI', 'STUDENT'];
+ProfilePage.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export const getServerSideProps: GetServerSideProps = async function (context) {
   const userId = context.query.id as string;
@@ -206,6 +228,7 @@ export const getServerSideProps: GetServerSideProps = async function (context) {
   return {
     props: {
       userId,
+      categoryName: 'Directory',
     },
   };
 };

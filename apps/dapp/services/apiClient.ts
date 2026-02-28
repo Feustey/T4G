@@ -314,6 +314,13 @@ class APIClient {
 
   // ============= AUTH API =============
 
+  async verifyDaznoSession(token: string) {
+    return this.request<{ id: string; email: string; name: string; role?: string }>('/api/auth/dazeno/verify', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
   async login(credentials: LoginRequest) {
     const response = await this.request<LoginResponse>('/api/auth/login', {
       method: 'POST',
@@ -414,8 +421,8 @@ class APIClient {
   }
 
   async updateMentoringOffer(offerId: string, data: Partial<CreateMentoringOfferRequest>) {
-    return this.request<MentoringOffer>(`/api/mentoring/offers/${offerId}`, {
-      method: 'PUT',
+    return this.request<MentoringOffer>(`/api/mentoring/offers/${offerId}/update`, {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   }
@@ -558,6 +565,7 @@ export interface MentoringOffersFilter {
   level?: string;
   format?: string;
   max_cost?: number;
+  mentor_id?: string;
 }
 
 export interface MentoringBooking {
