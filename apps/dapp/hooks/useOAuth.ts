@@ -121,10 +121,13 @@ export const useOAuth = () => {
    * Authentification avec LinkedIn OAuth
    */
   const loginWithLinkedIn = () => {
-    // Construire l'URL de redirection pour LinkedIn OAuth
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/linkedin`);
+    // Utilise NEXT_PUBLIC_APP_URL pour garantir que le redirect_uri correspond à l'URL
+    // enregistrée dans l'app OAuth (évite les problèmes si le site est accessible via
+    // plusieurs domaines, ex: app.token-for-good.com et t4g.dazno.de).
+    const appOrigin = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '');
+    const redirectUri = encodeURIComponent(`${appOrigin}/auth/callback/linkedin`);
     const clientId = process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || process.env.LINKEDIN_CLIENT_ID;
-    
+
     if (!clientId) {
       console.error('LINKEDIN_CLIENT_ID non configuré');
       throw new Error('Configuration LinkedIn manquante');
@@ -133,12 +136,12 @@ export const useOAuth = () => {
     // Rediriger vers LinkedIn OAuth avec les scopes nécessaires
     const scope = encodeURIComponent('openid profile email');
     const state = Math.random().toString(36).substring(7);
-    
+
     // Stocker le state pour validation
     sessionStorage.setItem('linkedin_oauth_state', state);
-    
+
     const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
-    
+
     window.location.href = authUrl;
   };
 
@@ -146,11 +149,11 @@ export const useOAuth = () => {
    * Authentification avec t4g OAuth
    */
   const loginWitht4g = () => {
-    // Construire l'URL de redirection pour t4g OAuth
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/t4g`);
+    const appOrigin = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '');
+    const redirectUri = encodeURIComponent(`${appOrigin}/auth/callback/t4g`);
     const clientId = process.env.NEXT_PUBLIC_T4G_CLIENT_ID || process.env.CLIENT_ID;
     const authUrl = process.env.NEXT_PUBLIC_T4G_AUTH_URL || process.env.AUTH_URL;
-    
+
     if (!clientId || !authUrl) {
       console.error('T4G OAuth non configuré');
       throw new Error('Configuration t4g manquante');
@@ -159,12 +162,12 @@ export const useOAuth = () => {
     // Rediriger vers t4g OAuth
     const scope = encodeURIComponent('openid profile email');
     const state = Math.random().toString(36).substring(7);
-    
+
     // Stocker le state pour validation
     sessionStorage.setItem('t4g_oauth_state', state);
-    
+
     const fullAuthUrl = `${authUrl}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
-    
+
     window.location.href = fullAuthUrl;
   };
 
@@ -179,7 +182,8 @@ export const useOAuth = () => {
       throw new Error('Configuration GitHub manquante');
     }
 
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/github`);
+    const appOrigin = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '');
+    const redirectUri = encodeURIComponent(`${appOrigin}/auth/callback/github`);
     const scope = encodeURIComponent('read:user user:email');
     const state = Math.random().toString(36).substring(7);
 
@@ -232,8 +236,10 @@ export const useOAuth = () => {
       }
 
       // Appel direct au backend Rust : échange le code et retourne un JWT
+      // redirect_uri doit correspondre EXACTEMENT à ce qui a été envoyé lors de l'autorisation
       const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
-      const redirectUri = `${window.location.origin}/auth/callback/${provider}`;
+      const appOrigin = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '');
+      const redirectUri = `${appOrigin}/auth/callback/${provider}`;
       const response = await fetch(`${apiBase}/api/auth/exchange/${provider}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

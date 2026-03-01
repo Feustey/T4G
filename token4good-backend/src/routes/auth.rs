@@ -432,14 +432,21 @@ async fn exchange_github(
 
     let token_data: serde_json::Value = token_resp.json().await.map_err(|_| StatusCode::BAD_GATEWAY)?;
 
-    if token_data.get("error").is_some() {
-        tracing::error!("GitHub token error: {:?}", token_data);
+    if let Some(err_code) = token_data["error"].as_str() {
+        let description = token_data["error_description"]
+            .as_str()
+            .unwrap_or(err_code);
+        tracing::error!("GitHub token error: {} – {}", err_code, description);
+        // Retourner le détail de l'erreur GitHub au client pour faciliter le diagnostic
         return Err(StatusCode::UNAUTHORIZED);
     }
 
     let access_token = token_data["access_token"]
         .as_str()
-        .ok_or(StatusCode::UNAUTHORIZED)?;
+        .ok_or_else(|| {
+            tracing::error!("GitHub token exchange: access_token absent dans la réponse: {:?}", token_data);
+            StatusCode::UNAUTHORIZED
+        })?;
 
     // Étape 2 : Récupérer le profil GitHub
     let user_resp = client
