@@ -36,9 +36,7 @@ const nextConfig = {
     const path = require('path');
     const libsPath = path.resolve(__dirname, '../../libs');
     
-    // Fix pour les modules Node.js
-    // IMPORTANT: Ne pas appliquer crypto:false côté serveur — les routes API
-    // (magic-link verify, etc.) ont besoin du module crypto natif Node.js
+    // Fix pour les modules Node.js (côté client uniquement)
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
@@ -198,19 +196,7 @@ const nextConfig = {
         source: '/landing/:path*',
         destination: '/landing/:path*',
       },
-      // Auth Next.js : magic-link, OAuth callbacks, dazno-verify, lnurl
-      {
-        source: '/api/auth/magic-link/:path*',
-        destination: '/api/auth/magic-link/:path*',
-      },
-      {
-        source: '/api/auth/callback/:path*',
-        destination: '/api/auth/callback/:path*',
-      },
-      {
-        source: '/api/auth/dazno-verify',
-        destination: '/api/auth/dazno-verify',
-      },
+      // Auth Next.js : lnurl uniquement (différé — nécessite stockage PostgreSQL)
       {
         source: '/api/auth/lnurl/:path*',
         destination: '/api/auth/lnurl/:path*',

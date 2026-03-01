@@ -194,7 +194,8 @@ export const useOAuth = () => {
    */
   const sendMagicLink = async (email: string): Promise<{ success: boolean; dev_link?: string }> => {
     const locale = router.locale || (router as { defaultLocale?: string }).defaultLocale || 'fr';
-    const response = await fetch('/api/auth/magic-link/send/', {
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
+    const response = await fetch(`${apiBase}/api/auth/magic-link/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, locale }),
@@ -210,17 +211,18 @@ export const useOAuth = () => {
 
   /**
    * Gérer le callback OAuth (LinkedIn, t4g ou GitHub)
+   * Appelle directement le backend Rust (/api/auth/exchange/{provider}) en 1 étape.
    */
   const handleOAuthCallback = useCallback(async (provider: 'linkedin' | 't4g' | 'github', code: string, state: string) => {
     try {
       // Vérifier le state pour éviter les attaques CSRF
       const savedState = sessionStorage.getItem(`${provider}_oauth_state`);
-      
+
       // En développement local, être plus permissif avec la validation du state
       if (process.env.NODE_ENV === 'production' && savedState !== state) {
         throw new Error('State invalide - possible attaque CSRF');
       }
-      
+
       // Log en dev pour debug
       if (process.env.NODE_ENV === 'development') {
         console.log(`[OAuth Debug] Provider: ${provider}, State reçu: ${state}, State sauvegardé: ${savedState}`);
@@ -229,15 +231,13 @@ export const useOAuth = () => {
         }
       }
 
-      // Échanger le code contre les données utilisateur via notre API
-      // Trailing slash requis : évite la redirection 308 avec trailingSlash: true (next.config.js)
-      const apiPath = `/api/auth/callback/${provider}/`;
-      const response = await fetch(apiPath, {
+      // Appel direct au backend Rust : échange le code et retourne un JWT
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
+      const redirectUri = `${window.location.origin}/auth/callback/${provider}`;
+      const response = await fetch(`${apiBase}/api/auth/exchange/${provider}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, redirect_uri: redirectUri }),
       });
 
       if (!response.ok) {
@@ -245,19 +245,8 @@ export const useOAuth = () => {
         throw new Error(err.message || err.error || 'Échec authentification OAuth');
       }
 
-      const userData = await response.json();
-
-      // Login avec le backend via le provider
-      await login(provider, {
-        providerUserData: {
-          email: userData.email,
-          given_name: userData.given_name || userData.firstName,
-          family_name: userData.family_name || userData.lastName,
-          name: userData.name || `${userData.given_name || ''} ${userData.family_name || ''}`.trim(),
-          sub: userData.sub || userData.id,
-          ...(provider === 'github' && { login: userData.login }),
-        },
-      });
+      const authData = await response.json(); // AuthResponse { token, user, expires_at }
+      apiClient.setToken(authData.token);
 
       // Nettoyer le state seulement après succès complet
       sessionStorage.removeItem(`${provider}_oauth_state`);
@@ -268,7 +257,7 @@ export const useOAuth = () => {
       console.error(`Erreur callback ${provider}:`, error);
       throw error;
     }
-  }, [login, router]);
+  }, [router]);
 
   /**
    * Initialiser l'authentification (vérifier sessions existantes)

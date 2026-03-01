@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '../../../contexts/AuthContext';
+import { apiClient } from '../../../services/apiClient';
 import Head from 'next/head';
 
 const getLocale = (router: { locale?: string; defaultLocale?: string }) =>
@@ -8,7 +8,6 @@ const getLocale = (router: { locale?: string; defaultLocale?: string }) =>
 
 export default function MagicLinkCallback() {
   const router = useRouter();
-  const { login } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const hasProcessed = useRef(false);
@@ -28,7 +27,9 @@ export default function MagicLinkCallback() {
 
     const verify = async () => {
       try {
-        const response = await fetch('/api/auth/magic-link/verify/', {
+        // Appel direct au backend Rust : vérifie le token et retourne un JWT
+        const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
+        const response = await fetch(`${apiBase}/api/auth/magic-link/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
@@ -47,29 +48,13 @@ export default function MagicLinkCallback() {
           throw new Error(errorMsg);
         }
 
-        const userData = await response.json();
-
-        try {
-          await login('magic_link', {
-            providerUserData: {
-              email: userData.email,
-              given_name: userData.given_name,
-              family_name: userData.family_name,
-              name: userData.name || userData.given_name,
-              sub: userData.sub,
-            },
-          });
-        } catch (loginErr) {
-          // Erreur backend (connexion, base de données, etc.)
-          const msg = loginErr instanceof Error ? loginErr.message : 'Erreur inconnue';
-          throw new Error(msg.includes('Backend') ? msg : `Erreur de connexion : ${msg}`);
-        }
+        const authData = await response.json(); // AuthResponse { token, user, expires_at }
+        apiClient.setToken(authData.token);
 
         setStatus('success');
         const locale = getLocale(router);
         const dashboardUrl = `/${locale}/dashboard/`;
         setTimeout(() => {
-          // router.push préserve le contexte React (user déjà en AuthContext) — évite full reload
           router.push(dashboardUrl, dashboardUrl, { locale });
         }, 500);
       } catch (err) {
@@ -84,7 +69,7 @@ export default function MagicLinkCallback() {
     };
 
     verify();
-  }, [router.isReady, router.query, login, router]);
+  }, [router.isReady, router.query, router]);
 
   return (
     <>
