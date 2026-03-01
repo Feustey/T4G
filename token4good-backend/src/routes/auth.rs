@@ -925,18 +925,19 @@ fn base64url_decode(s: &str) -> Option<Vec<u8>> {
 
 /// Génère un token HMAC-SHA256 signé, compatible avec la logique TypeScript.
 /// Format : base64url(JSON({email, exp})).base64url(HMAC-SHA256(payload))
+/// exp est en secondes (u64) pour éviter tout problème de sérialisation u128.
 fn create_magic_token(email: &str) -> String {
     let secret = env::var("MAGIC_LINK_SECRET")
         .or_else(|_| env::var("NEXTAUTH_SECRET"))
         .unwrap_or_else(|_| "fallback-dev-secret".to_string());
 
-    let exp_ms = std::time::SystemTime::now()
+    let exp: u64 = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
-        .as_millis()
-        + 15 * 60 * 1000; // 15 minutes
+        .as_secs()
+        + 15 * 60; // 15 minutes en secondes
 
-    let payload_json = serde_json::json!({"email": email, "exp": exp_ms}).to_string();
+    let payload_json = serde_json::json!({"email": email, "exp": exp}).to_string();
     let payload = base64url_encode(payload_json.as_bytes());
 
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
@@ -952,7 +953,10 @@ fn verify_magic_token(token: &str) -> Option<String> {
         .or_else(|_| env::var("NEXTAUTH_SECRET"))
         .unwrap_or_else(|_| "fallback-dev-secret".to_string());
 
-    let dot_pos = token.find('.')?;
+    let dot_pos = token.find('.').or_else(|| {
+        tracing::warn!("Magic link: pas de séparateur '.' dans le token (len={})", token.len());
+        None
+    })?;
     let (payload, sig) = (&token[..dot_pos], &token[dot_pos + 1..]);
 
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
@@ -961,6 +965,7 @@ fn verify_magic_token(token: &str) -> Option<String> {
 
     // Comparaison timing-safe
     if expected_sig.len() != sig.len() {
+        tracing::warn!("Magic link: longueur signature incorrecte (attendu={}, reçu={})", expected_sig.len(), sig.len());
         return None;
     }
     let ok = expected_sig
@@ -969,23 +974,41 @@ fn verify_magic_token(token: &str) -> Option<String> {
         .fold(0u8, |acc, (a, b)| acc | (a ^ b))
         == 0;
     if !ok {
+        tracing::warn!("Magic link: signature HMAC invalide");
         return None;
     }
 
     // Décoder et valider le payload
-    let payload_bytes = base64url_decode(payload)?;
-    let payload_str = std::str::from_utf8(&payload_bytes).ok()?;
-    let payload_json: serde_json::Value = serde_json::from_str(payload_str).ok()?;
+    let payload_bytes = base64url_decode(payload).or_else(|| {
+        tracing::warn!("Magic link: décodage base64url échoué pour le payload");
+        None
+    })?;
+    let payload_str = std::str::from_utf8(&payload_bytes).ok().or_else(|| {
+        tracing::warn!("Magic link: payload n'est pas du UTF-8 valide");
+        None
+    })?;
+    let payload_json: serde_json::Value = serde_json::from_str(payload_str).ok().or_else(|| {
+        tracing::warn!("Magic link: payload JSON invalide: {}", payload_str);
+        None
+    })?;
 
-    let email = payload_json["email"].as_str()?.to_string();
-    let exp = payload_json["exp"].as_u64()?;
+    let email = payload_json["email"].as_str().or_else(|| {
+        tracing::warn!("Magic link: champ 'email' manquant ou non-string dans le payload");
+        None
+    })?.to_string();
 
-    let now_ms = std::time::SystemTime::now()
+    let exp: u64 = payload_json["exp"].as_u64().or_else(|| {
+        tracing::warn!("Magic link: champ 'exp' manquant ou non-u64 (valeur: {:?})", payload_json["exp"]);
+        None
+    })?;
+
+    let now: u64 = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
-        .as_millis() as u64;
+        .as_secs();
 
-    if now_ms > exp {
+    if now > exp {
+        tracing::warn!("Magic link: token expiré (now={}, exp={})", now, exp);
         return None;
     }
 
