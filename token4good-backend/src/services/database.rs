@@ -133,7 +133,7 @@ impl DatabaseService {
             updated_at: row.try_get("updated_at")?,
             is_active: row.try_get("is_active")?,
             wallet_address: row.try_get("wallet_address").ok(),
-            preferences: row.try_get("preferences")?,
+            preferences: row.try_get("preferences").unwrap_or(serde_json::Value::Object(serde_json::Map::new())),
             email_verified: row.try_get("email_verified").unwrap_or(false),
             last_login: row.try_get("last_login").ok(),
             is_onboarded: row.try_get("is_onboarded").unwrap_or(false),

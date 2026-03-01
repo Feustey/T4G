@@ -1120,10 +1120,30 @@ async fn get_or_create_user_from_oauth(
     };
 
     // Créer l'utilisateur dans la base de données
-    state.db.create_user(&new_user).await.map_err(|e| {
-        tracing::error!("Error creating user from OAuth: {}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+    let create_err_str = match state.db.create_user(&new_user).await {
+        Ok(()) => None,
+        Err(e) => Some(e.to_string()), // e (Box<dyn Error>, non-Send) droppé ici
+    };
+    if let Some(err_str) = create_err_str {
+        if err_str.contains("duplicate key") || err_str.contains("unique constraint") {
+            // Race condition ou utilisateur existant non trouvé par get_user_by_email :
+            // on le recharge directement
+            tracing::warn!("Conflit email à l'insert, on recharge l'utilisateur existant");
+            match state.db.get_user_by_email(&email).await {
+                Ok(Some(user)) => return Ok(user),
+                Ok(None) => {
+                    tracing::error!("Utilisateur introuvable après conflit duplicate key");
+                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                }
+                Err(e2) => {
+                    tracing::error!("DB error re-fetching user after conflict: {}", e2);
+                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+        tracing::error!("Error creating user from OAuth: {}", err_str);
+        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    }
 
     tracing::info!(
         "Created new user from OAuth: {} ({})",
