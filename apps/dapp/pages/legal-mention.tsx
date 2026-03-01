@@ -126,7 +126,6 @@ export default function LegalMentionPage({ lang }: ILegalMentionPage) {
                 <p>{lm.main.section4.text1}</p>
                 <p>{lm.main.section4.text2}</p>
                 <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>{lm.main.section4.text3}</li>
                   <li>
                     {lm.main.section4.text4.replace('contact@token-for-good.com', '')}
                     <a
