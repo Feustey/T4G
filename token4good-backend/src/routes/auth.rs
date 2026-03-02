@@ -1146,11 +1146,11 @@ async fn get_or_create_user_from_oauth(
         if err_str.contains("duplicate key") || err_str.contains("unique constraint") {
             // Race condition ou utilisateur existant non trouvé par get_user_by_email :
             // on le recharge directement
-            tracing::warn!("Conflit email à l'insert, on recharge l'utilisateur existant");
+            tracing::warn!("Conflit à l'insert ({}), on recharge l'utilisateur existant par email={}", err_str, email);
             match state.db.get_user_by_email(&email).await {
                 Ok(Some(user)) => return Ok(user),
                 Ok(None) => {
-                    let msg = "Utilisateur introuvable après conflit duplicate key".to_string();
+                    let msg = format!("Utilisateur introuvable après conflit [{}] pour email={}", err_str, email);
                     tracing::error!("{}", msg);
                     return Err(msg);
                 }
