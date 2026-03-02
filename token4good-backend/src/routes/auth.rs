@@ -175,7 +175,8 @@ async fn handle_t4g_login(
         UserRole::Mentee, // t4g = étudiants/mentees
         format!("t4g_{}", t4g_id),
     )
-    .await?;
+    .await
+    .map_err(|e| { tracing::error!("handle_t4g_login: {}", e); StatusCode::INTERNAL_SERVER_ERROR })?;
 
     // Générer JWT
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -239,7 +240,8 @@ async fn handle_linkedin_login(
         UserRole::Alumni, // LinkedIn = alumni/professionnels
         format!("linkedin_{}", linkedin_id),
     )
-    .await?;
+    .await
+    .map_err(|e| { tracing::error!("handle_linkedin_login: {}", e); StatusCode::INTERNAL_SERVER_ERROR })?;
 
     // Générer JWT
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -310,7 +312,8 @@ async fn handle_oauth_login(
         UserRole::Mentee,
         format!("{}_{}", provider_prefix, sub),
     )
-    .await?;
+    .await
+    .map_err(|e| { tracing::error!("handle_oauth_login: {}", e); StatusCode::INTERNAL_SERVER_ERROR })?;
 
     let jwt_service = JWTService::new().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let jwt_token = jwt_service
@@ -514,7 +517,8 @@ async fn exchange_github(
         UserRole::Mentee,
         format!("github_{}", github_id),
     )
-    .await?;
+    .await
+    .map_err(|e| { tracing::error!("exchange_github: {}", e); StatusCode::INTERNAL_SERVER_ERROR })?;
 
     generate_auth_response(user)
 }
@@ -593,7 +597,8 @@ async fn exchange_linkedin(
         UserRole::Alumni,
         format!("linkedin_{}", sub),
     )
-    .await?;
+    .await
+    .map_err(|e| { tracing::error!("exchange_linkedin: {}", e); StatusCode::INTERNAL_SERVER_ERROR })?;
 
     generate_auth_response(user)
 }
@@ -694,7 +699,8 @@ async fn exchange_t4g(
         UserRole::Mentee,
         format!("t4g_{}", sub),
     )
-    .await?;
+    .await
+    .map_err(|e| { tracing::error!("exchange_t4g: {}", e); StatusCode::INTERNAL_SERVER_ERROR })?;
 
     generate_auth_response(user)
 }
@@ -811,9 +817,9 @@ async fn magic_link_verify(
         "magic_link".to_string(),
     )
     .await
-    .map_err(|status| {
-        tracing::error!("magic_link_verify: get_or_create_user_from_oauth failed with {:?}", status);
-        (status, Json(serde_json::json!({"error": "Erreur base de données lors de la vérification"})))
+    .map_err(|err_msg| {
+        tracing::error!("magic_link_verify: get_or_create_user_from_oauth: {}", err_msg);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": err_msg})))
     })?;
 
     generate_auth_response(user).map_err(|status| {
@@ -1079,7 +1085,7 @@ async fn get_or_create_user_from_oauth(
     full_name: String,
     role: UserRole,
     username_prefix: String,
-) -> Result<User, StatusCode> {
+) -> Result<User, String> {
     // Normaliser l'email en minuscules (GitHub/LinkedIn peuvent renvoyer des emails avec casse mixte)
     let email = email.to_lowercase();
     let email = email.trim().to_string();
@@ -1089,8 +1095,9 @@ async fn get_or_create_user_from_oauth(
         Ok(Some(existing_user)) => return Ok(existing_user),
         Ok(None) => {} // Nouvel utilisateur, on continue
         Err(e) => {
-            tracing::error!("DB error looking up user by email (oauth): {}", e);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            let msg = format!("get_user_by_email({}): {}", email, e);
+            tracing::error!("DB error looking up user by email (oauth): {}", msg);
+            return Err(msg);
         }
     }
 
@@ -1143,17 +1150,19 @@ async fn get_or_create_user_from_oauth(
             match state.db.get_user_by_email(&email).await {
                 Ok(Some(user)) => return Ok(user),
                 Ok(None) => {
-                    tracing::error!("Utilisateur introuvable après conflit duplicate key");
-                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                    let msg = "Utilisateur introuvable après conflit duplicate key".to_string();
+                    tracing::error!("{}", msg);
+                    return Err(msg);
                 }
                 Err(e2) => {
+                    let msg = format!("re-fetch après conflit: {}", e2);
                     tracing::error!("DB error re-fetching user after conflict: {}", e2);
-                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                    return Err(msg);
                 }
             }
         }
         tracing::error!("Error creating user from OAuth: {}", err_str);
-        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        return Err(format!("create_user: {}", err_str));
     }
 
     tracing::info!(
