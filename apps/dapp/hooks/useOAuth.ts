@@ -198,8 +198,8 @@ export const useOAuth = () => {
    */
   const sendMagicLink = async (email: string): Promise<{ success: boolean; dev_link?: string }> => {
     const locale = router.locale || (router as { defaultLocale?: string }).defaultLocale || 'fr';
-    const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
-    const response = await fetch(`${apiBase}/api/auth/magic-link/send`, {
+    // Appel via le proxy Vercel (/api/ → Railway) — même origine, pas de CORS
+    const response = await fetch('/api/auth/magic-link/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, locale }),

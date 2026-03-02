@@ -27,9 +27,8 @@ export default function MagicLinkCallback() {
 
     const verify = async () => {
       try {
-        // Appel direct au backend Rust : vérifie le token et retourne un JWT
-        const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
-        const response = await fetch(`${apiBase}/api/auth/magic-link/verify`, {
+        // Appel via le proxy Vercel (/api/ → Railway) pour éviter tout problème CORS/URL
+        const response = await fetch('/api/auth/magic-link/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
