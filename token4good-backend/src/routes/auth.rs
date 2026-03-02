@@ -795,10 +795,10 @@ async fn magic_link_send(
 async fn magic_link_verify(
     State(state): State<AppState>,
     Json(payload): Json<MagicLinkVerifyRequest>,
-) -> Result<Json<AuthResponse>, StatusCode> {
+) -> Result<Json<AuthResponse>, (StatusCode, Json<serde_json::Value>)> {
     let email = verify_magic_token(&payload.token).ok_or_else(|| {
         tracing::warn!("Magic link token invalide ou expiré");
-        StatusCode::UNAUTHORIZED
+        (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Lien expiré ou invalide. Veuillez demander un nouveau lien."})))
     })?;
 
     let name = email.split('@').next().unwrap_or("").to_string();
@@ -810,9 +810,16 @@ async fn magic_link_verify(
         UserRole::Mentee,
         "magic_link".to_string(),
     )
-    .await?;
+    .await
+    .map_err(|status| {
+        tracing::error!("magic_link_verify: get_or_create_user_from_oauth failed with {:?}", status);
+        (status, Json(serde_json::json!({"error": "Erreur base de données lors de la vérification"})))
+    })?;
 
-    generate_auth_response(user)
+    generate_auth_response(user).map_err(|status| {
+        tracing::error!("magic_link_verify: generate_auth_response failed with {:?}", status);
+        (status, Json(serde_json::json!({"error": "Erreur lors de la génération du token d'authentification"})))
+    })
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
