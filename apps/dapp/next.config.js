@@ -126,9 +126,11 @@ const nextConfig = {
   trailingSlash: true,
   
   // Variables d'environnement publiques avec fallbacks
+  // Note: NEXT_PUBLIC_API_URL n'est pas ici pour éviter d'injecter 'http://localhost:3000'
+  // dans le bundle Vercel si la variable n'est pas configurée.
+  // Le fallback est dans apiClient.ts : 'https://apirust-production.up.railway.app'
   env: {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
     NEXT_PUBLIC_DAZNO_API_URL: process.env.NEXT_PUBLIC_DAZNO_API_URL || 'https://www.token-for-good.com/api',
     NEXT_PUBLIC_DAZNO_USERS_API_URL: process.env.NEXT_PUBLIC_DAZNO_USERS_API_URL || 'https://www.token-for-good.com/api',
     NEXT_PUBLIC_DAZNO_VERIFY_URL: process.env.NEXT_PUBLIC_DAZNO_VERIFY_URL || 'https://www.token-for-good.com/api/verify',
