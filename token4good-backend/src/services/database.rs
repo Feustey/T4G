@@ -102,7 +102,7 @@ impl DatabaseService {
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<User>, Box<dyn Error>> {
         // Requête compatible avec ou sans colonnes mentoring (migration 007)
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE email = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded FROM users WHERE LOWER(email) = LOWER($1)"
         )
         .bind(email)
         .fetch_optional(&self.pool)
