@@ -257,8 +257,9 @@ export const useOAuth = () => {
       // Nettoyer le state seulement après succès complet
       sessionStorage.removeItem(`${provider}_oauth_state`);
 
-      // Rediriger vers le dashboard (avec locale pour i18n)
-      router.push('/dashboard', '/dashboard', { locale: router.locale || 'fr' });
+      // Rechargement complet pour que AuthContext.loadUser() lise le token en localStorage
+      const locale = router.locale || 'fr';
+      window.location.href = `/${locale}/dashboard/`;
     } catch (error) {
       console.error(`Erreur callback ${provider}:`, error);
       throw error;

@@ -58,8 +58,9 @@ export default function MagicLinkCallback({ token: tokenProp }: Props) {
         setStatus('success');
         const locale = getLocale(router);
         const dashboardUrl = `/${locale}/dashboard/`;
+        // Rechargement complet pour que AuthContext.loadUser() lise le token en localStorage
         setTimeout(() => {
-          router.push(dashboardUrl, dashboardUrl, { locale });
+          window.location.href = dashboardUrl;
         }, 500);
       } catch (err) {
         setStatus('error');
