@@ -1,23 +1,28 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 import { apiClient } from '../../../services/apiClient';
 import Head from 'next/head';
 
 const getLocale = (router: { locale?: string; defaultLocale?: string }) =>
   router.locale || router.defaultLocale || 'fr';
 
-export default function MagicLinkCallback() {
+interface Props {
+  token: string | null;
+}
+
+export default function MagicLinkCallback({ token: tokenProp }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const hasProcessed = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady || hasProcessed.current) return;
+    if (hasProcessed.current) return;
 
-    const { token } = router.query;
+    const token = tokenProp;
 
-    if (!token || typeof token !== 'string') {
+    if (!token) {
       setStatus('error');
       setErrorMessage('Lien invalide ou incomplet');
       return;
@@ -68,7 +73,7 @@ export default function MagicLinkCallback() {
     };
 
     verify();
-  }, [router.isReady, router.query, router]);
+  }, [tokenProp, router]);
 
   return (
     <>
@@ -118,4 +123,7 @@ export default function MagicLinkCallback() {
   );
 }
 
-export const getServerSideProps = () => ({ props: {} });
+export const getServerSideProps: GetServerSideProps<Props> = (context) => {
+  const token = typeof context.query.token === 'string' ? context.query.token : null;
+  return Promise.resolve({ props: { token } });
+};
