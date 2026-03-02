@@ -1073,6 +1073,10 @@ async fn get_or_create_user_from_oauth(
     role: UserRole,
     username_prefix: String,
 ) -> Result<User, StatusCode> {
+    // Normaliser l'email en minuscules (GitHub/LinkedIn peuvent renvoyer des emails avec casse mixte)
+    let email = email.to_lowercase();
+    let email = email.trim().to_string();
+
     // Essayer de récupérer l'utilisateur existant
     match state.db.get_user_by_email(&email).await {
         Ok(Some(existing_user)) => return Ok(existing_user),

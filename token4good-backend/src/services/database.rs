@@ -117,21 +117,22 @@ impl DatabaseService {
     }
 
     /// Convertit une row en User (colonnes de base uniquement, compatible pré-migration 007)
+    /// Toutes les colonnes nullable utilisent unwrap_or/ok() pour ne jamais échouer sur NULL.
     fn row_to_user_basic(&self, row: &sqlx::postgres::PgRow) -> Result<User, Box<dyn Error>> {
         Ok(User {
             id: row.try_get("id")?,
             email: row.try_get("email")?,
-            firstname: row.try_get("firstname")?,
-            lastname: row.try_get("lastname")?,
-            lightning_address: row.try_get("lightning_address")?,
-            role: row.try_get::<String, _>("role")?.parse().unwrap_or(crate::models::user::UserRole::Alumni),
-            username: row.try_get("username")?,
+            firstname: row.try_get("firstname").unwrap_or_default(),
+            lastname: row.try_get("lastname").unwrap_or_default(),
+            lightning_address: row.try_get("lightning_address").unwrap_or_default(),
+            role: row.try_get::<String, _>("role").unwrap_or_default().parse().unwrap_or(crate::models::user::UserRole::Alumni),
+            username: row.try_get("username").unwrap_or_default(),
             bio: row.try_get("bio").ok(),
-            score: row.try_get::<i32, _>("score")? as u32,
+            score: row.try_get::<i32, _>("score").unwrap_or(0) as u32,
             avatar: row.try_get("avatar").ok(),
             created_at: row.try_get("created_at")?,
             updated_at: row.try_get("updated_at")?,
-            is_active: row.try_get("is_active")?,
+            is_active: row.try_get("is_active").unwrap_or(true),
             wallet_address: row.try_get("wallet_address").ok(),
             preferences: row.try_get("preferences").unwrap_or(serde_json::Value::Object(serde_json::Map::new())),
             email_verified: row.try_get("email_verified").unwrap_or(false),
