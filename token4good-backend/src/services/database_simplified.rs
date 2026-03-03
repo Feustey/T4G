@@ -42,7 +42,7 @@ impl DatabaseService {
                 updated_at = NOW()
             "#
         )
-        .bind(user.id)
+        .bind(user.id.to_string())
         .bind(&user.email)
         .bind(&user.firstname)
         .bind(&user.lastname)
@@ -75,7 +75,7 @@ impl DatabaseService {
 
         if let Some(row) = row {
             let user = User {
-                id: row.try_get("id")?,
+                id: row.try_get::<String, _>("id")?.parse().unwrap_or_else(|_| uuid::Uuid::new_v4()),
                 email: row.try_get("email")?,
                 firstname: row.try_get("firstname")?,
                 lastname: row.try_get("lastname")?,
@@ -121,7 +121,7 @@ impl DatabaseService {
 
         if let Some(row) = row {
             let user = User {
-                id: row.try_get("id")?,
+                id: row.try_get::<String, _>("id")?.parse().unwrap_or_else(|_| uuid::Uuid::new_v4()),
                 email: row.try_get("email")?,
                 firstname: row.try_get("firstname")?,
                 lastname: row.try_get("lastname")?,
@@ -169,7 +169,7 @@ impl DatabaseService {
             RETURNING *
             "#,
         )
-        .bind(user.id)
+        .bind(user.id.to_string())
         .bind(&user.email)
         .bind(&user.firstname)
         .bind(&user.lastname)
@@ -191,7 +191,7 @@ impl DatabaseService {
         .await?;
 
         Ok(User {
-            id: row.try_get("id")?,
+            id: row.try_get::<String, _>("id")?.parse().unwrap_or_else(|_| uuid::Uuid::new_v4()),
             email: row.try_get("email")?,
             firstname: row.try_get("firstname")?,
             lastname: row.try_get("lastname")?,
