@@ -33,6 +33,13 @@ export function Onboarding() {
     { revalidateOnFocus: false }
   );
 
+  // Rediriger les utilisateurs déjà onboardés vers le dashboard
+  useEffect(() => {
+    if (user?.is_onboarded) {
+      window.location.href = `/${locale}/dashboard/`;
+    }
+  }, [user, locale]);
+
   // Pré-remplir depuis les données existantes
   useEffect(() => {
     if (user) {

@@ -110,7 +110,9 @@ export const useOAuth = () => {
       // Login via backend Rust (vérifie le token Dazno et retourne JWT)
       await login('dazeno', { token });
 
-      router.push('/dashboard');
+      // Rechargement complet — index.tsx redirige vers /onboarding ou /dashboard selon is_onboarded
+      const locale = router.locale || 'fr';
+      window.location.href = `/${locale}/`;
     } catch (error) {
       console.error('Erreur authentification Dazno:', error);
       throw error;

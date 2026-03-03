@@ -26,13 +26,9 @@ export function DirectoryPage({
   const { user } = useAuth();
   const categoryName="Directory"
 
-  const { data: users } = useSwr<User[]>('/api/users', () => apiClient.getUsers());
+  const { data: users, isLoading: isUsersLoading } = useSwr<User[]>('/api/users', () => apiClient.getUsers());
 
-  //filteredAvailableServices=service
-  let filteredTypeUsers =[]
-  if(users){
-    filteredTypeUsers = users
-  }
+  const filteredTypeUsers = users ?? [];
 
 
   const [incr, setIncr] = useState(0); // Indice de début de la plage
@@ -229,7 +225,9 @@ export function DirectoryPage({
           </section>
         </div>
 
-        {sortedUsers && sortedUsers.length > 0 ? (
+        {isUsersLoading ? (
+          <Spinner lang={lang} spinnerText={'Loading...'} size="lg" />
+        ) : sortedUsers.length > 0 ? (
           <section
             className="o-layout--grid--auto"
             style={{ '--grid-min-size': `300px` } as React.CSSProperties}
@@ -248,15 +246,9 @@ export function DirectoryPage({
                 />
               )
             )}
-            
           </section>
-        ):
-        (!sortedUsers || sortedUsers.length<1) ? 
-          <>
-            <Spinner lang={lang} spinnerText={'Loading...'} size="lg" />
-          </>
-        : (
-           <div className='flex flex-col justify-center items-center my-8'>
+        ) : (
+          <div className='flex flex-col justify-center items-center my-8'>
             <Image
               priority
               alt=""
@@ -265,7 +257,7 @@ export function DirectoryPage({
               height={124}
             />
             <p className="">{lang.utils.noResult}...</p>
-           </div>
+          </div>
         )}
         {sortedUsers && !(sortedUsers.length<incr+24) && (
         <button className="w-full flex justify-center" onClick={incrementSlice}> 
