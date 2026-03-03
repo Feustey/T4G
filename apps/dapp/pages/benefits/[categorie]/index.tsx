@@ -374,7 +374,7 @@ export function BenefitPage({
 }
 
 BenefitPage.auth = true;
-BenefitPage.role = ['ALUMNI', 'STUDENT'];
+BenefitPage.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export default BenefitPage;
 

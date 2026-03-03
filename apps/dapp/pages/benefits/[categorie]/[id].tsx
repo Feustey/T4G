@@ -75,7 +75,7 @@ export function BenefitPage({
 }
 
 BenefitPage.auth = true;
-BenefitPage.role = ['ALUMNI', 'STUDENT'];
+BenefitPage.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export const getServerSideProps: GetServerSideProps = async function (context) {
   const benefitId = context.query.id as string;
