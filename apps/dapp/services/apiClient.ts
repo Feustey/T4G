@@ -11,10 +11,13 @@ class APIClient {
   constructor() {
     // URL du backend Rust configurée via NEXT_PUBLIC_API_URL
     // Développement local: http://localhost:3001
-    // Production Railway: https://apirust-production.up.railway.app
-    // Note: le proxy Vercel (vercel.json) est bloqué par la protection SSRF de Vercel
-    // → les appels vont directement au backend Railway (CORS configuré côté Rust)
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
+    // Production: https://apirust-production.up.railway.app  (sans /api)
+    //   ou       https://t4g.dazno.de/api                   (avec /api)
+    // Les endpoints définis dans ce client commencent tous par /api/...,
+    // donc on retire le suffixe /api de baseURL s'il est présent pour éviter
+    // un double /api dans l'URL finale.
+    const raw = process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app';
+    this.baseURL = raw.replace(/\/api\/?$/, '').replace(/\/$/, '');
   }
 
   private getHeaders(): HeadersInit {

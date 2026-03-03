@@ -125,6 +125,7 @@ pub fn build_router(state: AppState) -> Router {
         .nest(
             "/api/users",
             routes::users::user_routes()
+                .merge(routes::mentoring_offers::mentoring_user_routes())
                 .layer(axum::middleware::from_fn(
                     crate::middleware::authorization::user_resource_authorization,
                 ))
