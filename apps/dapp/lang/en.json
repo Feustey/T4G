@@ -7,37 +7,7 @@
       },
       {
         "label": "Benefits",
-        "href": "/benefits",
-        "childrens": [
-          {
-            "label": "See all",
-            "href": "/benefits"
-          },
-          {
-            "label": "Professional Coaching",
-            "href": "/Professional%20coaching"
-          },
-          {
-            "label": "Certification programs",
-            "href": "/Certification%20programs"
-          },
-          {
-            "label": "Executive education",
-            "href": "/Executive%20education"
-          },
-          {
-            "label": "Recruitment visibility",
-            "href": "/Recruitment%20visibility"
-          },
-          {
-            "label": "Conferences & events",
-            "href": "/Conferences%20%26%20events"
-          },
-          {
-            "label": "Knowledge & expertise",
-            "href": "/Knowledge%20%26%20expertise"
-          }
-        ]
+        "href": "/benefits"
       },
       {
         "label": "Services",
@@ -59,22 +29,7 @@
       },
       {
         "label": "Benefits",
-        "href": "/benefits",
-        "childrens": [
-          {
-            "label": "See all",
-            "href": "/benefits"
-          },
-          {
-            "label": "Mentoring",
-            "href": "/Mentoring"
-          },
-          {
-            "label": "Reverse mentoring",
-            "href": "/Reverse%20mentoring",
-            "inactive": true
-          }
-        ]
+        "href": "/benefits"
       },
       {
         "label": "Services",

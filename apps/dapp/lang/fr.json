@@ -6,38 +6,8 @@
         "href": "/dashboard"
       },
       {
-        "label": "Bénéfices",
-        "href": "/benefits",
-        "childrens": [
-          {
-            "label": "Voir tout",
-            "href": "/benefits"
-          },
-          {
-            "label": "Coaching professionnel",
-            "href": "/Professional%20coaching"
-          },
-          {
-            "label": "Programmes de certification",
-            "href": "/Certification%20programs"
-          },
-          {
-            "label": "Formations",
-            "href": "/Executive%20education"
-          },
-          {
-            "label": "Recrutement et visibilité",
-            "href": "/Recruitment%20visibility"
-          },
-          {
-            "label": "Conférences et événements",
-            "href": "/Conferences%20%26%20events"
-          },
-          {
-            "label": "Savoirs et expertise",
-            "href": "/Knowledge%20%26%20expertise"
-          }
-        ]
+        "label": "Avantages",
+        "href": "/benefits"
       },
       {
         "label": "Services",
@@ -58,23 +28,8 @@
         "href": "/dashboard"
       },
       {
-        "label": "Bénéfices",
-        "href": "/benefits",
-        "childrens": [
-          {
-            "label": "Voir tout",
-            "href": "/benefits"
-          },
-          {
-            "label": "Mentoring",
-            "href": "/Mentoring"
-          },
-          {
-            "label": "Entraide étudiants",
-            "href": "/Reverse%20mentoring",
-            "inactive": true
-          }
-        ]
+        "label": "Avantages",
+        "href": "/benefits"
       },
       {
         "label": "Services",
@@ -665,7 +620,7 @@
         "link": "/dashboard"
       },
       "benefits": {
-        "label": "Bénéfices",
+        "label": "Avantages",
         "link": "/benefits"
       },
       "services": {

@@ -1,12 +1,8 @@
 import Image from 'next/image';
-import { CategoryType, LangType, SessionType } from '../../types';
+import { LangType } from '../../types';
 import type { User } from '../../services/apiClient';
-import { CustomLink, Icons, IconsT4G, MenuItem } from '../';
-import { useRouter } from 'next/router';
-import useSwr from 'swr';
-import { apiFetcher } from 'apps/dapp/services/config';
+import { Icons, IconsT4G, MenuItem } from '../';
 import { useAuth } from '../../contexts/AuthContext';
-// import * as Sentry from '@sentry/nextjs';
 
 export interface ISideNav {
   lang: LangType;
@@ -14,13 +10,7 @@ export interface ISideNav {
 }
 
 export const SideNav: React.FC<ISideNav> = ({ lang, user }) => {
-  const router = useRouter();
   const { logout } = useAuth();
-
-  const { data: categorieList } = useSwr<Omit<CategoryType, 'index'>[]>(
-    '/service-categories/as_consumer',
-    apiFetcher
-  ); //TODO error
 
   const renderMenuItems = (menuItems) => {
     return menuItems.map((link, i) => (
@@ -28,7 +18,7 @@ export const SideNav: React.FC<ISideNav> = ({ lang, user }) => {
         <MenuItem
           href={link.href}
           label={link.label}
-          childrens={link.label=="Benefits"&&categorieList}
+          childrens={link.childrens}
           inactive={link?.inactive || undefined}
           index={i}
         />
