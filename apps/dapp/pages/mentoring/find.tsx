@@ -5,9 +5,9 @@ import useSwr from 'swr';
 import ConnectedLayout from '../../layouts/ConnectedLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIndexing } from '../../hooks';
-import { Breadcrumb, Button, Icons, Spinner } from '../../components';
+import { Breadcrumb, Button, Spinner } from '../../components';
 import { AuthPageType, LangType } from '../../types';
-import { apiClient, LearningCategory, LearningTopic, MentoringOffer } from '../../services/apiClient';
+import { apiClient, LearningCategory, MentoringOffer } from '../../services/apiClient';
 
 interface IPage {
   lang: LangType;
