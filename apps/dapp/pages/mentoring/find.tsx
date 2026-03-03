@@ -50,11 +50,11 @@ const MOCK_OFFERS: MentoringOffer[] = [
     duration_minutes: 60,
     format: 'video',
     token_cost: 60,
-    availability: [{ date: new Date(Date.now() + 2 * 86400000).toISOString(), duration_minutes: 60 }],
+    availability: [{ date: '2026-04-10T10:00:00.000Z', duration_minutes: 60 }],
     status: 'open',
     average_rating: 4.9,
     sessions_count: 12,
-    created_at: new Date().toISOString(),
+    created_at: '2026-03-01T00:00:00.000Z',
   },
   {
     id: 'offer_2',
@@ -66,11 +66,11 @@ const MOCK_OFFERS: MentoringOffer[] = [
     duration_minutes: 90,
     format: 'video',
     token_cost: 120,
-    availability: [{ date: new Date(Date.now() + 3 * 86400000).toISOString(), duration_minutes: 90 }],
+    availability: [{ date: '2026-04-12T14:00:00.000Z', duration_minutes: 90 }],
     status: 'open',
     average_rating: 4.7,
     sessions_count: 7,
-    created_at: new Date().toISOString(),
+    created_at: '2026-03-01T00:00:00.000Z',
   },
   {
     id: 'offer_3',
@@ -84,13 +84,13 @@ const MOCK_OFFERS: MentoringOffer[] = [
     format: 'video',
     token_cost: 30,
     availability: [
-      { date: new Date(Date.now() + 86400000).toISOString(), duration_minutes: 45 },
-      { date: new Date(Date.now() + 4 * 86400000).toISOString(), duration_minutes: 45 },
+      { date: '2026-04-08T09:00:00.000Z', duration_minutes: 45 },
+      { date: '2026-04-11T09:00:00.000Z', duration_minutes: 45 },
     ],
     status: 'open',
     average_rating: 5.0,
     sessions_count: 23,
-    created_at: new Date().toISOString(),
+    created_at: '2026-03-01T00:00:00.000Z',
   },
   {
     id: 'offer_4',
@@ -106,7 +106,7 @@ const MOCK_OFFERS: MentoringOffer[] = [
     status: 'open',
     average_rating: 4.5,
     sessions_count: 4,
-    created_at: new Date().toISOString(),
+    created_at: '2026-03-01T00:00:00.000Z',
   },
 ];
 
@@ -124,13 +124,16 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Filtres pré-sélectionnés depuis l'URL (ex: ?category=lightning_network, ?mentor=user_id)
-  const initialCategory = typeof router.query.category === 'string' ? router.query.category : '';
-  const initialMentorId = typeof router.query.mentor === 'string' ? router.query.mentor : '';
+  const [mounted, setMounted] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [selectedMentorId, setSelectedMentorId] = useState<string>(initialMentorId);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedMentorId, setSelectedMentorId] = useState<string>('');
   const [selectedLevel, setSelectedLevel] = useState<string>('');
+
+  // Activer le rendu client (évite les erreurs d'hydratation SSR/CSR)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Synchroniser les filtres quand l'URL change (ex: navigation, lien direct)
   useEffect(() => {
@@ -340,7 +343,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
         </div>
 
         {/* ── Résultats ── */}
-        {isLoading ? (
+        {!mounted || isLoading ? (
           <Spinner lang={lang} spinnerText="Chargement des mentors..." size="lg" />
         ) : offers.length === 0 ? (
           <div
