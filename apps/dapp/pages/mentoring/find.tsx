@@ -37,78 +37,6 @@ const LEVEL_COLORS: Record<string, { bg: string; color: string }> = {
   advanced:     { bg: '#fce7f3', color: '#9d174d' },
 };
 
-// Données mock pour affichage sans backend (sera remplacé par vraie API)
-const MOCK_OFFERS: MentoringOffer[] = [
-  {
-    id: 'offer_1',
-    mentor_id: 'mentor_1',
-    mentor: { id: 'mentor_1', firstname: 'Alice', lastname: 'Martin', score: 480, mentor_bio: 'Opératrice de nœud depuis 3 ans, passionnée par le routing Lightning.' },
-    topic_slug: 'lightning-channel-management',
-    topic: { id: 't1', slug: 'lightning-channel-management', name: 'Gestion des canaux Lightning', level: 'intermediate', tags: ['lightning', 'channels'], sort_order: 2 },
-    target_level: 'intermediate',
-    description: 'Je t\'aide à ouvrir tes premiers canaux et à optimiser ta liquidité.',
-    duration_minutes: 60,
-    format: 'video',
-    token_cost: 60,
-    availability: [{ date: '2026-04-10T10:00:00.000Z', duration_minutes: 60 }],
-    status: 'open',
-    average_rating: 4.9,
-    sessions_count: 12,
-    created_at: '2026-03-01T00:00:00.000Z',
-  },
-  {
-    id: 'offer_2',
-    mentor_id: 'mentor_2',
-    mentor: { id: 'mentor_2', firstname: 'Bob', lastname: 'Dupont', score: 1600, mentor_bio: 'Expert RGB Protocol et développeur Lightning depuis 2019.' },
-    topic_slug: 'rgb-basics',
-    topic: { id: 't2', slug: 'rgb-basics', name: 'RGB Protocol — bases', level: 'advanced', tags: ['rgb', 'protocol'], sort_order: 2 },
-    target_level: 'advanced',
-    duration_minutes: 90,
-    format: 'video',
-    token_cost: 120,
-    availability: [{ date: '2026-04-12T14:00:00.000Z', duration_minutes: 90 }],
-    status: 'open',
-    average_rating: 4.7,
-    sessions_count: 7,
-    created_at: '2026-03-01T00:00:00.000Z',
-  },
-  {
-    id: 'offer_3',
-    mentor_id: 'mentor_3',
-    mentor: { id: 'mentor_3', firstname: 'Chloé', lastname: 'Bernard', score: 820, mentor_bio: 'Je configure des DazBox et accompagne les nouveaux opérateurs.' },
-    topic_slug: 'dazbox-setup',
-    topic: { id: 't3', slug: 'dazbox-setup', name: 'Installer et configurer sa DazBox', level: 'beginner', tags: ['dazbox', 'setup'], sort_order: 1 },
-    target_level: 'beginner',
-    description: 'Setup complet de ta DazBox en moins d\'une heure.',
-    duration_minutes: 45,
-    format: 'video',
-    token_cost: 30,
-    availability: [
-      { date: '2026-04-08T09:00:00.000Z', duration_minutes: 45 },
-      { date: '2026-04-11T09:00:00.000Z', duration_minutes: 45 },
-    ],
-    status: 'open',
-    average_rating: 5.0,
-    sessions_count: 23,
-    created_at: '2026-03-01T00:00:00.000Z',
-  },
-  {
-    id: 'offer_4',
-    mentor_id: 'mentor_4',
-    mentor: { id: 'mentor_4', firstname: 'David', lastname: 'Leroy', score: 560, mentor_bio: 'Intégrations DazPay pour commerçants, plusieurs projets livrés.' },
-    topic_slug: 'dazpay-integration',
-    topic: { id: 't4', slug: 'dazpay-integration', name: 'Intégrer DazPay dans une boutique', level: 'intermediate', tags: ['dazpay', 'payments'], sort_order: 2 },
-    target_level: 'intermediate',
-    duration_minutes: 60,
-    format: 'text',
-    token_cost: 40,
-    availability: [],
-    status: 'open',
-    average_rating: 4.5,
-    sessions_count: 4,
-    created_at: '2026-03-01T00:00:00.000Z',
-  },
-];
 
 function getUserLevel(score: number): string {
   if (score >= 1500) return 'Expert';
@@ -154,7 +82,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   );
 
   // Fetch des offres
-  const { data: rawOffers = MOCK_OFFERS, isLoading: isLoadingOffers } = useSwr<MentoringOffer[]>(
+  const { data: rawOffers = [], isLoading: isLoadingOffers } = useSwr<MentoringOffer[]>(
     ['/api/mentoring/offers', selectedCategory, selectedLevel, selectedFormat, maxCost, selectedMentorId],
     () => apiClient.getMentoringOffers({
       category: selectedCategory || undefined,
@@ -165,11 +93,11 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
     }),
     {
       revalidateOnFocus: false,
-      onError: () => { /* fallback sur mock */ },
+      onError: () => { /* fallback sur tableau vide */ },
     }
   );
 
-  // Filtrage côté client (pour mocks ou complément API)
+  // Filtrage côté client (complément aux filtres API)
   const offers = useMemo(() => {
     return rawOffers.filter((o) => {
       if (selectedCategory && o.topic?.category?.slug !== selectedCategory && !o.topic_slug.includes(selectedCategory)) return false;

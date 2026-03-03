@@ -531,6 +531,7 @@ const SessionDetailPage: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   );
 }
 
+SessionDetailPage.auth = true;
 SessionDetailPage.role = ['alumni', 'mentee', 'mentor', 'service_provider', 'admin'];
 
 export default SessionDetailPage;
