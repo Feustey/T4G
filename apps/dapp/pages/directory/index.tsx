@@ -235,7 +235,7 @@ export function DirectoryPage({
             style={{ '--grid-min-size': `300px` } as React.CSSProperties}
           >
             {sortedUsers.slice(0,24+incr).map(
-              (dirUser: User, index: number) => (
+              (dirUser: User) => (
                 <UserCard
                   categorieName={categoryName}
                   key={dirUser.id}
@@ -244,6 +244,7 @@ export function DirectoryPage({
                   isMentorActive={dirUser.is_mentor_active}
                   isLink={true}
                   parent="directory"
+                  prefetchedUser={dirUser}
                 />
               )
             )}

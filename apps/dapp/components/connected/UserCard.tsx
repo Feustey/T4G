@@ -17,6 +17,8 @@ export interface IUserCard {
   parent?: string;
   isLink: boolean;
   isMentorActive?: boolean;
+  /** Passer les données user déjà chargées pour éviter une requête individuelle */
+  prefetchedUser?: UserCardUser;
 }
 
 export const UserCard: React.FC<IUserCard> = ({
@@ -26,18 +28,22 @@ export const UserCard: React.FC<IUserCard> = ({
   parent,
   isLink,
   isMentorActive,
+  prefetchedUser,
 }) => {
-  const { data: cv, error: cvError, isLoading: isCvLoading } = useSwr<UserCVType>(
+  // N'effectue la requête individuelle que si les données ne sont pas déjà disponibles
+  const { data: fetchedUser, error: userError, isLoading: isUserLoading } = useSwr<UserCardUser>(
+    !prefetchedUser && userId ? ['user', userId] : null,
+    ([_, id]) => apiClient.getUser(id)
+  );
+  const user = prefetchedUser ?? fetchedUser;
+
+  const { data: cv, isLoading: isCvLoading } = useSwr<UserCVType>(
     userId ? ['user-cv', userId] : null,
     ([_, id]) => apiClient.getUserCV(id as string)
   );
-  const { data: user, error: userError, isLoading: isUserLoading } = useSwr<UserCardUser>(
-    userId ? ['user', userId] : null,
-    ([_, id]) => apiClient.getUser(id)
-  );
 
-  const isLoading = isCvLoading || isUserLoading;
-  const error = cvError || userError;
+  const isLoading = isUserLoading || (!prefetchedUser && isCvLoading && !user);
+  const error = !prefetchedUser && userError;
 
   // Afficher un état de chargement (squelette)
   if (isLoading) {
@@ -56,7 +62,7 @@ export const UserCard: React.FC<IUserCard> = ({
   }
 
   // Afficher un état d'erreur
-  if (error || !user || !cv) {
+  if (error || !user) {
     return (
       <div className="c-benefit-card--user p-4 text-center text-red-500">
         Impossible de charger les informations de l&apos;utilisateur.
@@ -117,17 +123,23 @@ export const UserCard: React.FC<IUserCard> = ({
             </span>
           )}
         </p>
-        {isLink && (
+        {isLink && cv && (
           <div className="mt-2">
-            <p className="c-benefit-card__infos__job">
-              <strong>Programme:</strong> {cv.program}
-            </p>
-            <p className="c-benefit-card__infos__job">
-              <strong>Sujet:</strong> {cv.topic}
-            </p>
-            <p className="c-benefit-card__infos__industry">
-              <strong>Diplômé en:</strong> {cv.graduatedYear}
-            </p>
+            {cv.program && (
+              <p className="c-benefit-card__infos__job">
+                <strong>Programme:</strong> {cv.program}
+              </p>
+            )}
+            {cv.topic && (
+              <p className="c-benefit-card__infos__job">
+                <strong>Sujet:</strong> {cv.topic}
+              </p>
+            )}
+            {cv.graduatedYear && (
+              <p className="c-benefit-card__infos__industry">
+                <strong>Diplômé en:</strong> {cv.graduatedYear}
+              </p>
+            )}
           </div>
         )}
       </div>

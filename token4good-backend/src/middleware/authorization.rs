@@ -1,8 +1,11 @@
-use axum::{extract::Request, http::StatusCode, middleware::Next, response::Response};
+use axum::{extract::Request, http::{Method, StatusCode}, middleware::Next, response::Response};
 
 use crate::middleware::auth::AuthUser;
 
-/// Middleware to ensure users can only access their own resources
+/// Middleware to ensure users can only access their own resources.
+/// Public GET access is allowed for profiles, CV, avatar (used by directory).
+/// Sensitive endpoints (wallet, transactions) and all write operations
+/// are restricted to the resource owner or admin.
 pub async fn user_resource_authorization(
     request: Request,
     next: Next,
@@ -20,10 +23,20 @@ pub async fn user_resource_authorization(
     // Find the user ID in the path (typically after /users/)
     if let Some(users_index) = path_segments.iter().position(|&x| x == "users") {
         if let Some(user_id) = path_segments.get(users_index + 1) {
-            // Allow access if the user is accessing their own resource or is an admin
-            if auth_user.id != *user_id
+            // "me" pseudo-path is always allowed (handled by auth middleware)
+            if *user_id == "me" {
+                return Ok(next.run(request).await);
+            }
+
+            // GET requests on public profile data are allowed for all authenticated users
+            // (needed for directory, UserCard, profile views)
+            let is_sensitive_path =
+                uri_path.contains("/wallet") || uri_path.contains("/transactions");
+            let is_write = request.method() != Method::GET;
+
+            if (is_write || is_sensitive_path)
+                && auth_user.id != *user_id
                 && auth_user.role != "ADMIN"
-                && auth_user.role != "SERVICE_PROVIDER"
             {
                 return Err(StatusCode::FORBIDDEN);
             }
