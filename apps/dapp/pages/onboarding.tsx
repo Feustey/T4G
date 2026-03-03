@@ -497,6 +497,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #e2e8f0',
     fontSize: 16,
     boxSizing: 'border-box',
+    color: '#1a202c',
   },
   btnRow: {
     display: 'flex',
