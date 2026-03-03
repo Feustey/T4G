@@ -142,6 +142,6 @@ const Page: React.FC<Components.Wallet.Page.Props> & AuthPageType = ({
 export default Page;
 
 Page.auth = true;
-Page.role = ['SERVICE_PROVIDER'];
+Page.role = ['service_provider'];
 
 export const getServerSideProps = () => ({ props: {} });

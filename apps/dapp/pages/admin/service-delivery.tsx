@@ -235,6 +235,6 @@ const Page: React.FC<Components.Admin.ServiceDeliveryPage.Props> &
 export default Page;
 
 Page.auth = true;
-Page.role = ['SERVICE_PROVIDER'];
+Page.role = ['service_provider'];
 
 export const getServerSideProps = () => ({ props: {} });

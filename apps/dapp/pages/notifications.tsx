@@ -133,6 +133,6 @@ const Page: React.FC<INotifications> & AuthPageType = ({ lang }: INotifications)
 export default Page;
 
 Page.auth = true;
-Page.role = ['ALUMNI', 'STUDENT'];
+Page.role = ['alumni', 'mentee', 'mentor', 'service_provider'];
 
 export const getServerSideProps = () => ({ props: {} });
