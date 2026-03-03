@@ -235,12 +235,12 @@ export const useOAuth = () => {
         }
       }
 
-      // Appel direct au backend Rust : échange le code et retourne un JWT
-      // redirect_uri doit correspondre EXACTEMENT à ce qui a été envoyé lors de l'autorisation
-      const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://apirust-production.up.railway.app').replace(/\/$/, '');
+      // Échange le code via le proxy Vercel (/api/ → Railway) — même origine, pas de CORS
+      // IMPORTANT : ne pas utiliser NEXT_PUBLIC_API_URL ici car il peut inclure /api déjà
+      // (ex: https://t4g.dazno.de/api) ce qui doublerait le chemin → 404.
       const appOrigin = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '');
       const redirectUri = `${appOrigin}/auth/callback/${provider}`;
-      const response = await fetch(`${apiBase}/api/auth/exchange/${provider}`, {
+      const response = await fetch(`/api/auth/exchange/${provider}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, redirect_uri: redirectUri }),
