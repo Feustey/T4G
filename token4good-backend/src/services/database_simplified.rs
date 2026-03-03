@@ -22,6 +22,10 @@ impl DatabaseService {
 impl DatabaseService {
     pub async fn new(database_url: &str) -> Result<Self, Box<dyn Error>> {
         let pool = PgPool::connect(database_url).await?;
+        // Applique les migrations au démarrage (idempotent via sqlx_migrations table)
+        if let Err(e) = sqlx::migrate!("./migrations").run(&pool).await {
+            tracing::warn!("Migrations: {}", e);
+        }
         Ok(Self { pool })
     }
 
@@ -29,8 +33,8 @@ impl DatabaseService {
     pub async fn create_user(&self, user: &User) -> Result<(), Box<dyn Error>> {
         sqlx::query(
             r#"
-            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, is_onboarded, is_graduated, is_speaker, is_staff)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, is_onboarded)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
             ON CONFLICT (id) DO UPDATE SET
                 email = EXCLUDED.email,
                 firstname = EXCLUDED.firstname,
@@ -55,9 +59,6 @@ impl DatabaseService {
         .bind(&user.preferences)
         .bind(user.email_verified)
         .bind(user.is_onboarded)
-        .bind(user.is_graduated)
-        .bind(user.is_speaker)
-        .bind(user.is_staff)
         .execute(&self.pool)
         .await?;
 
@@ -66,7 +67,7 @@ impl DatabaseService {
 
     pub async fn find_user_by_id(&self, id: &str) -> Result<Option<User>, Box<dyn Error>> {
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour, is_graduated, is_speaker, is_staff FROM users WHERE id = $1"
+            "SELECT * FROM users WHERE id = $1"
         )
         .bind(id)
         .fetch_optional(&self.pool)
@@ -112,7 +113,7 @@ impl DatabaseService {
 
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<User>, Box<dyn Error>> {
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour, is_graduated, is_speaker, is_staff FROM users WHERE LOWER(email) = LOWER($1)"
+            "SELECT * FROM users WHERE LOWER(email) = LOWER($1)"
         )
         .bind(email)
         .fetch_optional(&self.pool)
@@ -162,10 +163,10 @@ impl DatabaseService {
     pub async fn get_or_create_user(&self, user: &User) -> Result<User, Box<dyn Error>> {
         let row = sqlx::query(
             r#"
-            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_graduated, is_speaker, is_staff)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
             ON CONFLICT (email) DO UPDATE SET last_login = NOW(), email_verified = TRUE
-            RETURNING id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour, is_graduated, is_speaker, is_staff
+            RETURNING *
             "#,
         )
         .bind(user.id)
@@ -186,9 +187,6 @@ impl DatabaseService {
         .bind(user.email_verified)
         .bind(user.last_login)
         .bind(user.is_onboarded)
-        .bind(user.is_graduated)
-        .bind(user.is_speaker)
-        .bind(user.is_staff)
         .fetch_one(&self.pool)
         .await?;
 
