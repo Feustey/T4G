@@ -8,16 +8,17 @@ export namespace Auth {
     email: string;
     firstname: string;
     lastname: string;
-    is_student: boolean;
     is_staff: boolean;
     is_speaker: boolean;
     is_graduated: boolean;
+    is_active: boolean;
+    is_onboarded: boolean;
     role: ROLE_TYPE;
   }
 
-  export type ROLE_TYPE = "SERVICE_PROVIDER" | "ALUMNI" | "STUDENT";
+  export type ROLE_TYPE = "mentor" | "mentee" | "alumni" | "service_provider" | "admin";
 }
 
 export namespace Common {
-  export type ROLE_TYPE = "SERVICE_PROVIDER" | "ALUMNI" | "STUDENT";
+  export type ROLE_TYPE = "mentor" | "mentee" | "alumni" | "service_provider" | "admin";
 }

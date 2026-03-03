@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::models::{
     user::User,
     proof::Proof,
-    mentoring::{MentoringRequest, MentoringProof},
+    mentoring::MentoringProof,
 };
 
 #[derive(Debug, sqlx::FromRow)]
@@ -663,6 +663,22 @@ impl DatabaseService {
         if let Some(avatar) = &payload.avatar {
             sqlx::query("UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2")
                 .bind(avatar)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(ref firstname) = payload.firstname {
+            sqlx::query("UPDATE users SET firstname = $1, updated_at = NOW() WHERE id = $2")
+                .bind(firstname)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        }
+
+        if let Some(ref lastname) = payload.lastname {
+            sqlx::query("UPDATE users SET lastname = $1, updated_at = NOW() WHERE id = $2")
+                .bind(lastname)
                 .bind(id)
                 .execute(&self.pool)
                 .await?;

@@ -57,10 +57,11 @@ export default function MagicLinkCallback({ token: tokenProp }: Props) {
 
         setStatus('success');
         const locale = getLocale(router);
-        const dashboardUrl = `/${locale}/dashboard/`;
+        const homeUrl = `/${locale}/`;
         // Rechargement complet pour que AuthContext.loadUser() lise le token en localStorage
+        // La home (index.tsx) redirige vers /onboarding ou /dashboard selon is_onboarded
         setTimeout(() => {
-          window.location.href = dashboardUrl;
+          window.location.href = homeUrl;
         }, 500);
       } catch (err) {
         setStatus('error');

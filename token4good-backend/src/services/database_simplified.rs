@@ -29,8 +29,8 @@ impl DatabaseService {
     pub async fn create_user(&self, user: &User) -> Result<(), Box<dyn Error>> {
         sqlx::query(
             r#"
-            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, is_onboarded)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, is_onboarded, is_graduated, is_speaker, is_staff)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
             ON CONFLICT (id) DO UPDATE SET
                 email = EXCLUDED.email,
                 firstname = EXCLUDED.firstname,
@@ -55,6 +55,9 @@ impl DatabaseService {
         .bind(&user.preferences)
         .bind(user.email_verified)
         .bind(user.is_onboarded)
+        .bind(user.is_graduated)
+        .bind(user.is_speaker)
+        .bind(user.is_staff)
         .execute(&self.pool)
         .await?;
 
@@ -63,7 +66,7 @@ impl DatabaseService {
 
     pub async fn find_user_by_id(&self, id: &str) -> Result<Option<User>, Box<dyn Error>> {
         let row = sqlx::query(
-            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour FROM users WHERE id = $1"
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour, is_graduated, is_speaker, is_staff FROM users WHERE id = $1"
         )
         .bind(id)
         .fetch_optional(&self.pool)
@@ -97,6 +100,9 @@ impl DatabaseService {
                 learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
                 mentor_bio: row.try_get("mentor_bio").ok().flatten(),
                 mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
+                is_graduated: row.try_get("is_graduated").unwrap_or(false),
+                is_speaker: row.try_get("is_speaker").unwrap_or(false),
+                is_staff: row.try_get("is_staff").unwrap_or(false),
             };
             Ok(Some(user))
         } else {
@@ -104,9 +110,50 @@ impl DatabaseService {
         }
     }
 
-    pub async fn get_user_by_email(&self, _email: &str) -> Result<Option<User>, Box<dyn Error>> {
-        // TODO: Implement properly
-        Ok(None)
+    pub async fn get_user_by_email(&self, email: &str) -> Result<Option<User>, Box<dyn Error>> {
+        let row = sqlx::query(
+            "SELECT id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour, is_graduated, is_speaker, is_staff FROM users WHERE LOWER(email) = LOWER($1)"
+        )
+        .bind(email)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        if let Some(row) = row {
+            let user = User {
+                id: row.try_get("id")?,
+                email: row.try_get("email")?,
+                firstname: row.try_get("firstname")?,
+                lastname: row.try_get("lastname")?,
+                lightning_address: row.try_get("lightning_address")?,
+                role: row
+                    .try_get::<String, _>("role")?
+                    .parse()
+                    .unwrap_or(crate::models::user::UserRole::Alumni),
+                username: row.try_get("username")?,
+                bio: row.try_get("bio").ok(),
+                score: row.try_get::<i32, _>("score")? as u32,
+                avatar: row.try_get("avatar").ok(),
+                created_at: row.try_get("created_at")?,
+                updated_at: row.try_get("updated_at")?,
+                is_active: row.try_get("is_active")?,
+                wallet_address: row.try_get("wallet_address").ok(),
+                preferences: row.try_get("preferences")?,
+                email_verified: row.try_get("email_verified").unwrap_or(false),
+                last_login: row.try_get("last_login").ok(),
+                is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
+                is_graduated: row.try_get("is_graduated").unwrap_or(false),
+                is_speaker: row.try_get("is_speaker").unwrap_or(false),
+                is_staff: row.try_get("is_staff").unwrap_or(false),
+            };
+            Ok(Some(user))
+        } else {
+            Ok(None)
+        }
     }
 
     // Proof operations - simplified
@@ -212,18 +259,64 @@ impl DatabaseService {
         Ok(vec![])
     }
 
-    pub async fn get_user_by_id(&self, _user_id: &str) -> Result<Option<User>, Box<dyn Error>> {
-        // TODO: Implement properly
-        Ok(None)
+    pub async fn get_user_by_id(&self, user_id: &str) -> Result<Option<User>, Box<dyn Error>> {
+        self.find_user_by_id(user_id).await
     }
 
     pub async fn update_user(
         &self,
-        _id: &str,
-        _payload: crate::models::user::UpdateUserRequest,
+        id: &str,
+        payload: crate::models::user::UpdateUserRequest,
     ) -> Result<Option<User>, Box<dyn Error>> {
-        // TODO: Implement properly
-        Err("Not implemented".into())
+        if let Some(username) = &payload.username {
+            sqlx::query("UPDATE users SET username = $1, updated_at = NOW() WHERE id = $2")
+                .bind(username).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(bio) = &payload.bio {
+            sqlx::query("UPDATE users SET bio = $1, updated_at = NOW() WHERE id = $2")
+                .bind(bio).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(avatar) = &payload.avatar {
+            sqlx::query("UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2")
+                .bind(avatar).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(is_onboarded) = payload.is_onboarded {
+            sqlx::query("UPDATE users SET is_onboarded = $1, updated_at = NOW() WHERE id = $2")
+                .bind(is_onboarded).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(is_mentor_active) = payload.is_mentor_active {
+            sqlx::query("UPDATE users SET is_mentor_active = $1, updated_at = NOW() WHERE id = $2")
+                .bind(is_mentor_active).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(ref mentor_topics) = payload.mentor_topics {
+            sqlx::query("UPDATE users SET mentor_topics = $1, updated_at = NOW() WHERE id = $2")
+                .bind(mentor_topics).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(ref learning_topics) = payload.learning_topics {
+            sqlx::query("UPDATE users SET learning_topics = $1, updated_at = NOW() WHERE id = $2")
+                .bind(learning_topics).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(ref mentor_bio) = payload.mentor_bio {
+            sqlx::query("UPDATE users SET mentor_bio = $1, updated_at = NOW() WHERE id = $2")
+                .bind(mentor_bio).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(mentor_tokens_per_hour) = payload.mentor_tokens_per_hour {
+            sqlx::query("UPDATE users SET mentor_tokens_per_hour = $1, updated_at = NOW() WHERE id = $2")
+                .bind(mentor_tokens_per_hour).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(is_graduated) = payload.is_graduated {
+            sqlx::query("UPDATE users SET is_graduated = $1, updated_at = NOW() WHERE id = $2")
+                .bind(is_graduated).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(is_speaker) = payload.is_speaker {
+            sqlx::query("UPDATE users SET is_speaker = $1, updated_at = NOW() WHERE id = $2")
+                .bind(is_speaker).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(is_staff) = payload.is_staff {
+            sqlx::query("UPDATE users SET is_staff = $1, updated_at = NOW() WHERE id = $2")
+                .bind(is_staff).bind(id).execute(&self.pool).await?;
+        }
+        self.find_user_by_id(id).await
     }
 
     pub async fn delete_user(&self, _id: &str) -> Result<bool, Box<dyn Error>> {
@@ -529,7 +622,7 @@ impl DatabaseService {
 
         // Sessions données (comme mentor)
         let sessions_given = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE mentor_id = $1 AND status = 'completed'"
+            "SELECT COUNT(*) FROM mentoring_bookings WHERE mentor_id = $1 AND status = 'completed'"
         )
         .bind(user_id)
         .fetch_one(&self.pool)
@@ -538,19 +631,19 @@ impl DatabaseService {
 
         // Sessions reçues (comme mentee)
         let sessions_received = sqlx::query_scalar::<_, Option<i64>>(
-            "SELECT COUNT(*) FROM t4g_mentoring_sessions WHERE mentee_id = $1 AND status = 'completed'"
+            "SELECT COUNT(*) FROM mentoring_bookings WHERE mentee_id = $1 AND status = 'completed'"
         )
         .bind(user_id)
         .fetch_one(&self.pool)
         .await?
         .unwrap_or(0);
 
-        // Note moyenne
+        // Note moyenne reçue par le mentor (notée par les mentees)
         let avg_rating = sqlx::query_scalar::<_, Option<f64>>(
             r#"
-            SELECT AVG(rating)::FLOAT
-            FROM t4g_mentoring_sessions
-            WHERE mentor_id = $1 AND rating IS NOT NULL
+            SELECT AVG(mentee_rating)::FLOAT
+            FROM mentoring_bookings
+            WHERE mentor_id = $1 AND mentee_rating IS NOT NULL
             "#,
         )
         .bind(user_id)
@@ -1037,35 +1130,35 @@ impl DatabaseService {
         let mut opportunities = Vec::new();
 
         if !user_skills.is_empty() {
-            // Rechercher des sessions où l'utilisateur pourrait être mentor
-            let sessions = sqlx::query(
+            // Rechercher des offres de mentoring ouvertes qui correspondent aux compétences
+            let offers = sqlx::query(
                 r#"
-                SELECT id, mentee_id, category, topic, created_at
-                FROM t4g_mentoring_sessions
-                WHERE status = 'scheduled' AND mentor_id IS NULL
-                ORDER BY created_at DESC
+                SELECT mo.id, mo.topic_slug, mo.token_cost, lt.label_fr
+                FROM mentoring_offers mo
+                LEFT JOIN learning_topics lt ON lt.slug = mo.topic_slug
+                WHERE mo.status = 'open'
+                ORDER BY mo.created_at DESC
                 LIMIT 10
                 "#,
             )
             .fetch_all(&self.pool)
-            .await?;
+            .await
+            .unwrap_or_default();
 
-            for row in sessions {
-                let category: String = row.try_get("category")?;
-                // Vérifier si la catégorie correspond aux compétences
+            for row in offers {
+                let topic_slug: String = row.try_get("topic_slug").unwrap_or_default();
                 if user_skills
                     .iter()
-                    .any(|skill| category.to_lowercase().contains(&skill.to_lowercase()))
+                    .any(|skill| topic_slug.to_lowercase().contains(&skill.to_lowercase()))
                 {
+                    let label: String = row.try_get("label_fr").unwrap_or_else(|_| topic_slug.clone());
+                    let token_cost: i64 = row.try_get("token_cost").unwrap_or(50);
                     opportunities.push(crate::routes::token4good::Opportunity {
-                        id: row.try_get("id")?,
-                        title: format!(
-                            "Mentoring: {}",
-                            row.try_get::<String, _>("topic").unwrap_or_default()
-                        ),
-                        description: format!("Session de mentoring dans la catégorie {}", category),
-                        tokens_estimate: 50, // Estimation de base
-                        category,
+                        id: row.try_get("id").unwrap_or_default(),
+                        title: format!("Mentoring: {}", label),
+                        description: format!("Offre de mentoring sur le sujet {}", topic_slug),
+                        tokens_estimate: token_cost,
+                        category: topic_slug,
                     });
                 }
             }

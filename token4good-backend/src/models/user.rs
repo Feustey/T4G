@@ -71,6 +71,10 @@ pub struct User {
     pub learning_topics: Vec<String>,
     pub mentor_bio: Option<String>,
     pub mentor_tokens_per_hour: Option<i32>,
+    // Champs profil (migration 010)
+    pub is_graduated: bool,
+    pub is_speaker: bool,
+    pub is_staff: bool,
 }
 
 impl User {
@@ -107,6 +111,9 @@ impl User {
             learning_topics: vec![],
             mentor_bio: None,
             mentor_tokens_per_hour: None,
+            is_graduated: false,
+            is_speaker: false,
+            is_staff: false,
         }
     }
 }
@@ -125,6 +132,8 @@ pub struct CreateUserRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateUserRequest {
+    pub firstname: Option<String>,
+    pub lastname: Option<String>,
     pub username: Option<String>,
     pub bio: Option<String>,
     pub avatar: Option<String>,
@@ -135,6 +144,9 @@ pub struct UpdateUserRequest {
     pub learning_topics: Option<Vec<String>>,
     pub mentor_bio: Option<String>,
     pub mentor_tokens_per_hour: Option<i32>,
+    pub is_graduated: Option<bool>,
+    pub is_speaker: Option<bool>,
+    pub is_staff: Option<bool>,
 }
 
 #[cfg(test)]
@@ -284,6 +296,8 @@ mod tests {
     #[test]
     fn test_update_user_request_all_none() {
         let req = UpdateUserRequest {
+            firstname: None,
+            lastname: None,
             username: None,
             bio: None,
             avatar: None,
@@ -294,6 +308,9 @@ mod tests {
             learning_topics: None,
             mentor_bio: None,
             mentor_tokens_per_hour: None,
+            is_graduated: None,
+            is_speaker: None,
+            is_staff: None,
         };
         let json = serde_json::to_string(&req).unwrap();
         // Tous les champs sont Option<>, le JSON doit être valide

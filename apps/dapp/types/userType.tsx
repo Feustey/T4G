@@ -9,6 +9,7 @@ export type UserType = {
   is_graduated: boolean;
   is_speaker: boolean;
   is_staff: boolean;
-  is_student: boolean;
-  wallet: string;
+  is_active: boolean;
+  is_onboarded: boolean;
+  wallet_address?: string;
 };

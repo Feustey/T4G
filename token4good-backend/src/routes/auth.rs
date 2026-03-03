@@ -1068,6 +1068,9 @@ async fn get_or_create_user_from_dazno(
         learning_topics: vec![],
         mentor_bio: None,
         mentor_tokens_per_hour: None,
+        is_graduated: false,
+        is_speaker: false,
+        is_staff: false,
     };
 
     state
@@ -1135,6 +1138,9 @@ async fn get_or_create_user_from_oauth(
         learning_topics: vec![],
         mentor_bio: None,
         mentor_tokens_per_hour: None,
+        is_graduated: false,
+        is_speaker: false,
+        is_staff: false,
     };
 
     // Créer l'utilisateur dans la base de données

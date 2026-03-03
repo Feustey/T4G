@@ -14,7 +14,7 @@ export type SessionType = {
   role?: UserRoleType;
 };
 
-export type UserRoleType = "student" | "alumni" | "speaker" | "staff";
+export type UserRoleType = "mentor" | "mentee" | "alumni" | "service_provider" | "admin";
 
 export type UserType = {
   id: string;
@@ -25,5 +25,6 @@ export type UserType = {
   is_graduated: boolean;
   is_speaker: boolean;
   is_staff: boolean;
-  is_student: boolean;
+  is_active: boolean;
+  is_onboarded: boolean;
 };

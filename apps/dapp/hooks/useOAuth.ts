@@ -257,9 +257,9 @@ export const useOAuth = () => {
       // Nettoyer le state seulement après succès complet
       sessionStorage.removeItem(`${provider}_oauth_state`);
 
-      // Rechargement complet pour que AuthContext.loadUser() lise le token en localStorage
+      // Rechargement complet — la home (index.tsx) redirige vers /onboarding ou /dashboard selon is_onboarded
       const locale = router.locale || 'fr';
-      window.location.href = `/${locale}/dashboard/`;
+      window.location.href = `/${locale}/`;
     } catch (error) {
       console.error(`Erreur callback ${provider}:`, error);
       throw error;

@@ -105,6 +105,9 @@ pub async fn create_user(
         learning_topics: vec![],
         mentor_bio: None,
         mentor_tokens_per_hour: None,
+        is_graduated: false,
+        is_speaker: false,
+        is_staff: false,
     };
 
     state
