@@ -156,6 +156,75 @@ impl DatabaseService {
         }
     }
 
+    /// Insère un nouvel utilisateur ou, en cas de conflit d'email, met à jour last_login
+    /// et retourne la ligne résultante. Atomique — évite le problème INSERT + re-SELECT
+    /// (notamment les restrictions RLS qui peuvent bloquer le SELECT mais pas la contrainte).
+    pub async fn get_or_create_user(&self, user: &User) -> Result<User, Box<dyn Error>> {
+        let row = sqlx::query(
+            r#"
+            INSERT INTO users (id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_graduated, is_speaker, is_staff)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+            ON CONFLICT (email) DO UPDATE SET last_login = NOW(), email_verified = TRUE
+            RETURNING id, email, firstname, lastname, lightning_address, role, username, bio, score, avatar, created_at, updated_at, is_active, wallet_address, preferences, email_verified, last_login, is_onboarded, is_mentor_active, mentor_topics, learning_topics, mentor_bio, mentor_tokens_per_hour, is_graduated, is_speaker, is_staff
+            "#,
+        )
+        .bind(user.id)
+        .bind(&user.email)
+        .bind(&user.firstname)
+        .bind(&user.lastname)
+        .bind(&user.lightning_address)
+        .bind(user.role.to_string())
+        .bind(&user.username)
+        .bind(&user.bio)
+        .bind(user.score as i32)
+        .bind(&user.avatar)
+        .bind(user.created_at)
+        .bind(user.updated_at)
+        .bind(user.is_active)
+        .bind(&user.wallet_address)
+        .bind(&user.preferences)
+        .bind(user.email_verified)
+        .bind(user.last_login)
+        .bind(user.is_onboarded)
+        .bind(user.is_graduated)
+        .bind(user.is_speaker)
+        .bind(user.is_staff)
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(User {
+            id: row.try_get("id")?,
+            email: row.try_get("email")?,
+            firstname: row.try_get("firstname")?,
+            lastname: row.try_get("lastname")?,
+            lightning_address: row.try_get("lightning_address")?,
+            role: row
+                .try_get::<String, _>("role")?
+                .parse()
+                .unwrap_or(crate::models::user::UserRole::Alumni),
+            username: row.try_get("username")?,
+            bio: row.try_get("bio").ok(),
+            score: row.try_get::<i32, _>("score")? as u32,
+            avatar: row.try_get("avatar").ok(),
+            created_at: row.try_get("created_at")?,
+            updated_at: row.try_get("updated_at")?,
+            is_active: row.try_get("is_active")?,
+            wallet_address: row.try_get("wallet_address").ok(),
+            preferences: row.try_get("preferences")?,
+            email_verified: row.try_get("email_verified").unwrap_or(false),
+            last_login: row.try_get("last_login").ok(),
+            is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+            is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+            mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+            learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+            mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+            mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
+            is_graduated: row.try_get("is_graduated").unwrap_or(false),
+            is_speaker: row.try_get("is_speaker").unwrap_or(false),
+            is_staff: row.try_get("is_staff").unwrap_or(false),
+        })
+    }
+
     // Proof operations - simplified
     pub async fn create_proof(&self, _proof: &MentoringProof) -> Result<(), Box<dyn Error>> {
         // TODO: Implement properly

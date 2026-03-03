@@ -1073,13 +1073,18 @@ async fn get_or_create_user_from_dazno(
         is_staff: false,
     };
 
-    state
-        .db
-        .create_user(&new_user)
+    let new_user_id = new_user.id;
+    let user = state.db.get_or_create_user(&new_user)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    Ok(new_user)
+    if user.id == new_user_id {
+        tracing::info!("Nouvel utilisateur créé (dazno): {}", user.email);
+    } else {
+        tracing::info!("Utilisateur existant retrouvé (dazno): {}", user.email);
+    }
+
+    Ok(user)
 }
 
 async fn get_or_create_user_from_oauth(
@@ -1143,41 +1148,20 @@ async fn get_or_create_user_from_oauth(
         is_staff: false,
     };
 
-    // Créer l'utilisateur dans la base de données
-    let create_err_str = match state.db.create_user(&new_user).await {
-        Ok(()) => None,
-        Err(e) => Some(e.to_string()), // e (Box<dyn Error>, non-Send) droppé ici
-    };
-    if let Some(err_str) = create_err_str {
-        if err_str.contains("duplicate key") || err_str.contains("unique constraint") {
-            // Race condition ou utilisateur existant non trouvé par get_user_by_email :
-            // on le recharge directement
-            tracing::warn!("Conflit à l'insert ({}), on recharge l'utilisateur existant par email={}", err_str, email);
-            match state.db.get_user_by_email(&email).await {
-                Ok(Some(user)) => return Ok(user),
-                Ok(None) => {
-                    let msg = format!("Utilisateur introuvable après conflit [{}] pour email={}", err_str, email);
-                    tracing::error!("{}", msg);
-                    return Err(msg);
-                }
-                Err(e2) => {
-                    let msg = format!("re-fetch après conflit: {}", e2);
-                    tracing::error!("DB error re-fetching user after conflict: {}", e2);
-                    return Err(msg);
-                }
-            }
-        }
-        tracing::error!("Error creating user from OAuth: {}", err_str);
-        return Err(format!("create_user: {}", err_str));
+    // Insérer ou récupérer l'utilisateur (upsert atomique — évite la race condition
+    // INSERT + re-SELECT, et contourne les éventuelles restrictions RLS sur le SELECT).
+    let new_user_id = new_user.id;
+    let user = state.db.get_or_create_user(&new_user)
+        .await
+        .map_err(|e| format!("get_or_create_user({}): {}", email, e))?;
+
+    if user.id == new_user_id {
+        tracing::info!("Nouvel utilisateur créé (oauth): {} ({})", user.email, user.username);
+    } else {
+        tracing::info!("Utilisateur existant retrouvé (oauth): {} ({})", user.email, user.username);
     }
 
-    tracing::info!(
-        "Created new user from OAuth: {} ({})",
-        new_user.email,
-        new_user.username
-    );
-
-    Ok(new_user)
+    Ok(user)
 }
 
 fn dazno_error_to_status(error: DaznoError) -> StatusCode {
