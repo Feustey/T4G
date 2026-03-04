@@ -60,18 +60,28 @@ pub struct OffersFilter {
 // Handlers — Offres
 // ============================================================
 
-/// GET /api/mentoring/offers — liste publique des offres ouvertes
+/// GET /api/mentoring/offers — liste publique des offres ouvertes (enrichie mentor + topic)
 pub async fn list_offers(
     State(state): State<AppState>,
     Query(filters): Query<OffersFilter>,
-) -> Result<Json<Vec<MentoringOffer>>, StatusCode> {
+) -> Result<Json<Vec<serde_json::Value>>, StatusCode> {
     let limit = filters.limit.unwrap_or(50).min(100);
     let offset = filters.offset.unwrap_or(0);
 
     let mut sql = String::from(
         r#"
-        SELECT o.*
+        SELECT
+            o.id, o.mentor_id, o.topic_slug, o.target_level, o.description,
+            o.duration_minutes, o.format, o.token_cost, o.availability,
+            o.status, o.created_at, o.updated_at,
+            u.firstname AS mentor_firstname,
+            u.lastname  AS mentor_lastname,
+            u.avatar    AS mentor_avatar,
+            u.score     AS mentor_score,
+            u.mentor_bio AS mentor_bio,
+            t.name      AS topic_name
         FROM mentoring_offers o
+        LEFT JOIN users u ON u.id::text = o.mentor_id
         LEFT JOIN learning_topics t ON t.slug = o.topic_slug
         LEFT JOIN learning_categories c ON c.id = t.category_id
         WHERE o.status = 'open'
@@ -129,27 +139,44 @@ pub async fn list_offers(
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
 
-    let offers: Vec<MentoringOffer> = rows
+    let offers: Vec<serde_json::Value> = rows
         .into_iter()
-        .map(|row| MentoringOffer {
-            id: row.try_get("id").unwrap_or_default(),
-            mentor_id: row.try_get("mentor_id").unwrap_or_default(),
-            topic_slug: row.try_get("topic_slug").unwrap_or_default(),
-            target_level: row.try_get("target_level").unwrap_or_default(),
-            description: row.try_get("description").ok(),
-            duration_minutes: row.try_get("duration_minutes").unwrap_or(60),
-            format: row.try_get("format").unwrap_or_default(),
-            token_cost: row.try_get("token_cost").unwrap_or(0),
-            availability: row
-                .try_get("availability")
-                .unwrap_or(serde_json::Value::Array(vec![])),
-            status: row.try_get("status").unwrap_or_else(|_| "open".to_string()),
-            created_at: row
-                .try_get("created_at")
-                .unwrap_or_else(|_| chrono::Utc::now()),
-            updated_at: row
-                .try_get("updated_at")
-                .unwrap_or_else(|_| chrono::Utc::now()),
+        .map(|row| {
+            let mentor_id: String = row.try_get("mentor_id").unwrap_or_default();
+            let topic_slug: String = row.try_get("topic_slug").unwrap_or_default();
+            let mentor_firstname: Option<String> = row.try_get("mentor_firstname").ok();
+            let mentor_lastname: Option<String> = row.try_get("mentor_lastname").ok();
+            let mentor_avatar: Option<String> = row.try_get("mentor_avatar").ok();
+            let mentor_score: Option<i32> = row.try_get("mentor_score").ok();
+            let mentor_bio: Option<String> = row.try_get("mentor_bio").ok();
+            let topic_name: Option<String> = row.try_get("topic_name").ok();
+
+            serde_json::json!({
+                "id":               row.try_get::<String, _>("id").unwrap_or_default(),
+                "mentor_id":        mentor_id,
+                "topic_slug":       topic_slug,
+                "target_level":     row.try_get::<String, _>("target_level").unwrap_or_default(),
+                "description":      row.try_get::<Option<String>, _>("description").unwrap_or(None),
+                "duration_minutes": row.try_get::<i32, _>("duration_minutes").unwrap_or(60),
+                "format":           row.try_get::<String, _>("format").unwrap_or_default(),
+                "token_cost":       row.try_get::<i32, _>("token_cost").unwrap_or(0),
+                "availability":     row.try_get::<serde_json::Value, _>("availability").unwrap_or(serde_json::Value::Array(vec![])),
+                "status":           row.try_get::<String, _>("status").unwrap_or_else(|_| "open".to_string()),
+                "created_at":       row.try_get::<chrono::DateTime<chrono::Utc>, _>("created_at").unwrap_or_else(|_| chrono::Utc::now()),
+                "updated_at":       row.try_get::<chrono::DateTime<chrono::Utc>, _>("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+                "mentor": {
+                    "id":         mentor_id.clone(),
+                    "firstname":  mentor_firstname,
+                    "lastname":   mentor_lastname,
+                    "avatar_url": mentor_avatar,
+                    "score":      mentor_score,
+                    "mentor_bio": mentor_bio,
+                },
+                "topic": {
+                    "slug": topic_slug.clone(),
+                    "name": topic_name,
+                },
+            })
         })
         .collect();
 
