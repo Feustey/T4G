@@ -17,6 +17,53 @@ use crate::{
     AppState,
 };
 
+// ============================================================
+// Helper — notification fire-and-forget
+// ============================================================
+
+async fn notify(
+    pool: &sqlx::PgPool,
+    user_id: &str,
+    title: &str,
+    message: &str,
+    notif_type: &str,
+    link: Option<&str>,
+    amount: Option<i32>,
+) {
+    let metadata = serde_json::json!({ "amount": amount.unwrap_or(0) });
+    if let Err(e) = sqlx::query(
+        "INSERT INTO notifications (user_id, title, message, type, link, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6)",
+    )
+    .bind(user_id)
+    .bind(title)
+    .bind(message)
+    .bind(notif_type)
+    .bind(link)
+    .bind(metadata)
+    .execute(pool)
+    .await
+    {
+        tracing::warn!("Failed to insert notification for {}: {}", user_id, e);
+    }
+}
+
+/// Fetch display name for a user (firstname lastname, fallback to "Un utilisateur")
+async fn user_display_name(pool: &sqlx::PgPool, user_id: &str) -> String {
+    sqlx::query("SELECT firstname, lastname FROM users WHERE id = $1")
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await
+        .ok()
+        .flatten()
+        .map(|r| {
+            let first: String = r.try_get("firstname").unwrap_or_default();
+            let last: String = r.try_get("lastname").unwrap_or_default();
+            format!("{} {}", first, last).trim().to_string()
+        })
+        .unwrap_or_else(|| "Un utilisateur".to_string())
+}
+
 pub fn mentoring_offer_routes() -> Router<AppState> {
     Router::new()
         // Offres
@@ -586,6 +633,22 @@ pub async fn create_booking(
         }
     }
 
+    // Notifier le mentor — fire-and-forget
+    let mentee_name = user_display_name(state.db.pool(), &auth_user.id).await;
+    notify(
+        state.db.pool(),
+        &mentor_id,
+        "Nouvelle réservation",
+        &format!(
+            "{} a réservé ta session sur «{}» pour {} T4G.",
+            mentee_name, topic_slug, token_cost
+        ),
+        "MENTORING_BOOKED",
+        Some(&format!("/mentoring/session/{}", booking_id)),
+        None,
+    )
+    .await;
+
     tracing::info!(
         "Booking {} created: mentee {} booked offer {} for {} T4G (escrowed)",
         booking_id,
@@ -779,6 +842,47 @@ pub async fn confirm_booking(
         .bind(&id)
         .execute(state.db.pool())
         .await;
+
+        // Notifier les deux parties — session complétée
+        notify(
+            state.db.pool(),
+            &mentor_id,
+            "Session complétée 🎉",
+            &format!(
+                "Tu as reçu {} T4G pour ta session sur «{}».",
+                result.tokens_to_mentor, topic_slug
+            ),
+            "MENTORING_COMPLETED",
+            Some(&format!("/mentoring/session/{}", id)),
+            Some(result.tokens_to_mentor as i32),
+        )
+        .await;
+        notify(
+            state.db.pool(),
+            &mentee_id,
+            "Session complétée 🎉",
+            &format!(
+                "Session terminée ! Tu as reçu {} T4G en bonus d'apprentissage.",
+                result.tokens_to_mentee
+            ),
+            "MENTORING_COMPLETED",
+            Some(&format!("/mentoring/session/{}", id)),
+            Some(result.tokens_to_mentee as i32),
+        )
+        .await;
+    } else {
+        // pending_completion — notifier l'autre parti
+        let notified_user = if is_mentee { &mentor_id } else { &mentee_id };
+        notify(
+            state.db.pool(),
+            notified_user,
+            "Confirmation en attente",
+            "L'autre participant a confirmé la session. Confirme à ton tour pour libérer les tokens.",
+            "MENTORING_CONFIRMED",
+            Some(&format!("/mentoring/session/{}", id)),
+            None,
+        )
+        .await;
     }
 
     Ok(Json(MentoringBooking {
@@ -951,12 +1055,17 @@ pub async fn dispute_booking(
     AuthUserExtractor(auth_user): AuthUserExtractor,
     Path(id): Path<String>,
 ) -> Result<StatusCode, StatusCode> {
-    let booking_row = sqlx::query("SELECT mentee_id FROM mentoring_bookings WHERE id = $1")
-        .bind(&id)
-        .fetch_optional(state.db.pool())
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
+    let booking_row = sqlx::query(
+        r#"SELECT b.mentee_id, o.mentor_id, o.topic_slug
+           FROM mentoring_bookings b
+           JOIN mentoring_offers o ON o.id = b.offer_id
+           WHERE b.id = $1"#,
+    )
+    .bind(&id)
+    .fetch_optional(state.db.pool())
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+    .ok_or(StatusCode::NOT_FOUND)?;
 
     let mentee_id: String = booking_row
         .try_get("mentee_id")
@@ -964,12 +1073,29 @@ pub async fn dispute_booking(
     if mentee_id != auth_user.id {
         return Err(StatusCode::FORBIDDEN);
     }
+    let mentor_id: String = booking_row.try_get("mentor_id").unwrap_or_default();
+    let topic_slug: String = booking_row.try_get("topic_slug").unwrap_or_default();
 
     sqlx::query("UPDATE mentoring_bookings SET status = 'disputed' WHERE id = $1")
         .bind(&id)
         .execute(state.db.pool())
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Notifier le mentor
+    notify(
+        state.db.pool(),
+        &mentor_id,
+        "Litige ouvert",
+        &format!(
+            "Un litige a été ouvert sur la session «{}». L'équipe T4G va examiner la situation.",
+            topic_slug
+        ),
+        "MENTORING_DISPUTED",
+        Some(&format!("/mentoring/session/{}", id)),
+        None,
+    )
+    .await;
 
     tracing::warn!("Dispute opened on booking {}", id);
     Ok(StatusCode::NO_CONTENT)

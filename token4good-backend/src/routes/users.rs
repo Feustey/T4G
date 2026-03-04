@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     response::Json,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -27,6 +27,7 @@ pub fn user_routes() -> Router<AppState> {
         // Routes /me DOIVENT être avant /:id pour éviter les conflits
         .route("/me", get(get_current_user))
         .route("/me/notifications", get(get_user_notifications))
+        .route("/me/notifications/read-all", post(mark_all_notifications_read))
         .route("/me/wallet", get(get_current_user_wallet))
         .route("/me/services", get(get_current_user_services))
         .route("/me/transactions", get(get_current_user_transactions))
@@ -324,19 +325,25 @@ pub async fn get_user_notifications(
     State(state): State<AppState>,
     AuthUserExtractor(auth_user): AuthUserExtractor,
 ) -> Result<Json<Vec<Notification>>, StatusCode> {
-    // Récupérer les notifications depuis la base de données
     match state.db.get_user_notifications(&auth_user.id).await {
         Ok(notifications) => Ok(Json(notifications)),
         Err(e) => {
-            tracing::warn!(
-                "Failed to get notifications for user {}: {}",
-                auth_user.id,
-                e
-            );
-            // Retourner une liste vide en cas d'erreur plutôt que de faire échouer la requête
+            tracing::warn!("Failed to get notifications for user {}: {}", auth_user.id, e);
             Ok(Json(vec![]))
         }
     }
+}
+
+pub async fn mark_all_notifications_read(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<StatusCode, StatusCode> {
+    sqlx::query("UPDATE notifications SET read = true WHERE user_id = $1")
+        .bind(&auth_user.id)
+        .execute(state.db.pool())
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 // Handlers pour les routes /me/*
@@ -676,8 +683,13 @@ pub struct Notification {
     pub id: String,
     pub title: String,
     pub message: String,
+    #[serde(rename = "type")]
     pub notification_type: String,
     pub is_read: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
+    pub amount: i32,
+    #[serde(rename = "ts")]
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 

@@ -1,12 +1,13 @@
-import { UserType } from './userType';
-
 export interface NotificationType {
-  amount: number;
-  link: string;
-  message: string;
-  ts: Date;
-  tx: string;
-  type: string; // "SERVICE_BOOKED_BY_STUDENT" | "SERVICE_DELIVERY_CONFIRMED_BY_STUDENT" | "SERVICE_DELIVERY_CANCELED_BY_STUDENT" | "WELCOME_BONUS"
-  user: UserType['id'];
   id: string;
+  type: string;
+  title?: string;
+  message: string;
+  amount: number;
+  link?: string;
+  is_read?: boolean;
+  ts: Date;
+  // legacy MongoDB fields
+  tx?: string;
+  user?: string;
 }

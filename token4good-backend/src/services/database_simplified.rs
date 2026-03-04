@@ -1236,9 +1236,44 @@ impl DatabaseService {
 
     pub async fn get_user_notifications(
         &self,
-        _user_id: &str,
+        user_id: &str,
     ) -> Result<Vec<crate::routes::users::Notification>, Box<dyn Error>> {
-        Ok(vec![])
+        let rows = sqlx::query(
+            "SELECT id, title, message, type, read, link, metadata, created_at
+             FROM notifications
+             WHERE user_id = $1
+             ORDER BY created_at DESC
+             LIMIT 50",
+        )
+        .bind(user_id)
+        .fetch_all(self.pool())
+        .await?;
+
+        let notifications = rows
+            .iter()
+            .map(|row| {
+                let metadata: serde_json::Value =
+                    row.try_get("metadata").unwrap_or(serde_json::json!({}));
+                let amount = metadata
+                    .get("amount")
+                    .and_then(|v| v.as_i64())
+                    .unwrap_or(0) as i32;
+                crate::routes::users::Notification {
+                    id: row.try_get("id").unwrap_or_default(),
+                    title: row.try_get("title").unwrap_or_default(),
+                    message: row.try_get("message").unwrap_or_default(),
+                    notification_type: row.try_get("type").unwrap_or_default(),
+                    is_read: row.try_get("read").unwrap_or(false),
+                    link: row.try_get::<Option<String>, _>("link").unwrap_or(None),
+                    amount,
+                    created_at: row
+                        .try_get("created_at")
+                        .unwrap_or_else(|_| chrono::Utc::now()),
+                }
+            })
+            .collect();
+
+        Ok(notifications)
     }
 
     pub async fn count_user_services_provided(
