@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import useSwr from 'swr';
@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useIndexing } from '../../hooks';
 import { Breadcrumb, Button, Spinner } from '../../components';
 import { AuthPageType, LangType } from '../../types';
-import { apiClient, LearningCategory, MentoringOffer } from '../../services/apiClient';
+import { apiClient, LearningCategory, MentoringOffer, TimeSlot } from '../../services/apiClient';
 
 interface IPage {
   lang: LangType;
@@ -53,6 +53,40 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
+
+  // ── Booking modal ──
+  const [bookingOffer, setBookingOffer] = useState<MentoringOffer | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [bookingNotes, setBookingNotes] = useState('');
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+
+  const closeModal = useCallback(() => {
+    setBookingOffer(null);
+    setSelectedSlot(null);
+    setBookingNotes('');
+    setBookingError(null);
+  }, []);
+
+  const handleBook = useCallback(async () => {
+    if (!bookingOffer || !selectedSlot) return;
+    setIsBooking(true);
+    setBookingError(null);
+    try {
+      const booking = await apiClient.createMentoringBooking({
+        offer_id: bookingOffer.id,
+        scheduled_at: selectedSlot,
+        notes: bookingNotes.trim() || undefined,
+      });
+      closeModal();
+      router.push(`/mentoring/session/${booking.id}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors de la réservation.';
+      setBookingError(msg);
+    } finally {
+      setIsBooking(false);
+    }
+  }, [bookingOffer, selectedSlot, bookingNotes, closeModal, router]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedMentorId, setSelectedMentorId] = useState<string>('');
@@ -301,14 +335,229 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
-                  onBook={() => router.push(`/mentoring/session/${offer.id}`)}
+                  onSelect={setBookingOffer}
                 />
               ))}
             </div>
           </>
         )}
+        {/* ── Modal de réservation ── */}
+        {bookingOffer && (
+          <BookingModal
+            offer={bookingOffer}
+            selectedSlot={selectedSlot}
+            onSelectSlot={setSelectedSlot}
+            notes={bookingNotes}
+            onNotesChange={setBookingNotes}
+            onConfirm={handleBook}
+            onClose={closeModal}
+            isBooking={isBooking}
+            error={bookingError}
+          />
+        )}
       </ConnectedLayout>
     </>
+  );
+};
+
+// ── Composant modal de réservation ──
+
+interface BookingModalProps {
+  offer: MentoringOffer;
+  selectedSlot: string | null;
+  onSelectSlot: (slot: string) => void;
+  notes: string;
+  onNotesChange: (v: string) => void;
+  onConfirm: () => void;
+  onClose: () => void;
+  isBooking: boolean;
+  error: string | null;
+}
+
+const BookingModal: React.FC<BookingModalProps> = ({
+  offer,
+  selectedSlot,
+  onSelectSlot,
+  notes,
+  onNotesChange,
+  onConfirm,
+  onClose,
+  isBooking,
+  error,
+}) => {
+  const slots: TimeSlot[] = offer.availability ?? [];
+
+  function formatSlot(iso: string, durationMin: number): string {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return `${date} à ${time} (${durationMin} min)`;
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1000,
+        background: 'rgba(0,0,0,0.45)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        style={{
+          background: 'var(--color-surface, #fff)',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          maxWidth: 480,
+          width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.25rem',
+        }}
+      >
+        {/* En-tête */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-secondary, #64748b)' }}>
+              {offer.mentor?.firstname} {offer.mentor?.lastname}
+            </p>
+            <h2 style={{ margin: '2px 0 0', fontWeight: 700, fontSize: '1.1rem' }}>
+              {offer.topic?.name ?? offer.topic_slug}
+            </h2>
+            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-secondary, #64748b)' }}>
+              {offer.duration_minutes} min · {offer.token_cost} T4G
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: 20,
+              cursor: 'pointer',
+              color: 'var(--color-text-secondary, #94a3b8)',
+              lineHeight: 1,
+              padding: '2px 6px',
+            }}
+            aria-label="Fermer"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Sélecteur de créneaux */}
+        <div>
+          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: '0.875rem' }}>
+            Choisir un créneau
+          </p>
+          {slots.length === 0 ? (
+            <p style={{ fontSize: 13, color: 'var(--color-text-secondary, #64748b)', fontStyle: 'italic' }}>
+              Aucun créneau défini — le mentor organisera la session avec toi après la réservation.
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {slots.map((slot) => {
+                const isSelected = selectedSlot === slot.date;
+                return (
+                  <button
+                    key={slot.date}
+                    onClick={() => onSelectSlot(slot.date)}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '0.5rem',
+                      border: `2px solid ${isSelected ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                      background: isSelected ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
+                      color: isSelected ? 'var(--color-primary, #2563eb)' : 'inherit',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontSize: 13,
+                      fontWeight: isSelected ? 600 : 400,
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    📅 {formatSlot(slot.date, slot.duration_minutes)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Notes */}
+        <div>
+          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: 6 }}>
+            Message au mentor <span style={{ fontWeight: 400, color: 'var(--color-text-secondary, #64748b)' }}>(facultatif)</span>
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => onNotesChange(e.target.value)}
+            rows={3}
+            placeholder="Décris ton niveau actuel, tes objectifs, tes questions…"
+            style={{
+              width: '100%',
+              border: '1.5px solid var(--color-border, #e2e8f0)',
+              borderRadius: '0.5rem',
+              padding: '8px 12px',
+              fontSize: 13,
+              resize: 'vertical',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
+        {/* Erreur */}
+        {error && (
+          <p style={{ margin: 0, color: '#dc2626', fontSize: 13, background: '#fef2f2', padding: '8px 12px', borderRadius: '0.5rem' }}>
+            {error}
+          </p>
+        )}
+
+        {/* CTA */}
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            onClick={onConfirm}
+            disabled={isBooking || (slots.length > 0 && !selectedSlot)}
+            style={{
+              flex: 1,
+              background: isBooking || (slots.length > 0 && !selectedSlot) ? '#94a3b8' : 'var(--color-primary, #2563eb)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '0.5rem',
+              padding: '10px 16px',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              cursor: isBooking || (slots.length > 0 && !selectedSlot) ? 'not-allowed' : 'pointer',
+              transition: 'background 0.15s',
+            }}
+          >
+            {isBooking ? 'Réservation…' : 'Confirmer la réservation'}
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '10px 16px',
+              borderRadius: '0.5rem',
+              border: '1.5px solid var(--color-border, #e2e8f0)',
+              background: 'transparent',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              color: 'var(--color-text-secondary, #64748b)',
+            }}
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -316,10 +565,10 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
 
 interface OfferCardProps {
   offer: MentoringOffer;
-  onBook: () => void;
+  onSelect: (offer: MentoringOffer) => void;
 }
 
-const OfferCard: React.FC<OfferCardProps> = ({ offer, onBook }) => {
+const OfferCard: React.FC<OfferCardProps> = ({ offer, onSelect }) => {
   const level = LEVEL_COLORS[offer.target_level] ?? LEVEL_COLORS.beginner;
   const nextSlot = offer.availability?.[0];
 
@@ -446,7 +695,7 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, onBook }) => {
       <Button
         variant="primary"
         className="u-width--fill"
-        onClick={onBook}
+        onClick={() => onSelect(offer)}
         label="Réserver"
       />
     </div>
