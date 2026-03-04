@@ -35,14 +35,6 @@ pub fn user_routes() -> Router<AppState> {
         .route("/me/about", get(get_current_user_about))
         .route("/me/metrics", get(get_current_user_metrics))
         .route("/me/pending", get(get_current_user_pending))
-        .route(
-            "/me/mentoring-offers",
-            get(crate::routes::mentoring_offers::get_my_offers),
-        )
-        .route(
-            "/me/mentoring-bookings",
-            get(crate::routes::mentoring_offers::get_my_bookings),
-        )
         // Routes /:id après /me
         .route("/:id", get(get_user).put(update_user).delete(delete_user))
         .route("/:id/profile", get(get_user_profile))
