@@ -26,7 +26,7 @@ export function ProfilePage({
   const { user } = useAuth();
   const router = useRouter();
   const { data: profile } = useSwr<User>(['user', userId], () => apiClient.getUser(userId));
-  const { data: cv } = useSwr<UserCVType>(['user-cv', userId], () => apiClient.getUserCV(userId));
+  const { data: cv } = useSwr<UserCVType>(['user-cv', userId], () => apiClient.getUserCV(userId) as Promise<UserCVType>);
 
   return (
     <>
@@ -204,7 +204,7 @@ export function ProfilePage({
                             {profile.program}
                           </p>
                           <p className="u-margin--none">
-                            {profile.graduatedYear}
+                            {profile.graduated_year}
                           </p>
                         </div>
                       </div>

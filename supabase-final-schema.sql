@@ -403,3 +403,26 @@ GRANT SELECT ON mentoring_requests_detailed TO authenticated;
 -- 
 -- URL de connexion à configurer dans les variables d'environnement :
 -- DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.glikbylflheewbonytev.supabase.co:5432/postgres
+
+-- ================================================
+-- Table : LNURL-Auth challenges
+-- ================================================
+-- Stockage des challenges LNURL-Auth pour l'authentification Lightning.
+-- Remplace le Map en mémoire (non compatible Vercel serverless).
+-- Les challenges expirent après 5 minutes et sont supprimés après consommation.
+CREATE TABLE IF NOT EXISTS lnurl_challenges (
+  k1         TEXT PRIMARY KEY,
+  status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified')),
+  pubkey     TEXT,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Index pour nettoyer efficacement les challenges expirés
+CREATE INDEX IF NOT EXISTS idx_lnurl_challenges_expires_at ON lnurl_challenges (expires_at);
+
+-- RLS : autoriser les opérations server-side (service role uniquement)
+ALTER TABLE lnurl_challenges ENABLE ROW LEVEL SECURITY;
+
+-- Pas de politique RLS publique : accès exclusivement via la Service Role Key
+-- (les API Routes Next.js utilisent SUPABASE_SERVICE_ROLE_KEY)

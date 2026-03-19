@@ -188,7 +188,7 @@ describe('loginWithLinkedIn()', () => {
     result.current.loginWithLinkedIn()
 
     const stateCall = sessionStorageMock.setItem.mock.calls.find(
-      ([key]: [string]) => key === 'linkedin_oauth_state'
+      ([key]: [string, string]) => key === 'linkedin_oauth_state'
     )
     expect(stateCall).toBeDefined()
     expect(stateCall![1]).toMatch(/^[a-z0-9]+$/) // state aléatoire alphanumérique

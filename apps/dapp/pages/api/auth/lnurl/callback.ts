@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { lnurlChallenges } from './challenge';
+import { lnurlChallengesDb } from '../../../../lib/supabaseServerClient';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // LNURL-Auth spec : le wallet envoie une requête GET
@@ -14,15 +14,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ status: 'ERROR', reason: 'Paramètres manquants (k1, sig, key)' });
     }
 
-    // Vérifier que le challenge existe et n'est pas expiré
-    const challenge = lnurlChallenges.get(k1);
+    const challenge = await lnurlChallengesDb.findByK1(k1);
 
     if (!challenge) {
       return res.status(400).json({ status: 'ERROR', reason: 'Challenge invalide ou expiré' });
     }
 
-    if (Date.now() > challenge.expires) {
-      lnurlChallenges.delete(k1);
+    if (challenge.expires_at < new Date()) {
+      await lnurlChallengesDb.delete(k1);
       return res.status(400).json({ status: 'ERROR', reason: 'Challenge expiré' });
     }
 
@@ -31,9 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Vérifier la signature secp256k1 : le wallet signe le k1 avec sa clé privée
-    // sig est une signature DER hex, key est la clé publique compressée hex
     try {
-      // @noble/secp256k1 v1 est CommonJS-compatible (contrairement à v2/noble/curves)
       const secp = await import('@noble/secp256k1');
       const k1Bytes = Buffer.from(k1, 'hex');
       const sigBytes = Buffer.from(sig, 'hex');
@@ -48,14 +45,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ status: 'ERROR', reason: 'Signature malformée' });
     }
 
-    // Marquer le challenge comme vérifié avec la clé publique du nœud
-    lnurlChallenges.set(k1, {
-      ...challenge,
-      status: 'verified',
-      pubkey: key,
-    });
+    await lnurlChallengesDb.markVerified(k1, key);
 
-    // Réponse LNURL-Auth spec : { status: "OK" }
     return res.status(200).json({ status: 'OK' });
   } catch (error) {
     console.error('Erreur callback LNURL:', error);

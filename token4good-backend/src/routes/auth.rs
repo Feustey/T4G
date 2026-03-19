@@ -1034,7 +1034,22 @@ async fn get_or_create_user_from_dazno(
 ) -> Result<User, StatusCode> {
     // Essayer de récupérer l'utilisateur existant
     match state.db.get_user_by_email(&dazno_user.email).await {
-        Ok(Some(existing_user)) => return Ok(existing_user),
+        Ok(Some(mut existing_user)) => {
+            // À la deuxième connexion, marquer automatiquement is_onboarded pour éviter
+            // de re-présenter l'onboarding à un utilisateur qui a déjà un compte.
+            if !existing_user.is_onboarded {
+                let pool = state.db.pool().clone();
+                let user_id = existing_user.id;
+                tokio::spawn(async move {
+                    let _ = sqlx::query("UPDATE users SET is_onboarded = true, updated_at = NOW() WHERE id = $1")
+                        .bind(user_id)
+                        .execute(&pool)
+                        .await;
+                });
+                existing_user.is_onboarded = true;
+            }
+            return Ok(existing_user);
+        }
         Ok(None) => {} // Nouvel utilisateur, on continue
         Err(e) => {
             tracing::error!("DB error looking up user by email (dazno): {}", e);
@@ -1100,7 +1115,22 @@ async fn get_or_create_user_from_oauth(
 
     // Essayer de récupérer l'utilisateur existant
     match state.db.get_user_by_email(&email).await {
-        Ok(Some(existing_user)) => return Ok(existing_user),
+        Ok(Some(mut existing_user)) => {
+            // À la deuxième connexion, marquer automatiquement is_onboarded pour éviter
+            // de re-présenter l'onboarding à un utilisateur qui a déjà un compte.
+            if !existing_user.is_onboarded {
+                let pool = state.db.pool().clone();
+                let user_id = existing_user.id;
+                tokio::spawn(async move {
+                    let _ = sqlx::query("UPDATE users SET is_onboarded = true, updated_at = NOW() WHERE id = $1")
+                        .bind(user_id)
+                        .execute(&pool)
+                        .await;
+                });
+                existing_user.is_onboarded = true;
+            }
+            return Ok(existing_user);
+        }
         Ok(None) => {} // Nouvel utilisateur, on continue
         Err(e) => {
             let msg = format!("get_user_by_email({}): {}", email, e);

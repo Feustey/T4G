@@ -99,7 +99,7 @@ describe('Gestion du cache', () => {
     mockFetch.mockReturnValue(mockResponse(loginData))
     await apiClient.login({ email: 'a@b.com', provider: 't4g' })
     const cacheSetCalls = localStorageMock.setItem.mock.calls.filter(
-      ([key]: [string]) => key.startsWith('api_cache_')
+      ([key]: [string, string]) => key.startsWith('api_cache_')
     )
     expect(cacheSetCalls).toHaveLength(0)
   })
@@ -335,7 +335,7 @@ describe('Auth API', () => {
     mockFetch.mockReturnValue(mockResponse({ user: { id: '1', email: 'a@b.com', firstname: 'A', lastname: 'B', role: 'student' } }))
     // pas de token dans la response => setItem ne doit pas être appelé avec 'token'
     await apiClient.login({ email: 'a@b.com', provider: 't4g' } as any)
-    const tokenSet = localStorageMock.setItem.mock.calls.find(([key]: [string]) => key === 'token')
+    const tokenSet = localStorageMock.setItem.mock.calls.find(([key]: [string, string]) => key === 'token')
     expect(tokenSet).toBeUndefined()
   })
 

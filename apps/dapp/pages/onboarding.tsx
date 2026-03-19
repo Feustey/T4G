@@ -243,7 +243,7 @@ export function Onboarding() {
                         borderRadius: 8,
                         textAlign: 'left',
                         cursor: 'pointer',
-                        border: `2px solid ${mentorMode === key ? '#f7931a' : '#e2e8f0'}`,
+                        border: `2px solid ${mentorMode === key ? '#f7931a' : '#94a3b8'}`,
                         background: mentorMode === key ? '#fff8f0' : 'transparent',
                       }}
                     >
@@ -267,7 +267,7 @@ export function Onboarding() {
                             borderRadius: 999,
                             fontSize: 13,
                             cursor: 'pointer',
-                            border: `2px solid ${selectedLearningTopics.includes(t.slug) ? '#f7931a' : '#e2e8f0'}`,
+                            border: `2px solid ${selectedLearningTopics.includes(t.slug) ? '#f7931a' : '#94a3b8'}`,
                             background: selectedLearningTopics.includes(t.slug) ? '#fff8f0' : 'transparent',
                           }}
                         >
@@ -292,7 +292,7 @@ export function Onboarding() {
                             borderRadius: 999,
                             fontSize: 13,
                             cursor: 'pointer',
-                            border: `2px solid ${selectedMentorTopics.includes(t.slug) ? '#f7931a' : '#e2e8f0'}`,
+                            border: `2px solid ${selectedMentorTopics.includes(t.slug) ? '#f7931a' : '#94a3b8'}`,
                             background: selectedMentorTopics.includes(t.slug) ? '#fff8f0' : 'transparent',
                           }}
                         >
@@ -501,7 +501,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     padding: '0.75rem',
     borderRadius: 8,
-    border: '1px solid #e2e8f0',
+    border: '1px solid #94a3b8',
     fontSize: 16,
     boxSizing: 'border-box',
     color: '#1a202c',
@@ -522,7 +522,7 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     padding: '0.875rem',
     borderRadius: 8,
-    border: '2px solid #e2e8f0',
+    border: '2px solid #94a3b8',
     background: 'transparent',
     fontWeight: 700,
     fontSize: 16,
