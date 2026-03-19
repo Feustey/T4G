@@ -2,13 +2,15 @@
 // Fusion de next.config.js, next.config.production.js et next.config.nx.js
 const { withSentryConfig } = require('@sentry/nextjs');
 
-// Nx optionnel - uniquement en développement local
-let withNx;
-try {
-  withNx = require('@nrwl/next/plugins/with-nx');
-} catch {
-  // Fallback sans Nx pour Vercel
-  withNx = (config) => config;
+// Nx optionnel - uniquement en développement local (désactivé sur Vercel)
+// withNx est async et crashe sur Vercel (pas de workspace.json) → on ne le charge pas
+let withNx = (config) => config;
+if (!process.env.VERCEL) {
+  try {
+    withNx = require('@nrwl/next/plugins/with-nx');
+  } catch {
+    // @nrwl/next absent, fallback déjà défini
+  }
 }
 
 /** @type {import('next').NextConfig} */
@@ -247,13 +249,7 @@ const sentryWebpackPluginOptions = {
 };
 
 // Export avec Nx et optionnellement Sentry
-// withNx peut crasher sur Vercel si le workspace NX n'est pas configuré → fallback
-let configWithNx;
-try {
-  configWithNx = withNx(nextConfig);
-} catch {
-  configWithNx = nextConfig;
-}
+const configWithNx = withNx(nextConfig);
 module.exports = process.env.SENTRY_AUTH_TOKEN
   ? withSentryConfig(configWithNx, sentryWebpackPluginOptions)
   : configWithNx;
