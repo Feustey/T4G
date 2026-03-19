@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { LangType, LocaleType } from '../types';
 import PublicLayout from '../layouts/PublicLayout';
-import { useIndexing, useOAuth } from '../hooks';
+import { useIndexing, useNotify, useOAuth } from '../hooks';
 import { GetServerSideProps } from 'next';
 import OnboardingLayout from '../layouts/OnboardingLayout';
 import { Button } from '../components';
@@ -50,6 +50,7 @@ export function Page({ lang }: IPage) {
   const { login, isAuthenticated, user } = useAuth();
   const { loginWithLinkedIn, loginWithDazno, loginWithGitHub, sendMagicLink } = useOAuth();
 
+  const notify = useNotify();
   const [debugButtonsVisible, setDebugButtonsVisible] = useState<boolean>(false);
   const [isDazenoUser, setIsDazenoUser] = useState<boolean>(false);
   const [isCheckingDazeno, setIsCheckingDazeno] = useState<boolean>(false);
@@ -149,6 +150,7 @@ export function Page({ lang }: IPage) {
       await login('lnurl', { providerUserData: { ...userData, pubkey } });
     } catch (err) {
       console.error('Erreur login LNURL:', err);
+      notify.error(err instanceof Error ? err.message : 'Erreur de connexion Lightning');
       setIsLoggingIn(false);
     }
   };
@@ -224,7 +226,7 @@ export function Page({ lang }: IPage) {
                 style={{ background: '#f7931a', color: 'white' }}
               >
                 <LightningIcon />
-                Connexion Lightning (LNURL-Auth)
+                {isLoggingIn ? 'Connexion en cours...' : 'Connexion Lightning (LNURL-Auth)'}
               </button>
 
               <div className="auth-divider">ou</div>
@@ -244,7 +246,7 @@ export function Page({ lang }: IPage) {
                 style={{ background: '#24292e', color: 'white' }}
               >
                 <GitHubIcon />
-                Continuer avec GitHub
+                {isLoggingIn ? 'Connexion en cours...' : 'Continuer avec GitHub'}
               </button>
 
               <div className="auth-divider">ou</div>
@@ -332,7 +334,7 @@ export function Page({ lang }: IPage) {
                 }}
                 style={{ background: 'white', color: '#444', border: '1.5px solid #e0e0e0' }}
               >
-                Login with Daznode
+                {isLoggingIn ? 'Connexion en cours...' : 'Login with Daznode'}
               </button>
 
             </div>
@@ -357,7 +359,7 @@ export function Page({ lang }: IPage) {
                   } catch (error) {
                     console.error(`Erreur login ${role}:`, error);
                     const message = error instanceof Error ? error.message : 'Erreur de connexion';
-                    alert(message);
+                    notify.error(message);
                     setIsLoggingIn(false);
                   }
                 }}

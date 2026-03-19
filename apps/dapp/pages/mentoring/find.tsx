@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import useSwr from 'swr';
 import ConnectedLayout from '../../layouts/ConnectedLayout';
 import { useAuth } from '../../contexts/AuthContext';
-import { useIndexing } from '../../hooks';
+import { useIndexing, useNotify } from '../../hooks';
 import { Breadcrumb, Button, Spinner } from '../../components';
 import { AuthPageType, LangType } from '../../types';
 import { apiClient, LearningCategory, MentoringOffer, TimeSlot } from '../../services/apiClient';
@@ -51,6 +51,7 @@ function formatDate(iso: string): string {
 const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const { user } = useAuth();
   const router = useRouter();
+  const notify = useNotify();
 
   const [mounted, setMounted] = useState(false);
 
@@ -79,6 +80,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
         notes: bookingNotes.trim() || undefined,
       });
       closeModal();
+      notify.success('Réservation confirmée ! Redirection vers votre session...');
       router.push(`/mentoring/session/${booking.id}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erreur lors de la réservation.';
@@ -86,7 +88,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
     } finally {
       setIsBooking(false);
     }
-  }, [bookingOffer, selectedSlot, bookingNotes, closeModal, router]);
+  }, [bookingOffer, selectedSlot, bookingNotes, closeModal, router, notify]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedMentorId, setSelectedMentorId] = useState<string>('');

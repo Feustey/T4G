@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useMemo, useCallback } from 'react';
 import Head from 'next/head';
-import { useAppDispatch, useAppSelector, useIndexing } from '../hooks';
+import { useAppDispatch, useAppSelector, useIndexing, useNotify } from '../hooks';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import {
   AuthPageType,
@@ -80,6 +80,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [dismissedProfilePrompt, setDismissedProfilePrompt] = useState<boolean>(false);
   const dispatch = useAppDispatch();
+  const notify = useNotify();
   const router = useRouter();
 
   // Vérifier que l'utilisateur est connecté avant de faire les appels API
@@ -152,7 +153,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
     }
   );
 
-  // Afficher les erreurs dans la console pour debug
+  // Afficher les erreurs dans la console et notifier l'utilisateur
   React.useEffect(() => {
     if (metricsError) console.error('🔴 Dashboard - Metrics error:', metricsError);
     if (userMetricsError) console.error('🔴 Dashboard - User metrics error:', userMetricsError);
@@ -160,6 +161,12 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
     if (notificationsError) console.error('🔴 Dashboard - Notifications error:', notificationsError);
     if (dashboardAccessError) console.error('🔴 Dashboard - Dashboard access error:', dashboardAccessError);
     if (userAboutError) console.error('🔴 Dashboard - User about error:', userAboutError);
+
+    const hasAnyError = metricsError || userMetricsError || servicesError || notificationsError || userAboutError;
+    if (hasAnyError) {
+      notify.warning('Certaines données n\'ont pas pu être chargées. Affichage des dernières données disponibles.');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metricsError, userMetricsError, servicesError, notificationsError, dashboardAccessError, userAboutError]);
 
   const isLoading = isLoadingMetrics || isLoadingUserMetrics || isLoadingServices || isLoadingNotifications || isLoadingUserAbout;
@@ -197,6 +204,8 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
         (tx) => tx.dealId !== transactionToUpdate.dealId
       );
       dispatch(setPendingTransactionsState(updatedTransactions));
+      if (isConfirming) notify.success('Transaction confirmée avec succès.');
+      if (isCancelling) notify.info('Transaction annulée.');
     }
     setIsConfirming(false);
     setIsCancelling(false);
