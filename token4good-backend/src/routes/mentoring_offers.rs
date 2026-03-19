@@ -76,6 +76,8 @@ pub fn mentoring_offer_routes() -> Router<AppState> {
         .route("/bookings/:id", get(get_booking))
         .route("/bookings/:id/confirm", post(confirm_booking))
         .route("/bookings/:id/dispute", post(dispute_booking))
+        .route("/bookings/:id/accept", post(accept_booking))
+        .route("/bookings/:id/decline", post(decline_booking))
         // Vue enrichie (booking + offre)
         .route("/sessions/:id", get(get_session_full))
 }
@@ -85,6 +87,7 @@ pub fn mentoring_user_routes() -> Router<AppState> {
     Router::new()
         .route("/me/mentoring-offers", get(get_my_offers))
         .route("/me/mentoring-bookings", get(get_my_bookings))
+        .route("/me/mentoring-received-bookings", get(get_received_bookings))
 }
 
 // ============================================================
@@ -1099,4 +1102,243 @@ pub async fn dispute_booking(
 
     tracing::warn!("Dispute opened on booking {}", id);
     Ok(StatusCode::NO_CONTENT)
+}
+
+// ============================================================
+// Handlers — Acceptation / Refus mentor
+// ============================================================
+
+/// POST /api/mentoring/bookings/:id/accept — mentor accepte la demande (pending → confirmed)
+pub async fn accept_booking(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+    Path(id): Path<String>,
+) -> Result<Json<MentoringBooking>, StatusCode> {
+    let booking_row = sqlx::query(
+        r#"
+        SELECT b.*, o.mentor_id, o.topic_slug
+        FROM mentoring_bookings b
+        JOIN mentoring_offers o ON o.id = b.offer_id
+        WHERE b.id = $1
+        "#,
+    )
+    .bind(&id)
+    .fetch_optional(state.db.pool())
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+    .ok_or(StatusCode::NOT_FOUND)?;
+
+    let mentor_id: String = booking_row
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    if mentor_id != auth_user.id {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    let status: String = booking_row.try_get("status").unwrap_or_default();
+    if status != "pending" {
+        return Err(StatusCode::CONFLICT);
+    }
+
+    let mentee_id: String = booking_row.try_get("mentee_id").unwrap_or_default();
+    let topic_slug: String = booking_row.try_get("topic_slug").unwrap_or_default();
+
+    let updated = sqlx::query(
+        "UPDATE mentoring_bookings SET status = 'confirmed', updated_at = NOW() WHERE id = $1 RETURNING *",
+    )
+    .bind(&id)
+    .fetch_one(state.db.pool())
+    .await
+    .map_err(|e| {
+        tracing::error!("Error accepting booking {}: {}", id, e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    // Notifier le mentee
+    let mentor_name = user_display_name(state.db.pool(), &auth_user.id).await;
+    notify(
+        state.db.pool(),
+        &mentee_id,
+        "Session confirmée",
+        &format!(
+            "{} a accepté ta demande de session sur «{}». Prépare-toi !",
+            mentor_name, topic_slug
+        ),
+        "MENTORING_CONFIRMED",
+        Some(&format!("/mentoring/session/{}", id)),
+        None,
+    )
+    .await;
+
+    tracing::info!("Booking {} accepted by mentor {}", id, auth_user.id);
+
+    Ok(Json(MentoringBooking {
+        id: updated.try_get("id").unwrap_or_default(),
+        offer_id: updated.try_get("offer_id").unwrap_or_default(),
+        mentee_id: updated.try_get("mentee_id").unwrap_or_default(),
+        scheduled_at: updated.try_get("scheduled_at").unwrap_or_else(|_| chrono::Utc::now()),
+        status: updated.try_get("status").unwrap_or_default(),
+        mentee_confirmed: updated.try_get("mentee_confirmed").unwrap_or(false),
+        mentor_confirmed: updated.try_get("mentor_confirmed").unwrap_or(false),
+        tokens_escrowed: updated.try_get("tokens_escrowed").unwrap_or(0),
+        mentee_rating: updated.try_get("mentee_rating").ok(),
+        mentor_rating: updated.try_get("mentor_rating").ok(),
+        mentee_comment: updated.try_get("mentee_comment").ok(),
+        mentor_comment: updated.try_get("mentor_comment").ok(),
+        learned_skills: updated.try_get("learned_skills").unwrap_or_default(),
+        created_at: updated.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
+        updated_at: updated.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+    }))
+}
+
+/// POST /api/mentoring/bookings/:id/decline — mentor refuse (pending → cancelled, remboursement, offre → open)
+pub async fn decline_booking(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+    Path(id): Path<String>,
+) -> Result<StatusCode, StatusCode> {
+    let booking_row = sqlx::query(
+        r#"
+        SELECT b.*, o.mentor_id, o.topic_slug, o.id as offer_id_col
+        FROM mentoring_bookings b
+        JOIN mentoring_offers o ON o.id = b.offer_id
+        WHERE b.id = $1
+        "#,
+    )
+    .bind(&id)
+    .fetch_optional(state.db.pool())
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+    .ok_or(StatusCode::NOT_FOUND)?;
+
+    let mentor_id: String = booking_row
+        .try_get("mentor_id")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    if mentor_id != auth_user.id {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    let status: String = booking_row.try_get("status").unwrap_or_default();
+    if status != "pending" {
+        return Err(StatusCode::CONFLICT);
+    }
+
+    let mentee_id: String = booking_row.try_get("mentee_id").unwrap_or_default();
+    let offer_id: String = booking_row.try_get("offer_id").unwrap_or_default();
+    let topic_slug: String = booking_row.try_get("topic_slug").unwrap_or_default();
+    let tokens_escrowed: i32 = booking_row.try_get("tokens_escrowed").unwrap_or(0);
+
+    let mut tx = state
+        .db
+        .pool()
+        .begin()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Annuler la réservation
+    sqlx::query(
+        "UPDATE mentoring_bookings SET status = 'cancelled', updated_at = NOW() WHERE id = $1",
+    )
+    .bind(&id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Remettre l'offre en open
+    sqlx::query("UPDATE mentoring_offers SET status = 'open', updated_at = NOW() WHERE id = $1")
+        .bind(&offer_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    tx.commit()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Remboursement du séquestre (hors transaction)
+    if tokens_escrowed > 0 {
+        if let Err(e) = mentoring_completion::refund_escrow(
+            state.db.pool(),
+            &mentee_id,
+            tokens_escrowed as i64,
+            &id,
+        )
+        .await
+        {
+            tracing::error!("Escrow refund failed for declined booking {}: {}", id, e);
+        }
+    }
+
+    // Notifier le mentee
+    let mentor_name = user_display_name(state.db.pool(), &auth_user.id).await;
+    notify(
+        state.db.pool(),
+        &mentee_id,
+        "Demande de session refusée",
+        &format!(
+            "{} n'est pas disponible pour la session «{}». Tes T4G ont été remboursés.",
+            mentor_name, topic_slug
+        ),
+        "MENTORING_DECLINED",
+        Some("/mentoring/find"),
+        Some(tokens_escrowed),
+    )
+    .await;
+
+    tracing::info!("Booking {} declined by mentor {}", id, auth_user.id);
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// GET /api/users/me/mentoring-received-bookings — réservations reçues en tant que mentor
+pub async fn get_received_bookings(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+) -> Result<Json<Vec<serde_json::Value>>, StatusCode> {
+    let rows = sqlx::query(
+        r#"
+        SELECT
+            b.*,
+            o.topic_slug, o.duration_minutes, o.format, o.token_cost,
+            u.firstname AS mentee_firstname, u.lastname AS mentee_lastname, u.avatar_url AS mentee_avatar
+        FROM mentoring_bookings b
+        JOIN mentoring_offers o ON o.id = b.offer_id
+        JOIN users u ON u.id = b.mentee_id
+        WHERE o.mentor_id = $1
+          AND b.status IN ('pending', 'confirmed')
+        ORDER BY b.scheduled_at ASC
+        "#,
+    )
+    .bind(&auth_user.id)
+    .fetch_all(state.db.pool())
+    .await
+    .map_err(|e| {
+        tracing::error!("Error fetching received bookings: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let bookings: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|r| {
+            serde_json::json!({
+                "id":               r.try_get::<String, _>("id").unwrap_or_default(),
+                "offer_id":         r.try_get::<String, _>("offer_id").unwrap_or_default(),
+                "mentee_id":        r.try_get::<String, _>("mentee_id").unwrap_or_default(),
+                "scheduled_at":     r.try_get::<chrono::DateTime<chrono::Utc>, _>("scheduled_at").map(|d| d.to_rfc3339()).unwrap_or_default(),
+                "status":           r.try_get::<String, _>("status").unwrap_or_default(),
+                "tokens_escrowed":  r.try_get::<i32, _>("tokens_escrowed").unwrap_or(0),
+                "notes":            r.try_get::<Option<String>, _>("notes").unwrap_or(None),
+                "topic_slug":       r.try_get::<String, _>("topic_slug").unwrap_or_default(),
+                "duration_minutes": r.try_get::<i32, _>("duration_minutes").unwrap_or(60),
+                "format":           r.try_get::<String, _>("format").unwrap_or_default(),
+                "token_cost":       r.try_get::<i32, _>("token_cost").unwrap_or(0),
+                "mentee": {
+                    "firstname":  r.try_get::<String, _>("mentee_firstname").unwrap_or_default(),
+                    "lastname":   r.try_get::<String, _>("mentee_lastname").unwrap_or_default(),
+                    "avatar_url": r.try_get::<Option<String>, _>("mentee_avatar").unwrap_or(None),
+                },
+            })
+        })
+        .collect();
+
+    Ok(Json(bookings))
 }

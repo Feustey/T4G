@@ -469,6 +469,22 @@ class APIClient {
     });
   }
 
+  async acceptMentoringBooking(bookingId: string) {
+    return this.request<MentoringBooking>(`/api/mentoring/bookings/${bookingId}/accept`, {
+      method: 'POST',
+    });
+  }
+
+  async declineMentoringBooking(bookingId: string) {
+    return this.request<void>(`/api/mentoring/bookings/${bookingId}/decline`, {
+      method: 'POST',
+    });
+  }
+
+  async getMyReceivedBookings(): Promise<ReceivedBooking[]> {
+    return this.request<ReceivedBooking[]>('/api/users/me/mentoring-received-bookings');
+  }
+
   async getSessionFull(bookingId: string) {
     return this.request<SessionFull>(`/api/mentoring/sessions/${bookingId}`);
   }
@@ -598,6 +614,26 @@ export interface MentoringBooking {
   notes?: string;
   created_at: string;
   updated_at: string;
+}
+
+/** Réservation reçue côté mentor (avec infos du mentee) */
+export interface ReceivedBooking {
+  id: string;
+  offer_id: string;
+  mentee_id: string;
+  scheduled_at: string;
+  status: 'pending' | 'confirmed';
+  tokens_escrowed: number;
+  notes?: string;
+  topic_slug: string;
+  duration_minutes: number;
+  format: 'video' | 'text' | 'async';
+  token_cost: number;
+  mentee: {
+    firstname: string;
+    lastname: string;
+    avatar_url?: string;
+  };
 }
 
 /** Vue enrichie d'une session (booking + offre + utilisateurs) */

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { LangType } from '../../lib/shared-types';
 import useSwr from 'swr';
 import { apiClient } from '../../services/apiClient';
 import { resizeFile } from '../../services';
+import { useNotify } from '../../hooks/useNotify';
 
 export interface EditProfileInfoProps {
   lang: LangType;
@@ -25,13 +26,13 @@ const TopicPills: React.FC<TopicPillsProps> = ({ topics, selected, onToggle }) =
           type="button"
           onClick={() => onToggle(t.slug)}
           style={{
-            padding: '5px 12px',
+            padding: '5px 14px',
             borderRadius: 999,
-            fontSize: 13,
+            fontSize: 14,
             cursor: 'pointer',
-            border: `2px solid ${active ? 'var(--app-button-background)' : '#94a3b8'}`,
-            background: active ? 'var(--app-color-background-ternary, #f1f5f9)' : 'transparent',
-            color: active ? 'var(--app-button-background)' : 'inherit',
+            border: `2px solid ${active ? 'var(--app-button-background)' : '#cbd5e0'}`,
+            background: active ? 'var(--app-color-background-ternary, #fff8f0)' : '#fff',
+            color: active ? 'var(--app-button-background)' : '#2d3748',
             fontWeight: active ? 600 : 400,
           }}
         >
@@ -48,7 +49,8 @@ const TopicPills: React.FC<TopicPillsProps> = ({ topics, selected, onToggle }) =
 );
 
 export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang }) => {
-  const { user, refreshSession } = useAuth();
+  const { user, reloadUser } = useAuth();
+  const notify = useNotify();
 
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -64,7 +66,18 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
 
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  // Valeurs initiales pour le dirty state
+  const [initial, setInitial] = useState({
+    firstname: '',
+    lastname: '',
+    bio: '',
+    isMentorActive: false,
+    mentorBio: '',
+    mentorTopics: [] as string[],
+    mentorTokensPerHour: null as number | null,
+    learningTopics: [] as string[],
+  });
 
   const { data: topics = [] } = useSwr(
     'learning-topics',
@@ -74,16 +87,41 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
 
   useEffect(() => {
     if (!user) return;
-    setFirstname(user.firstname || '');
-    setLastname(user.lastname || '');
-    setBio(user.bio || '');
+    const init = {
+      firstname: user.firstname || '',
+      lastname: user.lastname || '',
+      bio: user.bio || '',
+      isMentorActive: user.is_mentor_active ?? false,
+      mentorBio: user.mentor_bio ?? '',
+      mentorTopics: user.mentor_topics ?? [],
+      mentorTokensPerHour: user.mentor_tokens_per_hour ?? null,
+      learningTopics: user.learning_topics ?? [],
+    };
+    setFirstname(init.firstname);
+    setLastname(init.lastname);
+    setBio(init.bio);
     setAvatarPreview(user.avatar_url || '');
-    setIsMentorActive(user.is_mentor_active ?? false);
-    setMentorBio(user.mentor_bio ?? '');
-    setMentorTopics(user.mentor_topics ?? []);
-    setLearningTopics(user.learning_topics ?? []);
-    setMentorTokensPerHour(user.mentor_tokens_per_hour ?? null);
+    setIsMentorActive(init.isMentorActive);
+    setMentorBio(init.mentorBio);
+    setMentorTopics(init.mentorTopics);
+    setLearningTopics(init.learningTopics);
+    setMentorTokensPerHour(init.mentorTokensPerHour);
+    setInitial(init);
   }, [user]);
+
+  const isDirty = useMemo(() => {
+    if (avatarBase64) return true;
+    return (
+      firstname !== initial.firstname ||
+      lastname !== initial.lastname ||
+      bio !== initial.bio ||
+      isMentorActive !== initial.isMentorActive ||
+      mentorBio !== initial.mentorBio ||
+      mentorTokensPerHour !== initial.mentorTokensPerHour ||
+      JSON.stringify([...mentorTopics].sort()) !== JSON.stringify([...initial.mentorTopics].sort()) ||
+      JSON.stringify([...learningTopics].sort()) !== JSON.stringify([...initial.learningTopics].sort())
+    );
+  }, [firstname, lastname, bio, isMentorActive, mentorBio, mentorTokensPerHour, mentorTopics, learningTopics, avatarBase64, initial]);
 
   const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,11 +132,11 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
       setAvatarPreview(resized);
       setAvatarBase64(resized);
     } catch {
-      // ignore
+      notify.error('Impossible de charger la photo.');
     } finally {
       setIsAvatarUploading(false);
     }
-  }, []);
+  }, [notify]);
 
   const toggleTopic = (
     slug: string,
@@ -110,9 +148,8 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !isDirty) return;
     setIsSaving(true);
-    setSaveStatus('idle');
     try {
       await apiClient.updateUser(user.id, {
         firstname,
@@ -125,11 +162,12 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
         learning_topics: learningTopics,
         mentor_tokens_per_hour: mentorTokensPerHour ?? undefined,
       } as any);
-      await refreshSession?.();
-      setSaveStatus('success');
-      setTimeout(() => setSaveStatus('idle'), 4000);
+      // Recharger l'utilisateur sans tenter de refresh le token (évite la déconnexion)
+      await reloadUser();
+      setAvatarBase64('');
+      notify.success('Profil enregistré avec succès.');
     } catch {
-      setSaveStatus('error');
+      notify.error('Erreur lors de la sauvegarde. Réessaie.');
     } finally {
       setIsSaving(false);
     }
@@ -143,7 +181,7 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
       {/* ── Avatar ─────────────────────────────────────── */}
       <section className="EditProfileInfo__section">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ flexShrink: 0 }}>
+          <div style={{ flexShrink: 0, position: 'relative' }}>
             {avatarPreview ? (
               <img
                 src={avatarPreview}
@@ -317,20 +355,16 @@ export const EditProfileInfo: React.FC<EditProfileInfoProps> = ({ lang: _lang })
 
       {/* ── Actions ────────────────────────────────────── */}
       <div className="EditProfileInfo__actions">
-        {saveStatus === 'success' && (
-          <p className="EditProfileInfo__feedback EditProfileInfo__feedback--success">
-            Profil enregistré.
-          </p>
-        )}
-        {saveStatus === 'error' && (
-          <p className="EditProfileInfo__feedback EditProfileInfo__feedback--error error-text">
-            Une erreur est survenue. Réessaie.
+        {isDirty && !isSaving && (
+          <p style={{ fontSize: 13, color: 'var(--app-color-text-disabled)', margin: 0 }}>
+            Modifications non sauvegardées
           </p>
         )}
         <button
           type="submit"
           className="c-button c-button--primary"
-          disabled={isSaving}
+          disabled={isSaving || !isDirty}
+          style={{ opacity: !isDirty ? 0.5 : 1 }}
         >
           {isSaving ? 'Enregistrement...' : 'Enregistrer'}
         </button>

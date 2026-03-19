@@ -57,11 +57,12 @@ export default function MagicLinkCallback({ token: tokenProp }: Props) {
 
         setStatus('success');
         const locale = getLocale(router);
-        const homeUrl = `/${locale}/`;
-        // Rechargement complet pour que AuthContext.loadUser() lise le token en localStorage
-        // La home (index.tsx) redirige vers /onboarding ou /dashboard selon is_onboarded
+        // Redirection directe vers la bonne destination — évite le flash de la landing
+        const destination = authData.user?.is_onboarded === false
+          ? `/${locale}/onboarding/`
+          : `/${locale}/dashboard/`;
         setTimeout(() => {
-          window.location.href = homeUrl;
+          window.location.href = destination;
         }, 500);
       } catch (err) {
         setStatus('error');
@@ -99,13 +100,7 @@ export default function MagicLinkCallback({ token: tokenProp }: Props) {
             <>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
               <h2 style={{ color: '#1a1a2e', marginBottom: 8 }}>Connexion réussie</h2>
-              <p style={{ color: '#999', marginBottom: 16 }}>Redirection vers le tableau de bord...</p>
-              <p style={{ fontSize: 14, color: '#666' }}>
-                Si la redirection ne fonctionne pas,{' '}
-                <a href={`/${getLocale(router)}/dashboard/`} style={{ color: '#f7931a', fontWeight: 600 }}>
-                  cliquez ici
-                </a>
-              </p>
+              <p style={{ color: '#999', marginBottom: 16 }}>Redirection en cours...</p>
             </>
           )}
           {status === 'error' && (

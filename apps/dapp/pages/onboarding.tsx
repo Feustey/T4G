@@ -244,11 +244,13 @@ export function Onboarding() {
                         textAlign: 'left',
                         cursor: 'pointer',
                         border: `2px solid ${mentorMode === key ? '#f7931a' : '#94a3b8'}`,
-                        background: mentorMode === key ? '#fff8f0' : 'transparent',
+                        background: mentorMode === key ? '#fff8f0' : '#fff',
+                        color: '#1a202c',
+                        width: '100%',
                       }}
                     >
-                      <p style={{ fontWeight: 600, margin: 0 }}>{label}</p>
-                      <p style={{ margin: 0, fontSize: 13, color: '#666' }}>{desc}</p>
+                      <p style={{ fontWeight: 600, margin: 0, color: '#1a202c' }}>{label}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: 14, color: '#555' }}>{desc}</p>
                     </button>
                   ))}
                 </div>
@@ -263,12 +265,14 @@ export function Onboarding() {
                           type="button"
                           onClick={() => toggleTopic(t.slug, setSelectedLearningTopics)}
                           style={{
-                            padding: '6px 12px',
+                            padding: '6px 14px',
                             borderRadius: 999,
-                            fontSize: 13,
+                            fontSize: 14,
                             cursor: 'pointer',
-                            border: `2px solid ${selectedLearningTopics.includes(t.slug) ? '#f7931a' : '#94a3b8'}`,
-                            background: selectedLearningTopics.includes(t.slug) ? '#fff8f0' : 'transparent',
+                            border: `2px solid ${selectedLearningTopics.includes(t.slug) ? '#f7931a' : '#cbd5e0'}`,
+                            background: selectedLearningTopics.includes(t.slug) ? '#fff8f0' : '#fff',
+                            color: selectedLearningTopics.includes(t.slug) ? '#c05e00' : '#2d3748',
+                            fontWeight: selectedLearningTopics.includes(t.slug) ? 600 : 400,
                           }}
                         >
                           {t.name}
@@ -288,12 +292,14 @@ export function Onboarding() {
                           type="button"
                           onClick={() => toggleTopic(t.slug, setSelectedMentorTopics)}
                           style={{
-                            padding: '6px 12px',
+                            padding: '6px 14px',
                             borderRadius: 999,
-                            fontSize: 13,
+                            fontSize: 14,
                             cursor: 'pointer',
-                            border: `2px solid ${selectedMentorTopics.includes(t.slug) ? '#f7931a' : '#94a3b8'}`,
-                            background: selectedMentorTopics.includes(t.slug) ? '#fff8f0' : 'transparent',
+                            border: `2px solid ${selectedMentorTopics.includes(t.slug) ? '#f7931a' : '#cbd5e0'}`,
+                            background: selectedMentorTopics.includes(t.slug) ? '#fff8f0' : '#fff',
+                            color: selectedMentorTopics.includes(t.slug) ? '#c05e00' : '#2d3748',
+                            fontWeight: selectedMentorTopics.includes(t.slug) ? 600 : 400,
                           }}
                         >
                           {t.name}

@@ -362,7 +362,177 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   );
 };
 
-// ── Composant modal de réservation ──
+// ── SlotCalendar ────────────────────────────────────────────────────────────
+
+const WEEK_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function toLocalDay(date: Date): string {
+  // YYYY-MM-DD en heure locale
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+interface SlotCalendarProps {
+  slots: TimeSlot[];
+  selectedSlot: string | null;
+  onSelect: (iso: string) => void;
+  durationMinutes: number;
+}
+
+const SlotCalendar: React.FC<SlotCalendarProps> = ({ slots, selectedSlot, onSelect, durationMinutes }) => {
+  // Group slots by local day
+  const slotsByDay = useMemo(() => {
+    const map: Record<string, TimeSlot[]> = {};
+    for (const s of slots) {
+      const day = toLocalDay(new Date(s.date));
+      if (!map[day]) map[day] = [];
+      map[day].push(s);
+    }
+    return map;
+  }, [slots]);
+
+  // Initial month: first month with a slot, or current month
+  const firstSlotDate = slots.length > 0 ? new Date(slots[0].date) : new Date();
+  const [viewYear, setViewYear] = useState(firstSlotDate.getFullYear());
+  const [viewMonth, setViewMonth] = useState(firstSlotDate.getMonth());
+  const [activeDay, setActiveDay] = useState<string | null>(() => {
+    if (selectedSlot) return toLocalDay(new Date(selectedSlot));
+    return slots.length > 0 ? toLocalDay(new Date(slots[0].date)) : null;
+  });
+
+  // Calendar cells for current month view
+  const cells = useMemo(() => {
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    // Monday-first offset (0=Mon … 6=Sun)
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const result: (string | null)[] = Array(startOffset).fill(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      result.push(toLocalDay(new Date(viewYear, viewMonth, d)));
+    }
+    return result;
+  }, [viewYear, viewMonth]);
+
+  const today = toLocalDay(new Date());
+  const activeDaySlots = activeDay ? (slotsByDay[activeDay] ?? []) : [];
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  return (
+    <div>
+      {/* Month navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <button type="button" onClick={prevMonth}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--color-text-secondary, #64748b)', padding: '0 6px' }}>
+          ‹
+        </button>
+        <span style={{ fontWeight: 600, fontSize: 14 }}>
+          {MONTHS_FR[viewMonth]} {viewYear}
+        </span>
+        <button type="button" onClick={nextMonth}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--color-text-secondary, #64748b)', padding: '0 6px' }}>
+          ›
+        </button>
+      </div>
+
+      {/* Day-of-week header */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 4 }}>
+        {WEEK_DAYS.map(d => (
+          <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary, #94a3b8)', padding: '2px 0' }}>
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+        {cells.map((day, i) => {
+          if (!day) return <div key={`empty-${i}`} />;
+          const hasSlots = !!slotsByDay[day];
+          const isPast = day < today;
+          const isActive = day === activeDay;
+          const isToday = day === today;
+          return (
+            <button
+              key={day}
+              type="button"
+              disabled={!hasSlots || isPast}
+              onClick={() => { setActiveDay(day); onSelect(''); }}
+              style={{
+                aspectRatio: '1',
+                borderRadius: '50%',
+                border: isToday ? '2px solid var(--color-primary, #2563eb)' : '2px solid transparent',
+                background: isActive
+                  ? 'var(--color-primary, #2563eb)'
+                  : hasSlots && !isPast
+                  ? 'var(--color-primary-light, #eff6ff)'
+                  : 'transparent',
+                color: isActive ? '#fff' : isPast ? 'var(--color-text-disabled, #cbd5e0)' : hasSlots ? 'var(--color-primary, #2563eb)' : 'var(--color-text-secondary, #64748b)',
+                fontWeight: hasSlots ? 700 : 400,
+                fontSize: 13,
+                cursor: hasSlots && !isPast ? 'pointer' : 'default',
+                transition: 'all 0.1s',
+                padding: 0,
+              }}
+            >
+              {parseInt(day.split('-')[2], 10)}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Time slots for selected day */}
+      {activeDay && (
+        <div style={{ marginTop: 14 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-secondary, #64748b)', margin: '0 0 8px' }}>
+            {activeDaySlots.length > 0
+              ? `Créneaux disponibles — ${new Date(activeDay).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}`
+              : 'Aucun créneau ce jour'}
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {activeDaySlots.map((slot) => {
+              const isSelected = selectedSlot === slot.date;
+              const time = new Date(slot.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+              return (
+                <button
+                  key={slot.date}
+                  type="button"
+                  onClick={() => onSelect(slot.date)}
+                  style={{
+                    padding: '7px 16px',
+                    borderRadius: '0.5rem',
+                    border: `2px solid ${isSelected ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
+                    background: isSelected ? 'var(--color-primary, #2563eb)' : '#fff',
+                    color: isSelected ? '#fff' : '#1a202c',
+                    fontWeight: isSelected ? 700 : 400,
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    transition: 'all 0.1s',
+                  }}
+                >
+                  {time}
+                  <span style={{ fontSize: 11, marginLeft: 6, opacity: 0.75 }}>{durationMinutes} min</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Composant modal de réservation ──────────────────────────────────────────
 
 interface BookingModalProps {
   offer: MentoringOffer;
@@ -388,25 +558,19 @@ const BookingModal: React.FC<BookingModalProps> = ({
   error,
 }) => {
   const slots: TimeSlot[] = offer.availability ?? [];
+  const hasSlots = slots.length > 0;
+  const canConfirm = !isBooking && (!hasSlots || !!selectedSlot);
 
-  function formatSlot(iso: string, durationMin: number): string {
-    const d = new Date(iso);
-    const date = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-    const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    return `${date} à ${time} (${durationMin} min)`;
-  }
+  const selectedLabel = selectedSlot
+    ? `${new Date(selectedSlot).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à ${new Date(selectedSlot).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+    : null;
 
   return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1000,
+        position: 'fixed', inset: 0, zIndex: 1000,
         background: 'rgba(0,0,0,0.45)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -415,7 +579,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
           background: 'var(--color-surface, #fff)',
           borderRadius: '1rem',
           padding: '1.5rem',
-          maxWidth: 480,
+          maxWidth: 520,
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -435,63 +599,42 @@ const BookingModal: React.FC<BookingModalProps> = ({
               {offer.topic?.name ?? offer.topic_slug}
             </h2>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-secondary, #64748b)' }}>
-              {offer.duration_minutes} min · {offer.token_cost} T4G
+              {offer.duration_minutes} min · {FORMAT_ICONS[offer.format]} {FORMAT_LABELS[offer.format]} · <strong style={{ color: 'var(--app-token-color, #f59e0b)' }}>{offer.token_cost} T4G</strong>
             </p>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 20,
-              cursor: 'pointer',
-              color: 'var(--color-text-secondary, #94a3b8)',
-              lineHeight: 1,
-              padding: '2px 6px',
-            }}
+            style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: 'var(--color-text-secondary, #94a3b8)', lineHeight: 1, padding: '2px 6px' }}
             aria-label="Fermer"
-          >
-            ×
-          </button>
+          >×</button>
         </div>
 
-        {/* Sélecteur de créneaux */}
+        {/* Calendrier de sélection */}
         <div>
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: '0.875rem' }}>
+          <p style={{ margin: '0 0 10px', fontWeight: 600, fontSize: '0.875rem' }}>
             Choisir un créneau
           </p>
-          {slots.length === 0 ? (
-            <p style={{ fontSize: 13, color: 'var(--color-text-secondary, #64748b)', fontStyle: 'italic' }}>
-              Aucun créneau défini — le mentor organisera la session avec toi après la réservation.
-            </p>
+          {hasSlots ? (
+            <SlotCalendar
+              slots={slots}
+              selectedSlot={selectedSlot}
+              onSelect={onSelectSlot}
+              durationMinutes={offer.duration_minutes}
+            />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {slots.map((slot) => {
-                const isSelected = selectedSlot === slot.date;
-                return (
-                  <button
-                    key={slot.date}
-                    onClick={() => onSelectSlot(slot.date)}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: '0.5rem',
-                      border: `2px solid ${isSelected ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
-                      background: isSelected ? 'var(--color-primary-light, #eff6ff)' : 'transparent',
-                      color: isSelected ? 'var(--color-primary, #2563eb)' : 'inherit',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      fontSize: 13,
-                      fontWeight: isSelected ? 600 : 400,
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    📅 {formatSlot(slot.date, slot.duration_minutes)}
-                  </button>
-                );
-              })}
-            </div>
+            <p style={{ fontSize: 13, color: 'var(--color-text-secondary, #64748b)', fontStyle: 'italic', margin: 0 }}>
+              Aucun créneau fixe — le mentor organisera la session avec toi après la réservation.
+            </p>
           )}
         </div>
+
+        {/* Récap créneau sélectionné */}
+        {selectedLabel && (
+          <div style={{ background: 'var(--color-primary-light, #eff6ff)', borderRadius: '0.5rem', padding: '10px 14px', fontSize: 13 }}>
+            <span style={{ color: 'var(--color-text-secondary, #64748b)' }}>Créneau sélectionné : </span>
+            <strong style={{ color: 'var(--color-primary, #2563eb)' }}>{selectedLabel}</strong>
+          </div>
+        )}
 
         {/* Notes */}
         <div>
@@ -504,14 +647,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
             rows={3}
             placeholder="Décris ton niveau actuel, tes objectifs, tes questions…"
             style={{
-              width: '100%',
-              border: '1.5px solid var(--color-border, #e2e8f0)',
-              borderRadius: '0.5rem',
-              padding: '8px 12px',
-              fontSize: 13,
-              resize: 'vertical',
-              fontFamily: 'inherit',
-              boxSizing: 'border-box',
+              width: '100%', border: '1.5px solid var(--color-border, #e2e8f0)',
+              borderRadius: '0.5rem', padding: '8px 12px', fontSize: 13,
+              resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
             }}
           />
         </div>
@@ -527,18 +665,13 @@ const BookingModal: React.FC<BookingModalProps> = ({
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button
             onClick={onConfirm}
-            disabled={isBooking || (slots.length > 0 && !selectedSlot)}
+            disabled={!canConfirm}
             style={{
               flex: 1,
-              background: isBooking || (slots.length > 0 && !selectedSlot) ? '#94a3b8' : 'var(--color-primary, #2563eb)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '0.5rem',
-              padding: '10px 16px',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              cursor: isBooking || (slots.length > 0 && !selectedSlot) ? 'not-allowed' : 'pointer',
-              transition: 'background 0.15s',
+              background: canConfirm ? 'var(--color-primary, #2563eb)' : '#94a3b8',
+              color: '#fff', border: 'none', borderRadius: '0.5rem',
+              padding: '11px 16px', fontWeight: 700, fontSize: '0.95rem',
+              cursor: canConfirm ? 'pointer' : 'not-allowed', transition: 'background 0.15s',
             }}
           >
             {isBooking ? 'Réservation…' : 'Confirmer la réservation'}
@@ -546,13 +679,10 @@ const BookingModal: React.FC<BookingModalProps> = ({
           <button
             onClick={onClose}
             style={{
-              padding: '10px 16px',
-              borderRadius: '0.5rem',
+              padding: '11px 16px', borderRadius: '0.5rem',
               border: '1.5px solid var(--color-border, #e2e8f0)',
-              background: 'transparent',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              color: 'var(--color-text-secondary, #64748b)',
+              background: 'transparent', cursor: 'pointer',
+              fontSize: '0.875rem', color: 'var(--color-text-secondary, #64748b)',
             }}
           >
             Annuler

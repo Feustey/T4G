@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (provider: string, credentials?: any) => Promise<void>;
   logout: () => void;
   refreshSession: () => Promise<void>;
+  reloadUser: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -226,7 +227,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Rafraîchir la session
+  // Rafraîchir la session (tente un refresh token, mais ne déconnecte pas si ça échoue)
   const refreshSession = async () => {
     try {
       const response = await apiClient.refreshToken();
@@ -234,7 +235,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await loadUser();
     } catch (err) {
       console.error('Erreur lors du rafraîchissement du token:', err);
-      logout();
+      // Ne pas déconnecter si le refresh échoue — recharger l'utilisateur avec le token actuel
+      await loadUser();
     }
   };
 
@@ -245,6 +247,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     logout,
     refreshSession,
+    reloadUser: loadUser,
     isAuthenticated: !!user,
   };
 

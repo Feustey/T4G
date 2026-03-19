@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import useSwr from 'swr';
+import useSwr, { useSWRConfig } from 'swr';
 import ConnectedLayout from '../../layouts/ConnectedLayout';
 import { useAuth } from '../../contexts/AuthContext';
-import { useIndexing } from '../../hooks';
+import { useIndexing, useNotify } from '../../hooks';
 import { Breadcrumb, Button, Spinner } from '../../components';
 import { AuthPageType, LangType } from '../../types';
-import { apiClient, MentoringOffer, MentoringBooking } from '../../services/apiClient';
+import { apiClient, MentoringOffer, MentoringBooking, ReceivedBooking } from '../../services/apiClient';
 
 interface IPage {
   lang: LangType;
@@ -37,15 +37,25 @@ type ActiveTab = 'mentor' | 'mentee';
 const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const { user } = useAuth();
   const router = useRouter();
+  const notify = useNotify();
+  const { mutate } = useSWRConfig();
 
   const defaultTab: ActiveTab =
     (router.query.role as ActiveTab) === 'mentor' ? 'mentor' : 'mentee';
   const [tab, setTab] = useState<ActiveTab>(defaultTab);
+  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
   // Offres du mentor
   const { data: myOffers = [], isLoading: isLoadingOffers } = useSwr<MentoringOffer[]>(
     user?.is_mentor_active ? '/api/users/me/mentoring-offers' : null,
     () => apiClient.getMyMentoringOffers(),
+    { revalidateOnFocus: false }
+  );
+
+  // Réservations reçues en tant que mentor (pending + confirmed)
+  const { data: receivedBookings = [], isLoading: isLoadingReceived } = useSwr<ReceivedBooking[]>(
+    user?.is_mentor_active ? '/api/users/me/mentoring-received-bookings' : null,
+    () => apiClient.getMyReceivedBookings(),
     { revalidateOnFocus: false }
   );
 
@@ -56,7 +66,34 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
     { revalidateOnFocus: false }
   );
 
-  const isLoading = isLoadingOffers || isLoadingBookings;
+  const isLoading = isLoadingOffers || isLoadingBookings || isLoadingReceived;
+
+  const handleAccept = useCallback(async (bookingId: string) => {
+    setActionInProgress(bookingId);
+    try {
+      await apiClient.acceptMentoringBooking(bookingId);
+      await mutate('/api/users/me/mentoring-received-bookings');
+      notify.success('Session acceptée ! Le mentee a été notifié.');
+    } catch {
+      notify.error('Erreur lors de l\'acceptation.');
+    } finally {
+      setActionInProgress(null);
+    }
+  }, [mutate, notify]);
+
+  const handleDecline = useCallback(async (bookingId: string) => {
+    setActionInProgress(bookingId);
+    try {
+      await apiClient.declineMentoringBooking(bookingId);
+      await mutate('/api/users/me/mentoring-received-bookings');
+      await mutate('/api/users/me/mentoring-offers');
+      notify.info('Demande refusée. Les T4G du mentee ont été remboursés.');
+    } catch {
+      notify.error('Erreur lors du refus.');
+    } finally {
+      setActionInProgress(null);
+    }
+  }, [mutate, notify]);
 
   const showMentorTab  = user?.is_mentor_active === true;
   const showMenteeTab  = user?.role === 'mentee' || (user?.learning_topics?.length ?? 0) > 0;
@@ -138,18 +175,31 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
             {(tab === 'mentor' || !showMenteeTab) && showMentorTab && (
               <div className="u-d--flex u-flex-column u-gap--m">
 
-                {/* Réservées */}
-                {bookedOffers.length > 0 && (
-                  <Section title={`Sessions réservées (${bookedOffers.length})`} accent="#1d4ed8">
-                    {bookedOffers.map((o) => <OfferCard key={o.id} offer={o} />)}
+                {/* Demandes en attente d'acceptation */}
+                {receivedBookings.filter(b => b.status === 'pending').length > 0 && (
+                  <Section title={`Demandes à traiter (${receivedBookings.filter(b => b.status === 'pending').length})`} accent="#d97706">
+                    {receivedBookings.filter(b => b.status === 'pending').map((b) => (
+                      <ReceivedBookingCard
+                        key={b.id}
+                        booking={b}
+                        isLoading={actionInProgress === b.id}
+                        onAccept={() => handleAccept(b.id)}
+                        onDecline={() => handleDecline(b.id)}
+                      />
+                    ))}
                   </Section>
                 )}
 
-                {/* À confirmer */}
-                {myOffers.filter((o) => o.status === 'booked').length > 0 && (
-                  <Section title="En attente de ta confirmation" accent="#c2410c">
-                    {myOffers.filter((o) => o.status === 'booked').map((o) => (
-                      <OfferCard key={o.id} offer={o} showConfirmCta onConfirm={() => router.push(`/mentoring/session/${o.id}`)} />
+                {/* Sessions confirmées à venir */}
+                {receivedBookings.filter(b => b.status === 'confirmed').length > 0 && (
+                  <Section title={`Sessions confirmées (${receivedBookings.filter(b => b.status === 'confirmed').length})`} accent="#1d4ed8">
+                    {receivedBookings.filter(b => b.status === 'confirmed').map((b) => (
+                      <ReceivedBookingCard
+                        key={b.id}
+                        booking={b}
+                        isLoading={false}
+                        onViewSession={() => router.push(`/mentoring/session/${b.id}`)}
+                      />
                     ))}
                   </Section>
                 )}
@@ -323,6 +373,78 @@ const EmptyState = ({ icon, title, desc, cta, onCta }: { icon: string; title: st
     <Button variant="primary" label={cta} onClick={onCta} />
   </div>
 );
+
+interface ReceivedBookingCardProps {
+  booking: ReceivedBooking;
+  isLoading: boolean;
+  onAccept?: () => void;
+  onDecline?: () => void;
+  onViewSession?: () => void;
+}
+
+const ReceivedBookingCard: React.FC<ReceivedBookingCardProps> = ({
+  booking, isLoading, onAccept, onDecline, onViewSession,
+}) => {
+  const initials = (booking.mentee.firstname[0] ?? '') + (booking.mentee.lastname[0] ?? '');
+  const date = new Date(booking.scheduled_at).toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+  });
+
+  return (
+    <div className="o-card u-d--flex u-flex-column u-gap--s">
+      <div className="u-d--flex u-align-items-center u-gap--s">
+        {booking.mentee.avatar_url ? (
+          <img src={booking.mentee.avatar_url} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-primary-light, #eff6ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, color: 'var(--color-primary, #2563eb)', flexShrink: 0 }}>
+            {initials.toUpperCase()}
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.95rem' }}>
+            {booking.mentee.firstname} {booking.mentee.lastname}
+          </p>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary, #64748b)' }}>
+            {booking.topic_slug} · {booking.duration_minutes} min · {FORMAT_LABELS[booking.format] ?? booking.format}
+          </p>
+        </div>
+        <StatusBadge status={booking.status} />
+      </div>
+
+      <div style={{ fontSize: 13, color: 'var(--color-text-secondary, #64748b)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <span>📅 {date}</span>
+        <span style={{ color: 'var(--app-token-color, #f59e0b)', fontWeight: 600 }}>{booking.tokens_escrowed} T4G en séquestre</span>
+      </div>
+
+      {booking.notes && (
+        <p style={{ margin: 0, fontSize: 13, fontStyle: 'italic', color: 'var(--color-text-secondary, #64748b)', borderLeft: '3px solid var(--color-border, #e2e8f0)', paddingLeft: 10 }}>
+          &ldquo;{booking.notes}&rdquo;
+        </p>
+      )}
+
+      {booking.status === 'pending' && onAccept && onDecline && (
+        <div className="u-d--flex u-gap--s">
+          <Button
+            variant="primary"
+            label={isLoading ? 'Traitement…' : 'Accepter'}
+            onClick={onAccept}
+            disabled={isLoading}
+          />
+          <Button
+            variant="secondary"
+            label="Refuser"
+            onClick={onDecline}
+            disabled={isLoading}
+          />
+        </div>
+      )}
+
+      {booking.status === 'confirmed' && onViewSession && (
+        <Button variant="secondary" label="Voir la session" onClick={onViewSession} />
+      )}
+    </div>
+  );
+};
 
 export default Page;
 

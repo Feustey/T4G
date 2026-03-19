@@ -100,6 +100,34 @@ pub async fn debit_escrow(
     Ok(())
 }
 
+/// Rembourse le séquestre au mentee suite à un refus ou annulation mentor
+pub async fn refund_escrow(
+    pool: &PgPool,
+    mentee_id: &str,
+    amount: i64,
+    booking_id: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        INSERT INTO t4g_token_transactions
+            (id, user_id, action_type, tokens, description, metadata, impact_score)
+        VALUES (gen_random_uuid()::text, $1, 'service_refund', $2, $3, $4, 0.0)
+        "#,
+    )
+    .bind(mentee_id)
+    .bind(amount) // positif → crédit
+    .bind("Remboursement séquestre — session refusée")
+    .bind(serde_json::json!({ "booking_id": booking_id, "type": "escrow_refund" }))
+    .execute(pool)
+    .await?;
+
+    info!(
+        "Escrow refund: {} T4G to {} for booking {}",
+        amount, mentee_id, booking_id
+    );
+    Ok(())
+}
+
 // ── Attribution des tokens à la complétion ────────────────────────────────
 
 /// Calcule les tokens, libère le séquestre vers le mentor, attribue le bonus
@@ -318,6 +346,134 @@ pub async fn run_auto_completion(pool: &PgPool, rgb: &RGBService) -> u64 {
     }
 
     count
+}
+
+// ── Rappels automatiques ───────────────────────────────────────────────────
+
+/// Envoie des notifications de rappel J-1 (entre 23h et 25h avant la session)
+/// et H-1 (entre 50min et 70min avant la session) pour les sessions confirmées.
+/// Utilise la table `notifications` pour éviter les doublons.
+pub async fn send_session_reminders(pool: &PgPool) -> u64 {
+    use sqlx::Row;
+
+    let rows = sqlx::query(
+        r#"
+        SELECT
+            b.id, b.scheduled_at, b.mentee_id,
+            o.mentor_id, o.topic_slug,
+            u_mentor.firstname AS mentor_firstname,
+            u_mentee.firstname AS mentee_firstname
+        FROM mentoring_bookings b
+        JOIN mentoring_offers o ON o.id = b.offer_id
+        JOIN users u_mentor ON u_mentor.id = o.mentor_id
+        JOIN users u_mentee ON u_mentee.id = b.mentee_id
+        WHERE b.status = 'confirmed'
+          AND b.scheduled_at BETWEEN NOW() + INTERVAL '50 minutes' AND NOW() + INTERVAL '25 hours'
+        "#,
+    )
+    .fetch_all(pool)
+    .await;
+
+    let rows = match rows {
+        Ok(r) => r,
+        Err(e) => {
+            error!("Session reminders query failed: {}", e);
+            return 0;
+        }
+    };
+
+    let mut sent = 0u64;
+
+    for row in &rows {
+        let booking_id: String = row.try_get("id").unwrap_or_default();
+        let scheduled_at: chrono::DateTime<chrono::Utc> =
+            row.try_get("scheduled_at").unwrap_or_else(|_| chrono::Utc::now());
+        let mentee_id: String = row.try_get("mentee_id").unwrap_or_default();
+        let mentor_id: String = row.try_get("mentor_id").unwrap_or_default();
+        let topic_slug: String = row.try_get("topic_slug").unwrap_or_default();
+        let mentor_firstname: String = row.try_get("mentor_firstname").unwrap_or_default();
+        let mentee_firstname: String = row.try_get("mentee_firstname").unwrap_or_default();
+
+        let now = chrono::Utc::now();
+        let minutes_until = (scheduled_at - now).num_minutes();
+        let session_link = format!("/mentoring/session/{}", booking_id);
+        let time_label = scheduled_at.format("%d/%m à %Hh%M").to_string();
+
+        // J-1 : entre 23h et 25h avant
+        if minutes_until >= 23 * 60 && minutes_until <= 25 * 60 {
+            let notif_type = "MENTORING_REMINDER_J1";
+            // Vérifier si déjà envoyé
+            let already_sent: bool = sqlx::query_scalar(
+                "SELECT EXISTS(SELECT 1 FROM notifications WHERE user_id = $1 AND type = $2 AND metadata->>'booking_id' = $3)"
+            )
+            .bind(&mentee_id)
+            .bind(notif_type)
+            .bind(&booking_id)
+            .fetch_one(pool)
+            .await
+            .unwrap_or(false);
+
+            if !already_sent {
+                let meta = serde_json::json!({ "booking_id": booking_id });
+                for (uid, msg) in [
+                    (&mentee_id, format!("Rappel : ta session «{}» avec {} commence demain ({}).", topic_slug, mentor_firstname, time_label)),
+                    (&mentor_id, format!("Rappel : ta session «{}» avec {} commence demain ({}).", topic_slug, mentee_firstname, time_label)),
+                ] {
+                    let _ = sqlx::query(
+                        "INSERT INTO notifications (user_id, title, message, type, link, metadata) VALUES ($1, $2, $3, $4, $5, $6)"
+                    )
+                    .bind(uid)
+                    .bind("Rappel session J-1")
+                    .bind(&msg)
+                    .bind(notif_type)
+                    .bind(&session_link)
+                    .bind(&meta)
+                    .execute(pool)
+                    .await;
+                }
+                sent += 1;
+                info!("J-1 reminder sent for booking {}", booking_id);
+            }
+        }
+
+        // H-1 : entre 50min et 70min avant
+        if minutes_until >= 50 && minutes_until <= 70 {
+            let notif_type = "MENTORING_REMINDER_H1";
+            let already_sent: bool = sqlx::query_scalar(
+                "SELECT EXISTS(SELECT 1 FROM notifications WHERE user_id = $1 AND type = $2 AND metadata->>'booking_id' = $3)"
+            )
+            .bind(&mentee_id)
+            .bind(notif_type)
+            .bind(&booking_id)
+            .fetch_one(pool)
+            .await
+            .unwrap_or(false);
+
+            if !already_sent {
+                let meta = serde_json::json!({ "booking_id": booking_id });
+                for (uid, msg) in [
+                    (&mentee_id, format!("Ta session «{}» avec {} commence dans 1 heure ({}) !", topic_slug, mentor_firstname, time_label)),
+                    (&mentor_id, format!("Ta session «{}» avec {} commence dans 1 heure ({}) !", topic_slug, mentee_firstname, time_label)),
+                ] {
+                    let _ = sqlx::query(
+                        "INSERT INTO notifications (user_id, title, message, type, link, metadata) VALUES ($1, $2, $3, $4, $5, $6)"
+                    )
+                    .bind(uid)
+                    .bind("Rappel session H-1")
+                    .bind(&msg)
+                    .bind(notif_type)
+                    .bind(&session_link)
+                    .bind(&meta)
+                    .execute(pool)
+                    .await;
+                }
+                sent += 1;
+                info!("H-1 reminder sent for booking {}", booking_id);
+            }
+        }
+    }
+
+    sent
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────

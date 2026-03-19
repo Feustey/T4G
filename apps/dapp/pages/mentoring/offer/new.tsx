@@ -13,6 +13,7 @@ import {
   CreateMentoringOfferRequest,
   TimeSlot,
 } from '../../../services/apiClient';
+import { AvailabilityPicker, AvailabilityMode } from '../../../components/ui/AvailabilityPicker';
 
 interface IPage {
   lang: LangType;
@@ -31,17 +32,6 @@ const LEVELS = [
   { value: 'advanced',     label: 'Avancé',        desc: 'Expérience solide, sujets complexes' },
 ] as const;
 
-// Prochains créneaux à J+1, J+3, J+7, J+14
-function defaultSlots(durationMinutes: number): TimeSlot[] {
-  const offsets = [1, 3, 7, 14];
-  return offsets.map((d) => {
-    const date = new Date();
-    date.setDate(date.getDate() + d);
-    date.setHours(14, 0, 0, 0);
-    return { date: date.toISOString(), duration_minutes: durationMinutes };
-  });
-}
-
 type Step = 1 | 2 | 3;
 
 interface FormState {
@@ -52,7 +42,7 @@ interface FormState {
   duration_minutes: number;
   format: 'video' | 'text' | 'async';
   token_cost: number;
-  on_demand: boolean;
+  availability_mode: AvailabilityMode;
   slots: TimeSlot[];
 }
 
@@ -71,9 +61,16 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
     duration_minutes: 60,
     format: 'video',
     token_cost: user?.mentor_tokens_per_hour ?? 60,
-    on_demand: false,
-    slots: defaultSlots(60),
+    availability_mode: 'recurring',
+    slots: [],
   });
+
+  const handleAvailabilityChange = useCallback(
+    (slots: TimeSlot[], mode: AvailabilityMode) => {
+      setForm((prev) => ({ ...prev, slots, availability_mode: mode }));
+    },
+    []
+  );
 
   const set = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -111,7 +108,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
         duration_minutes: form.duration_minutes,
         format:           form.format,
         token_cost:       form.token_cost,
-        availability:     form.on_demand ? [] : form.slots,
+        availability:     form.availability_mode === 'on_demand' ? [] : form.slots,
       };
       await apiClient.createMentoringOffer(payload);
       router.push('/mentoring/my-sessions?role=mentor&created=1');
@@ -294,7 +291,7 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
                     <button
                       key={d}
                       type="button"
-                      onClick={() => { set('duration_minutes', d); set('slots', defaultSlots(d)); }}
+                      onClick={() => set('duration_minutes', d)}
                       style={{
                         padding: '8px 20px', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 600,
                         border: `2px solid ${form.duration_minutes === d ? 'var(--color-primary, #2563eb)' : 'var(--color-border, #e2e8f0)'}`,
@@ -359,52 +356,10 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
                 <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: 8 }}>
                   Disponibilités
                 </label>
-                <div className="u-d--flex u-flex-column u-gap--xs" style={{ marginBottom: 8 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
-                    <input
-                      type="checkbox"
-                      checked={form.on_demand}
-                      onChange={(e) => set('on_demand', e.target.checked)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    Sur demande uniquement (pas de créneaux fixes)
-                  </label>
-                </div>
-
-                {!form.on_demand && (
-                  <div className="u-d--flex u-flex-column u-gap--xs">
-                    {form.slots.map((slot, i) => (
-                      <div key={i} className="u-d--flex u-align-items-center u-gap--s">
-                        <input
-                          type="datetime-local"
-                          value={slot.date.slice(0, 16)}
-                          onChange={(e) => {
-                            const updated = [...form.slots];
-                            updated[i] = { ...updated[i], date: new Date(e.target.value).toISOString() };
-                            set('slots', updated);
-                          }}
-                          style={{
-                            flex: 1, padding: '6px 10px', borderRadius: '0.375rem',
-                            border: '1.5px solid var(--color-border, #e2e8f0)', fontSize: 13,
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => set('slots', form.slots.filter((_, j) => j !== i))}
-                          style={{ color: 'var(--color-error, #d32f2f)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, padding: '0 4px' }}
-                          aria-label="Supprimer ce créneau"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      label="+ Ajouter un créneau"
-                      onClick={() => set('slots', [...form.slots, { date: new Date().toISOString(), duration_minutes: form.duration_minutes }])}
-                    />
-                  </div>
-                )}
+                <AvailabilityPicker
+                  durationMinutes={form.duration_minutes}
+                  onChange={handleAvailabilityChange}
+                />
               </div>
             </>
           )}
@@ -423,9 +378,13 @@ const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
                 <Row label="Tarif"       value={`${form.token_cost} T4G`} highlight />
                 <Row
                   label="Disponibilités"
-                  value={form.on_demand
-                    ? 'Sur demande'
-                    : `${form.slots.length} créneau${form.slots.length > 1 ? 'x' : ''}`}
+                  value={
+                    form.availability_mode === 'on_demand'
+                      ? 'Sur demande'
+                      : `${form.slots.length} créneau${form.slots.length > 1 ? 'x' : ''} (${
+                          form.availability_mode === 'recurring' ? 'récurrents' : 'dates fixes'
+                        })`
+                  }
                 />
               </div>
 

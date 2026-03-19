@@ -30,8 +30,16 @@ export function Page({ lang }: IPage) {
     }
   }, [router, isAuthenticated, user, loading]);
 
-  // Utilisateur authentifié en cours de redirection → spinner uniquement dans ce cas
-  // (évite le flash de spinner pour les visiteurs non authentifiés)
+  // Auth en cours de chargement et token présent → spinner pour éviter le flash de la landing
+  if (loading && typeof window !== 'undefined' && localStorage.getItem('token')) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner lang={lang} spinnerText={(lang?.utils as { redirecting?: string })?.redirecting || 'Chargement...'} size="lg" />
+      </div>
+    );
+  }
+
+  // Utilisateur authentifié en cours de redirection → spinner
   if (isAuthenticated && user) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -40,7 +48,7 @@ export function Page({ lang }: IPage) {
     );
   }
 
-  // Non authentifié ou chargement en cours → afficher la landing immédiatement
+  // Non authentifié → afficher la landing
   return <LandingPage />;
 }
 

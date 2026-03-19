@@ -3,6 +3,7 @@ use serde_json::json;
 use std::net::SocketAddr;
 
 use token4good_backend::{build_router, build_state};
+use token4good_backend::services::mentoring_completion;
 
 #[tokio::main]
 async fn main() {
@@ -25,6 +26,40 @@ async fn main() {
             return start_minimal_server(port).await;
         }
     };
+
+    // ── Tâches de fond ────────────────────────────────────────────────────
+
+    // Auto-complétion 48h (toutes les heures)
+    {
+        let pool = state.db.pool().clone();
+        let rgb = state.rgb.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(3600));
+            loop {
+                interval.tick().await;
+                let n = mentoring_completion::run_auto_completion(&pool, &rgb).await;
+                if n > 0 {
+                    tracing::info!("Auto-completion: {} booking(s) processed", n);
+                }
+            }
+        });
+    }
+
+    // Rappels session J-1 et H-1 (toutes les 15 minutes)
+    {
+        let pool = state.db.pool().clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(900));
+            loop {
+                interval.tick().await;
+                let n = mentoring_completion::send_session_reminders(&pool).await;
+                if n > 0 {
+                    tracing::info!("Session reminders: {} notification(s) sent", n);
+                }
+            }
+        });
+    }
+
     let app = build_router(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));

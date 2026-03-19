@@ -232,6 +232,34 @@ PageProps) => {
                     title: 'Migration PostgreSQL sur Railway',
                     desc: 'Le backend est désormais 100 % Rust (Axum + SQLx) avec une base PostgreSQL managée sur Railway.',
                   },
+                  {
+                    emoji: '📅',
+                    color: '#7c3aed',
+                    date: 'Mars 2026',
+                    title: 'Disponibilités récurrentes du mentor',
+                    desc: 'Le mentor définit ses plages horaires par règles récurrentes (ex. "tous les lundis à 18h"). Le système génère automatiquement les créneaux concrets pour les 4 prochaines semaines.',
+                  },
+                  {
+                    emoji: '🗓️',
+                    color: '#2563eb',
+                    date: 'Mars 2026',
+                    title: 'Calendrier visuel de réservation',
+                    desc: 'Lors d\'une demande de session, le mentee navigue dans un calendrier mensuel interactif pour choisir son créneau parmi les disponibilités du mentor.',
+                  },
+                  {
+                    emoji: '✅',
+                    color: '#16a34a',
+                    date: 'Mars 2026',
+                    title: 'Acceptation / refus de session par le mentor',
+                    desc: 'Le mentor reçoit les demandes de réservation dans "Mes sessions" et peut les accepter ou refuser. En cas de refus, les tokens sont automatiquement restitués au mentee.',
+                  },
+                  {
+                    emoji: '⏰',
+                    color: '#ea580c',
+                    date: 'Mars 2026',
+                    title: 'Rappels automatiques J-1 et H-1',
+                    desc: 'Un rappel est envoyé la veille (J-1) puis une heure avant (H-1) à chaque session confirmée, pour le mentor comme pour le mentee. Les doublons sont automatiquement filtrés.',
+                  },
                 ].map((item, i) => (
                   <li
                     key={i}
@@ -239,7 +267,7 @@ PageProps) => {
                       display: 'flex',
                       gap: 14,
                       paddingBottom: 16,
-                      borderBottom: i < 4 ? '1px solid var(--app-color-border, #f0f0f0)' : 'none',
+                      borderBottom: i < 8 ? '1px solid var(--app-color-border, #f0f0f0)' : 'none',
                     }}
                   >
                     <div
