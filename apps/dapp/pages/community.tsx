@@ -151,6 +151,137 @@ PageProps) => {
               </>
             )}
           </section>
+          {/* ── Section Nouveautés V2 ── */}
+          <section className="o-dahboard-content">
+
+            {/* Bandeau lancement V2 */}
+            <div
+              className="o-card"
+              style={{
+                background: 'linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%)',
+                color: 'white',
+                border: 'none',
+              }}
+            >
+              <div className="u-d--flex u-align-items-center u-gap--s" style={{ marginBottom: 10 }}>
+                <span style={{ fontSize: 28, lineHeight: 1 }}>🚀</span>
+                <h2 className="subtitle-1" style={{ color: 'white', margin: 0 }}>
+                  Token4Good V2 — en ligne !
+                </h2>
+                <span
+                  style={{
+                    marginLeft: 'auto',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    background: 'rgba(255,255,255,0.2)',
+                    padding: '3px 10px',
+                    borderRadius: 999,
+                  }}
+                >
+                  Mars 2026
+                </span>
+              </div>
+              <p style={{ margin: 0, opacity: 0.92, fontSize: 14, lineHeight: 1.6 }}>
+                La plateforme T4G est entièrement reconstruite : nouvelle architecture Rust + PostgreSQL sur Railway,
+                système de mentoring complet, portefeuille Lightning natif et annuaire communautaire en temps réel.
+              </p>
+            </div>
+
+            {/* Timeline des améliorations récentes */}
+            <div className="o-card">
+              <h2 className="subtitle-1 u-d--flex u-align-items-center u-gap--s">
+                <span className="c-icon--title u-margin--none" style={{ fontSize: 20 }}>
+                  {Icons.bell}
+                </span>
+                Dernières améliorations
+              </h2>
+              <ul role="list" style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {[
+                  {
+                    emoji: '⚡',
+                    color: '#f7931a',
+                    date: 'Mars 2026',
+                    title: 'Connexion Lightning (LNURL-Auth)',
+                    desc: 'Authentification native via votre wallet Lightning. Retours visuels en temps réel sur chaque étape de connexion.',
+                  },
+                  {
+                    emoji: '🎓',
+                    color: '#2563eb',
+                    date: 'Mars 2026',
+                    title: 'Mentoring — réservation de sessions',
+                    desc: 'Recherche de mentor par thème, sélection de créneaux, confirmation de session et suivi des échanges en T4G.',
+                  },
+                  {
+                    emoji: '👥',
+                    color: '#7c3aed',
+                    date: 'Mars 2026',
+                    title: 'Annuaire communautaire',
+                    desc: 'Exploration de tous les membres inscrits avec badge Mentor, recherche floue par nom et tri par score.',
+                  },
+                  {
+                    emoji: '🔔',
+                    color: '#16a34a',
+                    date: 'Mars 2026',
+                    title: 'Système de notifications toast',
+                    desc: 'Feedback instantané sur chaque action : connexion, réservation, confirmation ou annulation de transaction.',
+                  },
+                  {
+                    emoji: '🗄️',
+                    color: '#0891b2',
+                    date: 'Fév. 2026',
+                    title: 'Migration PostgreSQL sur Railway',
+                    desc: 'Le backend est désormais 100 % Rust (Axum + SQLx) avec une base PostgreSQL managée sur Railway.',
+                  },
+                ].map((item, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      gap: 14,
+                      paddingBottom: 16,
+                      borderBottom: i < 4 ? '1px solid var(--app-color-border, #f0f0f0)' : 'none',
+                    }}
+                  >
+                    <div
+                      style={{
+                        flexShrink: 0,
+                        width: 38,
+                        height: 38,
+                        borderRadius: '50%',
+                        background: `${item.color}18`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 18,
+                      }}
+                    >
+                      {item.emoji}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="u-d--flex u-align-items-center u-gap--s" style={{ marginBottom: 3 }}>
+                        <span style={{ fontWeight: 700, fontSize: 14 }}>{item.title}</span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: 'var(--app-color-text-disabled, #999)',
+                            marginLeft: 'auto',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {item.date}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 13, color: 'var(--app-color-text-secondary, #64748b)', lineHeight: 1.5 }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </section>
+
           {!isWalletLoading && wallet && metrics && (
           <aside className="c-metrics">
             <div className="o-card">
