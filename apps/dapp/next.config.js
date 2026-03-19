@@ -247,7 +247,13 @@ const sentryWebpackPluginOptions = {
 };
 
 // Export avec Nx et optionnellement Sentry
-const configWithNx = withNx(nextConfig);
+// withNx peut crasher sur Vercel si le workspace NX n'est pas configuré → fallback
+let configWithNx;
+try {
+  configWithNx = withNx(nextConfig);
+} catch {
+  configWithNx = nextConfig;
+}
 module.exports = process.env.SENTRY_AUTH_TOKEN
   ? withSentryConfig(configWithNx, sentryWebpackPluginOptions)
   : configWithNx;
