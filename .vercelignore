@@ -6,6 +6,7 @@ staging-deploy
 !README.md
 .husky
 node_modules
+apps/dapp/node_modules
 dist
 contracts
 tools

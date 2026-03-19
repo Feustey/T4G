@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "cd apps/dapp && npm run build",
-  "installCommand": "npm install next@14 react react-dom --no-save --legacy-peer-deps --ignore-scripts && cd apps/dapp && npm install --legacy-peer-deps --include=dev",
+  "installCommand": "npm install next@14.2.33 --no-save --legacy-peer-deps --ignore-scripts --no-package-lock && cd apps/dapp && npm install --legacy-peer-deps --include=dev",
   "outputDirectory": "apps/dapp/.next",
   "framework": "nextjs"
 }
