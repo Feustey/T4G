@@ -3,5 +3,5 @@
   "buildCommand": "cd apps/dapp && npm run build",
   "installCommand": "cd apps/dapp && npm install --legacy-peer-deps --include=dev",
   "outputDirectory": "apps/dapp/.next",
-  "framework": null
+  "framework": "nextjs"
 }
