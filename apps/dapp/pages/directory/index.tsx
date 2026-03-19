@@ -24,7 +24,7 @@ export function DirectoryPage({
   const { user } = useAuth();
   const categoryName="Directory"
 
-  const { data: users, isLoading: isUsersLoading } = useSwr<User[]>('/api/users', () => apiClient.getUsers());
+  const { data: users, isLoading: isUsersLoading } = useSwr<User[]>('/api/users?limit=500', () => apiClient.getUsers({ limit: 500 }));
 
   const filteredTypeUsers = users ?? [];
 

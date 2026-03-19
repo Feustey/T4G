@@ -318,12 +318,63 @@ impl DatabaseService {
 
     pub async fn get_users(
         &self,
-        _role: Option<crate::models::user::UserRole>,
-        _limit: u32,
-        _offset: u32,
+        role: Option<crate::models::user::UserRole>,
+        limit: u32,
+        offset: u32,
     ) -> Result<Vec<User>, Box<dyn Error>> {
-        // TODO: Implement properly
-        Ok(vec![])
+        let rows = if let Some(r) = role {
+            let role_str = format!("{:?}", r).to_lowercase();
+            sqlx::query(
+                "SELECT * FROM users WHERE is_active = true AND is_onboarded = true AND LOWER(role) = $1 ORDER BY score DESC, created_at DESC LIMIT $2 OFFSET $3"
+            )
+            .bind(&role_str)
+            .bind(limit as i64)
+            .bind(offset as i64)
+            .fetch_all(&self.pool)
+            .await?
+        } else {
+            sqlx::query(
+                "SELECT * FROM users WHERE is_active = true AND is_onboarded = true ORDER BY score DESC, created_at DESC LIMIT $1 OFFSET $2"
+            )
+            .bind(limit as i64)
+            .bind(offset as i64)
+            .fetch_all(&self.pool)
+            .await?
+        };
+
+        let users = rows
+            .iter()
+            .map(|row| User {
+                id: row.try_get::<String, _>("id").unwrap_or_default().parse().unwrap_or_else(|_| uuid::Uuid::new_v4()),
+                email: row.try_get("email").unwrap_or_default(),
+                firstname: row.try_get("firstname").unwrap_or_default(),
+                lastname: row.try_get("lastname").unwrap_or_default(),
+                lightning_address: row.try_get("lightning_address").unwrap_or_default(),
+                role: row.try_get::<String, _>("role").unwrap_or_default().parse().unwrap_or(crate::models::user::UserRole::Alumni),
+                username: row.try_get("username").unwrap_or_default(),
+                bio: row.try_get("bio").ok(),
+                score: row.try_get::<i32, _>("score").unwrap_or(0) as u32,
+                avatar: row.try_get("avatar").ok(),
+                created_at: row.try_get("created_at").unwrap_or_else(|_| chrono::Utc::now()),
+                updated_at: row.try_get("updated_at").unwrap_or_else(|_| chrono::Utc::now()),
+                is_active: row.try_get("is_active").unwrap_or(true),
+                wallet_address: row.try_get("wallet_address").ok(),
+                preferences: row.try_get("preferences").unwrap_or(serde_json::Value::Object(serde_json::Map::new())),
+                email_verified: row.try_get("email_verified").unwrap_or(false),
+                last_login: row.try_get("last_login").ok(),
+                is_onboarded: row.try_get("is_onboarded").unwrap_or(false),
+                is_mentor_active: row.try_get("is_mentor_active").unwrap_or(false),
+                mentor_topics: row.try_get::<Vec<String>, _>("mentor_topics").ok().unwrap_or_default(),
+                learning_topics: row.try_get::<Vec<String>, _>("learning_topics").ok().unwrap_or_default(),
+                mentor_bio: row.try_get("mentor_bio").ok().flatten(),
+                mentor_tokens_per_hour: row.try_get("mentor_tokens_per_hour").ok().flatten(),
+                is_graduated: row.try_get("is_graduated").unwrap_or(false),
+                is_speaker: row.try_get("is_speaker").unwrap_or(false),
+                is_staff: row.try_get("is_staff").unwrap_or(false),
+            })
+            .collect();
+
+        Ok(users)
     }
 
     pub async fn get_user_by_id(&self, user_id: &str) -> Result<Option<User>, Box<dyn Error>> {
@@ -335,6 +386,14 @@ impl DatabaseService {
         id: &str,
         payload: crate::models::user::UpdateUserRequest,
     ) -> Result<Option<User>, Box<dyn Error>> {
+        if let Some(firstname) = &payload.firstname {
+            sqlx::query("UPDATE users SET firstname = $1, updated_at = NOW() WHERE id = $2")
+                .bind(firstname).bind(id).execute(&self.pool).await?;
+        }
+        if let Some(lastname) = &payload.lastname {
+            sqlx::query("UPDATE users SET lastname = $1, updated_at = NOW() WHERE id = $2")
+                .bind(lastname).bind(id).execute(&self.pool).await?;
+        }
         if let Some(username) = &payload.username {
             sqlx::query("UPDATE users SET username = $1, updated_at = NOW() WHERE id = $2")
                 .bind(username).bind(id).execute(&self.pool).await?;
