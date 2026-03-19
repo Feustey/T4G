@@ -20,7 +20,7 @@ export interface IStudentBenefitPage {
 const formatDate = (
   date: string | Date | number,
   locale: LocaleType,
-  lang: LangType
+  _lang: LangType
 ): string => {
   if (!date) return '';
 

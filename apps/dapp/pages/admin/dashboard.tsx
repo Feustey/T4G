@@ -4,13 +4,12 @@ import { DividerElement } from '../../components/elements';
 import { Components } from '../../lib/types';
 import useSwr from 'swr';
 import moment from 'moment';
-import Link from 'next/link';
 import { TableSkeleton } from '../../components';
 
 import Head from 'next/head';
-import { useAppDispatch, useIndexing } from '../../hooks';
+import { useIndexing } from '../../hooks';
 import AdminLayout from '../../layouts/AdminLayout';
-import { AuthPageType, SessionType } from 'apps/dapp/types';
+import { AuthPageType } from 'apps/dapp/types';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiClient, AdminWalletInfo } from '../../services/apiClient';
 
@@ -22,7 +21,6 @@ const Page: React.FC<Components.Wallet.Page.Props> & AuthPageType = ({
   // Utiliser apiClient via SWR pour auto-refresh
   const {
     data,
-    mutate,
     error,
     isLoading,
   } = useSwr<AdminWalletInfo[]>(

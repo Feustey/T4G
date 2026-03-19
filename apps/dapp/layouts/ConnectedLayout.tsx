@@ -73,7 +73,7 @@ export default function ConnectedLayout({
         dispatch(fetchPendingTransactionsState());
       }
     },
-    shouldReconnect: (closeEvent) => true,
+    shouldReconnect: (_closeEvent) => true,
   });
 
   return (

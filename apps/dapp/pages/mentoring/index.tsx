@@ -11,12 +11,6 @@ interface IPage {
   lang: LangType;
 }
 
-const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'Débutant',
-  intermediate: 'Intermédiaire',
-  advanced: 'Avancé',
-};
-
 const Page: React.FC<IPage> & AuthPageType = ({ lang }: IPage) => {
   const { user } = useAuth();
   const router = useRouter();

@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: IAdminLayout) {
         dispatch(fetchPendingTransactionsState());
       }
     },
-    shouldReconnect: (closeEvent) => true,
+    shouldReconnect: (_closeEvent) => true,
   });
 
   return <GlobalLayout>{children}</GlobalLayout>;

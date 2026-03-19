@@ -12,7 +12,7 @@ import Head from 'next/head';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIndexing } from '../../hooks';
 import AdminLayout from '../../layouts/AdminLayout';
-import { AuthPageType, SessionType } from '../../types';
+import { AuthPageType } from '../../types';
 import { apiFetcher } from 'apps/dapp/services/config';
 
 const Page: React.FC<Components.Admin.ServiceCataloguePage.Props> &

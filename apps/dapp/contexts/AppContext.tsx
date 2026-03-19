@@ -103,8 +103,8 @@ export function AppContextProvider({ children }: AppContextProps) {
         setToaster,
         setModal,
         setRightPanel,
-        editUserProfile: (user: UserType) => console.log("update user"),
-        deleteUserProfile: (user: UserType) => console.log("delete user"),
+        editUserProfile: (_user: UserType) => console.log("update user"),
+        deleteUserProfile: (_user: UserType) => console.log("delete user"),
       }}
     >
       {children}

@@ -281,7 +281,7 @@ export async function getSession() {
 }
 
 // Fonction pour remplacer next-auth signIn
-export async function signIn(provider: string, options?: any) {
+export async function signIn(_provider: string, _options?: any) {
   // Cette fonction est utilisée dans les composants
   // Elle doit être appelée via useAuth().login() à la place
   console.warn(

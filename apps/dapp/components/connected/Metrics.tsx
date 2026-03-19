@@ -4,7 +4,6 @@ import { GlobalMetricsType, LangType, UserMetricsType } from 'apps/dapp/types';
 import getConfig from 'next/config';
 import Image from 'next/image';
 import { CustomLink } from '../shared/CustomLink';
-import { useRouter } from 'next/router';
 import { Icons } from '../shared/Icons';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -25,7 +24,6 @@ export const Metrics: React.FC<IMetrics> = ({
   address,
 }) => {
   const userBalance = useAppSelector(selectUserBalance);
-  const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   const POLYGONSCAN_BASEURL = getConfig().publicRuntimeConfig.polygonScanUrl;

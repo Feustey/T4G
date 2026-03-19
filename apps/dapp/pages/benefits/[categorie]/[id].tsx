@@ -10,7 +10,6 @@ import {
   AuthPageType,
   LangType,
   ReceiveServiceType,
-  SessionType,
   UserCVType,
 } from 'apps/dapp/types';
 import { useIndexing } from 'apps/dapp/hooks';

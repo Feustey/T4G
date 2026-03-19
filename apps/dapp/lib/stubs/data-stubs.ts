@@ -3,7 +3,7 @@
 
 export const identitiesDAO = {
   getAllUsers: async () => [],
-  getUserById: async (id: string) => null,
+  getUserById: async (_id: string) => null,
   getUserByEmail: async (email: string) => ({
     id: '1',
     email,
@@ -23,5 +23,5 @@ export const dbConnect = async () => {
 };
 
 export const categoriesDAO = {
-  getByName: async (name: string) => null,
+  getByName: async (_name: string) => null,
 };

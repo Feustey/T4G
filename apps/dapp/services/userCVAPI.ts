@@ -1,4 +1,4 @@
-import { UserCVType, UserStudiesType, UserType } from '../types';
+import { UserStudiesType } from '../types';
 import { apiFetch } from './config';
 
 export async function setUserCV(

@@ -1,6 +1,6 @@
 import { Dispatch, ReactElement, SetStateAction } from "react";
 import { Entities } from "../types";
-import { Notification, ServiceCategory } from "../../stubs/service-data-types";
+import { Notification } from "../../stubs/service-data-types";
 import { Api } from "../types";
 import { Service } from "../api/index.types";
 import { LangType } from "../../../types/shared";

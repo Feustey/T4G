@@ -15,7 +15,7 @@ export interface IRating {
 
 export const Rating: React.FC<IRating> = ({
   isEditable,
-  lang,
+  lang: _lang,
   rate = [],
   nbOpinion = 0,
   value = 0,

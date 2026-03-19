@@ -1,7 +1,6 @@
 import { CategoryType, LangType } from '../../types';
 import type { User } from '../../services/apiClient';
 import { ButtonIcon, CustomLink, Icons, MenuItem } from '../';
-import { useRouter } from 'next/router';
 import { useRef, useState, useEffect } from 'react';
 import { trapFocus } from 'apps/dapp/services';
 import { apiFetcher } from 'apps/dapp/services/config';
@@ -18,7 +17,6 @@ export const MobileMenu: React.FC<IMobileMenu> = ({ lang, user }) => {
     '/service-categories/as_consumer',
     apiFetcher
   ); //TODO error
-  const router = useRouter();
   const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);

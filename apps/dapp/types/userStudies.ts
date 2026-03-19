@@ -1,4 +1,3 @@
-import { programTopics, programs, schools } from '../data/en';
 
 export type UserStudiesType = {
   program: string;

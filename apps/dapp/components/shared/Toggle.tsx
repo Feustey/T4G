@@ -8,7 +8,7 @@ export interface IToggle {
 }
 
 export const Toggle: React.FC<IToggle> = ({
-  type,active,onClick
+  type: _type,active,onClick
 }) => {
   return <div className={`c-toggle ${active}`} onClick={onClick} >
     <div className="c-toggle-button"></div>

@@ -9,7 +9,6 @@ import {
   CategoryType,
   LangType,
   ReceiveServiceType,
-  SessionType,
   UserExperienceType,
 } from 'apps/dapp/types';
 import { useIndexing, useMediaQuery } from 'apps/dapp/hooks';

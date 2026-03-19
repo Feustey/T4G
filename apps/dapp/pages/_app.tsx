@@ -12,7 +12,7 @@ import Script from 'next/script';
 import type { NextComponentType } from 'next';
 import { Provider } from 'react-redux';
 import store from '../store/store';
-import { AuthPageType, LocaleType, SessionType } from '../types';
+import { AuthPageType, LocaleType } from '../types';
 import { useRouter } from 'next/router';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { NetworkProvider } from '../contexts/NetworkContext';
@@ -28,7 +28,7 @@ type CustomAppProps = AppProps & {
 
 function CustomApp({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { session: _, ...pageProps },
 }: CustomAppProps) {
   const lang = useLanguage();
 

@@ -32,7 +32,7 @@ const nextConfig = {
   },
   
   // Configuration Webpack pour le monorepo
-  webpack: (config, { isServer, defaultLoaders, dev, webpack }) => {
+  webpack: (config, { isServer, defaultLoaders, dev }) => {
     const path = require('path');
     const libsPath = path.resolve(__dirname, '../../libs');
     
@@ -213,12 +213,12 @@ const nextConfig = {
   
   // Configuration TypeScript
   typescript: {
-    ignoreBuildErrors: process.env.NODE_ENV === 'production',
+    ignoreBuildErrors: false,
   },
-  
+
   // Configuration ESLint
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   
   // Configuration du compilateur

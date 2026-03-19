@@ -15,7 +15,7 @@ export const BookModal: React.FC<BookModalProps> = function ({
   benefit,
 }: BookModalProps) {
 
-  const { user } = useAuth();
+  useAuth();
 
   const [topic, setTopic] = useState<string>();
 

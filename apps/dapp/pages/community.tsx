@@ -1,11 +1,10 @@
 import React from 'react';
-import { CopyIconElement, PolygonIconElement } from '../components/icons';
 import getConfig from 'next/config';
 import Head from 'next/head';
 import useSwr from 'swr';
 import ConnectedLayout from '../layouts/ConnectedLayout';
 import { useIndexing } from '../hooks';
-import { AuthPageType, LangType, SessionType } from '../types';
+import { AuthPageType, LangType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb, CustomLink, Icons, Spinner } from '../components';
 import { apiFetcher } from 'apps/dapp/services/config';

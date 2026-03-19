@@ -6,7 +6,7 @@ import Head from 'next/head';
 import useSwr from 'swr';
 import { useAppSelector, useIndexing } from '../../hooks';
 import AdminLayout from '../../layouts/AdminLayout';
-import { AuthPageType, SessionType } from 'apps/dapp/types';
+import { AuthPageType } from 'apps/dapp/types';
 import { useAuth } from '../../contexts/AuthContext';
 import { TableSkeleton } from 'apps/dapp/components';
 import { HiddenIconElement } from '../../components/icons';

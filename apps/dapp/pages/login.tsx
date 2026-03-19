@@ -3,7 +3,6 @@ import * as process from 'process';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { LangType, LocaleType } from '../types';
-import PublicLayout from '../layouts/PublicLayout';
 import { useIndexing, useNotify, useOAuth } from '../hooks';
 import { GetServerSideProps } from 'next';
 import OnboardingLayout from '../layouts/OnboardingLayout';
@@ -48,7 +47,7 @@ export function Page({ lang }: IPage) {
   const router = useRouter();
   const locale = router.locale as LocaleType;
   const { login, isAuthenticated, user } = useAuth();
-  const { loginWithLinkedIn, loginWithDazno, loginWithGitHub, sendMagicLink } = useOAuth();
+  const { loginWithDazno, loginWithGitHub, sendMagicLink } = useOAuth();
 
   const notify = useNotify();
   const [debugButtonsVisible, setDebugButtonsVisible] = useState<boolean>(false);

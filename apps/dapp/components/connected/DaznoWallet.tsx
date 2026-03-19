@@ -26,7 +26,6 @@ export const DaznoWallet: React.FC<DaznoWalletProps> = ({ userId, userRole, lang
     addPoints,
     refreshData,
     clearError,
-    setError, // Supposant que useDazno expose setError
   } = useDazno(userId);
 
   const { transactions, loading: txLoading } = useLightningTransactions(userId);
@@ -353,7 +352,7 @@ interface CreateInvoiceModalProps {
   onError: (error: any) => void;
 }
 
-const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ lang, createInvoice, onClose, onSuccess, onError }) => {
+const _CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ lang: _lang, createInvoice, onClose, onSuccess, onError }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -438,7 +437,7 @@ interface PayInvoiceModalProps {
     onError: (error: any) => void;
 }
 
-const PayInvoiceModal: React.FC<PayInvoiceModalProps> = ({ lang, payInvoice, onClose, onSuccess, onError }) => {
+const _PayInvoiceModal: React.FC<PayInvoiceModalProps> = ({ lang: _lang, payInvoice, onClose, onSuccess, onError }) => {
     const [paymentRequest, setPaymentRequest] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 

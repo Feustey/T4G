@@ -1,4 +1,3 @@
-import { Auth } from "../../stubs/t4g-types";
 import * as React from "react";
 import { ReactNode } from "react";
 import { UserType } from "../../../types/shared";

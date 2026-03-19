@@ -28,13 +28,13 @@ const Page: React.FC<Components.Wallet.Page.Props> & AuthPageType = ({
 }: Components.Wallet.Page.Props) => {
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [userStat, setUserStat] = useState({
+  const [, setUserStat] = useState({
     servicesProvided: 0,
     tokensEarned: 0,
     benefitsEnjoyed: 0,
     tokensUsed: 0,
   });
-  const [txCount, setTxCount] = useState<number>();
+  const [, setTxCount] = useState<number>();
   const { data, error } = useSwr<AdminWalletResponse>(
     `/users/${user.id}/admin-wallet`,
     apiFetcher,

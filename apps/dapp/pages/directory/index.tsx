@@ -2,17 +2,15 @@ import { useState } from 'react';
 import Head from 'next/head';
 
 import ConnectedLayout from 'apps/dapp/layouts/ConnectedLayout';
-import {  Breadcrumb, Filters, Icons, IconsT4G, Spinner } from 'apps/dapp/components';
+import {  Breadcrumb, Icons, IconsT4G, Spinner } from 'apps/dapp/components';
 import {
   AuthPageType,
   LangType,
-  SessionType,
-  UserExperienceType,
 } from 'apps/dapp/types';
 import { useIndexing, useMediaQuery } from 'apps/dapp/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import Image from 'next/image';
-import useSwr, { SWRResponse } from 'swr';
+import useSwr from 'swr';
 import { UserCard } from 'apps/dapp/components/connected/UserCard';
 import { apiClient, User } from '../../services/apiClient';
 
@@ -37,7 +35,7 @@ export function DirectoryPage({
     setIncr(incr + 12); // Incrémenter l'indice de début de la plage de 6
   };
   
-  const [sort, setSort] = useState<string>('');
+  const [sort, ] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
   const isMobile = useMediaQuery(992);
 

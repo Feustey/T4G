@@ -1,7 +1,7 @@
 import moment from 'moment';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
 import { useAppDispatch, useAppSelector, useIndexing, useNotify } from '../hooks';
 import ConnectedLayout from '../layouts/ConnectedLayout';
@@ -10,7 +10,6 @@ import {
   LangType,
   NotificationType,
   PendingTransactionType,
-  SessionType,
   ReceiveServiceType,
   UserMetricsType,
 } from '../types';
@@ -19,7 +18,6 @@ import {
   Button,
   CancellingTransactionModal,
   ConfirmingTransactionModal,
-  CustomLink,
   FirstDashboardAccessModal,
   Icons,
   Metrics,

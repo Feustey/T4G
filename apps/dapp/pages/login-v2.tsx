@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 import { useOAuth } from '../hooks/useOAuth';
 import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Login.module.css';
 
 export default function LoginV2() {
-  const router = useRouter();
   const { loginWitht4g, loginWithLinkedIn, loginWithDazno } = useOAuth();
   const { loading } = useAuth();
   const [daznoToken, setDaznoToken] = useState('');

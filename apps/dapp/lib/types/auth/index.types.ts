@@ -1,4 +1,3 @@
-import { Common } from "../types";
 
 export interface User {
   id: string;

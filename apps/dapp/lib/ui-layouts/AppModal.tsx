@@ -60,7 +60,7 @@ export const AppModal = () => {
               <div className="absolute top-0 right-0 pt-7 pr-7">
                 <button
                   className="bg-white focus:outline-none focus:ring-transpare text-blue-008 "
-                  onClick={(value) => {
+                  onClick={(_value) => {
                     setOpenModal(false);
                     setTimeout(() => setModal(null), 300);
                   }}

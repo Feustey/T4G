@@ -33,13 +33,13 @@ export const UserCard: React.FC<IUserCard> = ({
   // N'effectue la requête individuelle que si les données ne sont pas déjà disponibles
   const { data: fetchedUser, error: userError, isLoading: isUserLoading } = useSwr<UserCardUser>(
     !prefetchedUser && userId ? ['user', userId] : null,
-    ([_, id]) => apiClient.getUser(id)
+    ([_key, id]: [string, string]) => apiClient.getUser(id)
   );
   const user = prefetchedUser ?? fetchedUser;
 
   const { data: cv, isLoading: isCvLoading } = useSwr<UserCVType>(
     userId ? ['user-cv', userId] : null,
-    ([_, id]) => apiClient.getUserCV(id as string)
+    ([_key, id]: [string, string]) => apiClient.getUserCV(id) as Promise<UserCVType>
   );
 
   const isLoading = isUserLoading || (!prefetchedUser && isCvLoading && !user);

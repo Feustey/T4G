@@ -6,7 +6,7 @@ import Head from 'next/head';
 import { useAuth } from '../contexts/AuthContext';
 import { useIndexing } from '../hooks';
 import ConnectedLayout from '../layouts/ConnectedLayout';
-import { AuthPageType, SessionType, UserMetricsType, LangType, NotificationType } from '../types';
+import { AuthPageType, UserMetricsType, LangType, NotificationType } from '../types';
 import { Breadcrumb, Icons, Metrics, Spinner } from '../components';
 import { apiFetcher } from 'apps/dapp/services/config';
 
