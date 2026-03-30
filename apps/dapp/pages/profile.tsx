@@ -39,7 +39,7 @@ const MentorProfileSection: React.FC = () => {
   async function handleSave() {
     setSaving(true);
     try {
-      const updated = await apiClient.updateMentorProfile({
+      await apiClient.updateMentorProfile({
         is_mentor_active: isActive,
         mentor_topics: mentorTopics,
         learning_topics: learningTopics,
