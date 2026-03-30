@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import useSwr, { useSWRConfig } from 'swr';
 import ConnectedLayout from '../../layouts/ConnectedLayout';
@@ -394,7 +395,7 @@ const ReceivedBookingCard: React.FC<ReceivedBookingCardProps> = ({
     <div className="o-card u-d--flex u-flex-column u-gap--s">
       <div className="u-d--flex u-align-items-center u-gap--s">
         {booking.mentee.avatar_url ? (
-          <img src={booking.mentee.avatar_url} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+          <Image src={booking.mentee.avatar_url} alt="avatar" width={40} height={40} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
         ) : (
           <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-primary-light, #eff6ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, color: 'var(--color-primary, #2563eb)', flexShrink: 0 }}>
             {initials.toUpperCase()}

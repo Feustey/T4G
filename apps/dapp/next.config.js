@@ -140,17 +140,18 @@ const nextConfig = {
   
   // Configuration des images
   images: {
-    domains: [
-      'token-for-good.com',
-      'www.token-for-good.com',
-      'api.token-for-good.com',
-      'token4good.com',
-      'token-for-good.com',
-      'www.token-for-good.com',
-      'app.token-for-good.com',
-      'token4good.vercel.app'
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.token-for-good.com' },
+      { protocol: 'https', hostname: 'token4good.com' },
+      { protocol: 'https', hostname: 'token4good.vercel.app' },
+      // Avatars OAuth
+      { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      { protocol: 'https', hostname: '*.googleusercontent.com' },
+      { protocol: 'https', hostname: 'media.licdn.com' },
+      { protocol: 'https', hostname: 'pbs.twimg.com' },
     ],
     formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 3600,
   },
   
   // Headers pour CORS et sécurité

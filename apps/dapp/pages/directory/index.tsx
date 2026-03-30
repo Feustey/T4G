@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Head from 'next/head';
 
 import ConnectedLayout from 'apps/dapp/layouts/ConnectedLayout';
@@ -24,144 +24,67 @@ export function DirectoryPage({
   const { user } = useAuth();
   const categoryName="Directory"
 
-  const { data: users, isLoading: isUsersLoading } = useSwr<User[]>('/api/users?limit=500', () => apiClient.getUsers({ limit: 500 }));
+  const { data: users, isLoading: isUsersLoading } = useSwr<User[]>(
+    '/api/users?limit=100',
+    () => apiClient.getUsers({ limit: 100 }),
+    { revalidateOnFocus: false }
+  );
 
-  const filteredTypeUsers = users ?? [];
+  const [incr, setIncr] = useState(0);
+  const incrementSlice = () => setIncr((v) => v + 12);
 
-
-  const [incr, setIncr] = useState(0); // Indice de début de la plage
-
-  const incrementSlice = () => {
-    setIncr(incr + 12); // Incrémenter l'indice de début de la plage de 6
-  };
-  
-  const [sort, ] = useState<string>('');
+  const [sort] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMobile = useMediaQuery(992);
 
-  function getLevenshteinDistance(s1: string, s2: string): number {
-    const m = s1.length;
-    const n = s2.length;
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(searchValue), 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchValue]);
 
-    if (m === 0) return n;
-    if (n === 0) return m;
+  const sortedUsers = useMemo(() => {
+    const normalize = (s: string) =>
+      s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    const distanceMatrix: number[][] = Array.from({ length: m + 1 }, () =>
-      Array.from({ length: n + 1 }, () => 0)
-    );
+    const q = normalize(debouncedSearch);
 
-    for (let i = 0; i <= m; i++) {
-      distanceMatrix[i][0] = i;
-    }
-
-    for (let j = 0; j <= n; j++) {
-      distanceMatrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
-        distanceMatrix[i][j] = Math.min(
-          distanceMatrix[i - 1][j] + 1, // Suppression
-          distanceMatrix[i][j - 1] + 1, // Insertion
-          distanceMatrix[i - 1][j - 1] + cost // Substitution
-        );
+    const levenshtein = (a: string, b: string): number => {
+      if (!a.length) return b.length;
+      if (!b.length) return a.length;
+      const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        let prev = i;
+        for (let j = 1; j <= b.length; j++) {
+          const val = a[i - 1] === b[j - 1] ? row[j - 1] : Math.min(row[j - 1], row[j], prev) + 1;
+          row[j - 1] = prev;
+          prev = val;
+        }
+        row[b.length] = prev;
       }
+      return row[b.length];
+    };
+
+    const filtered = (users ?? []).filter((u) => {
+      if (!q) return true;
+      const first = normalize(u.firstname || '');
+      const last  = normalize(u.lastname  || '');
+      return first.includes(q) || last.includes(q) ||
+             levenshtein(first, q) <= 2 || levenshtein(last, q) <= 2;
+    });
+
+    const getName = (u: User) => `${u.firstname || ''} ${u.lastname || ''}`.trim();
+    switch (sort) {
+      case 'YEAR_ASC':  return [...filtered].sort((a, b) => Number((a as any).graduated_year) - Number((b as any).graduated_year));
+      case 'YEAR_DESC': return [...filtered].sort((a, b) => Number((b as any).graduated_year) - Number((a as any).graduated_year));
+      case 'ALPHA_ASC': return [...filtered].sort((a, b) => getName(a).localeCompare(getName(b)));
+      case 'ALPHA_DESC':return [...filtered].sort((a, b) => getName(b).localeCompare(getName(a)));
+      case 'RATING':    return [...filtered].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+      default:          return filtered;
     }
-
-    return distanceMatrix[m][n];
-  }
-
-  const filteredUsers = filteredTypeUsers
-  .filter((u: User) => {
-    if (searchValue) {
-      const distanceLastName = getLevenshteinDistance(
-        (u.lastname || '')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, ''),
-        searchValue
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-      );
-      const distanceFirstName = getLevenshteinDistance(
-        (u.firstname || '')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, ''),
-        searchValue
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-      );
-      const isLastNameIncluded = (u.lastname || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .includes(
-          searchValue
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-        );
-      
-      return (
-        (u.firstname || '')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .includes(
-            searchValue
-              .toLowerCase()
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-          ) ||
-        isLastNameIncluded ||
-        distanceLastName <= 2 ||
-        distanceFirstName <= 2
-      );
-    } else {
-      return true;
-    }
-  });
-
-  let sortedUsers: User[] = filteredUsers;
-
-  const getName = (u: User) => `${u.firstname || ''} ${u.lastname || ''}`.trim();
-  switch (sort) {
-    case 'YEAR_ASC':
-      sortedUsers = [...filteredUsers].sort(
-        (a, b) =>
-          Number((a as any).graduated_year) - Number((b as any).graduated_year)
-      );
-      break;
-    case 'YEAR_DESC':
-      sortedUsers = [...filteredUsers].sort(
-        (a, b) =>
-          Number((b as any).graduated_year) - Number((a as any).graduated_year)
-      );
-      break;
-    case 'ALPHA_ASC':
-      sortedUsers = [...filteredUsers].sort((a, b) =>
-        getName(a).localeCompare(getName(b))
-      );
-      break;
-    case 'ALPHA_DESC':
-      sortedUsers = [...filteredUsers].sort((a, b) =>
-        getName(b).localeCompare(getName(a))
-      );
-      break;
-    case 'RATING':
-      sortedUsers = [...filteredUsers].sort((a, b) =>
-        (b.score ?? 0) - (a.score ?? 0)
-      );
-      break;
-
-    default:
-      sortedUsers = filteredUsers;
-      break;
-  }
+  }, [users, debouncedSearch, sort]);
 
   return (
     <>
@@ -196,9 +119,7 @@ export function DirectoryPage({
                   <input
                     className={'form-search'}
                     type="search"
-                    onChange={(e) => {
-                      setSearchValue(e.target.value.trim());
-                    }}
+                    onChange={(e) => setSearchValue(e.target.value.trim())}
                     onSubmit={(e) => e.preventDefault()}
                     placeholder="Who are you looking for?"
                   />
@@ -248,7 +169,6 @@ export function DirectoryPage({
         ) : (
           <div className='flex flex-col justify-center items-center my-8'>
             <Image
-              priority
               alt=""
               src="/assets/images/png/token-0.png"
               width={124}

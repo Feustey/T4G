@@ -1,5 +1,5 @@
-import moment from 'moment';
 import React, { useState } from 'react';
+import { timeAgo } from '../utils/date';
 import Head from 'next/head';
 import { useIndexing } from '../hooks';
 import ConnectedLayout from '../layouts/ConnectedLayout';
@@ -139,7 +139,7 @@ const Page: React.FC<INotifications> & AuthPageType = ({ lang }: INotifications)
                       <div className="u-d--flex u-align-items-center u-gap--s" style={{ marginBottom: '4px' }}>
                         <span style={{ fontSize: '16px', lineHeight: 1 }} aria-hidden="true">{config.icon}</span>
                         <span style={{ color: 'var(--app-color-text-disabled)', fontSize: '12px' }}>
-                          {moment(notification.ts).fromNow()}
+                          {timeAgo(notification.ts)}
                         </span>
                         {config.label && (
                           <span style={{

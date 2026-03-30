@@ -1,5 +1,6 @@
-import moment from 'moment';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { timeAgo } from '../utils/date';
 import Link from 'next/link';
 import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
@@ -16,14 +17,15 @@ import {
 import {
   BenefitCard,
   Button,
-  CancellingTransactionModal,
-  ConfirmingTransactionModal,
-  FirstDashboardAccessModal,
   Icons,
   Metrics,
   PendingTransactionCard,
   Spinner,
 } from '../components';
+
+const CancellingTransactionModal  = dynamic(() => import('../components').then((m) => ({ default: m.CancellingTransactionModal })),  { ssr: false });
+const ConfirmingTransactionModal  = dynamic(() => import('../components').then((m) => ({ default: m.ConfirmingTransactionModal })),  { ssr: false });
+const FirstDashboardAccessModal   = dynamic(() => import('../components').then((m) => ({ default: m.FirstDashboardAccessModal })),   { ssr: false });
 import {
   selectPendingTransactions,
   setPendingTransactionsState,
@@ -396,7 +398,7 @@ const Page: React.FC<IDashboard> & AuthPageType = ({ lang }: IDashboard) => {
                               <div className="u-d--flex u-align-items-center u-gap--s" style={{ marginBottom: '2px' }}>
                                 <span style={{ fontSize: '15px', lineHeight: 1 }} aria-hidden="true">{config.icon}</span>
                                 <span style={{ color: 'var(--app-color-text-disabled)', fontSize: '12px' }}>
-                                  {moment(notification.ts).fromNow()}
+                                  {timeAgo(notification.ts)}
                                 </span>
                                 {config.label && (
                                   <span style={{

@@ -3,7 +3,7 @@ import { AppLayout } from '../../components/elements';
 import { DividerElement } from '../../components/elements';
 import { Components } from '../../lib/types';
 import useSwr from 'swr';
-import moment from 'moment';
+import { formatShortDate } from '../../utils/date';
 import { TableSkeleton } from '../../components';
 
 import Head from 'next/head';
@@ -114,7 +114,7 @@ const Page: React.FC<Components.Wallet.Page.Props> & AuthPageType = ({
                                 </span>
                                 {walletInfo.last_transaction_at && (
                                   <p className="text-xs text-gray-500">
-                                    {moment(walletInfo.last_transaction_at).format('DD/MM/YY HH:mm')}
+                                    {formatShortDate(walletInfo.last_transaction_at)}
                                   </p>
                                 )}
                               </div>
