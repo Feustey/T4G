@@ -488,6 +488,19 @@ class APIClient {
   async getSessionFull(bookingId: string) {
     return this.request<SessionFull>(`/api/mentoring/sessions/${bookingId}`);
   }
+
+  async updateMentorProfile(data: {
+    is_mentor_active?: boolean;
+    mentor_topics?: string[];
+    learning_topics?: string[];
+    mentor_bio?: string;
+    mentor_tokens_per_hour?: number;
+  }) {
+    return this.request<User>('/api/users/me/mentoring-profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 // Singleton instance

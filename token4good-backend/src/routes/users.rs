@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     response::Json,
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -13,6 +13,15 @@ use crate::{
     models::user::{CreateUserRequest, UpdateUserRequest, User, UserRole},
     AppState,
 };
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MentorProfilePayload {
+    pub is_mentor_active: Option<bool>,
+    pub mentor_topics: Option<Vec<String>>,
+    pub learning_topics: Option<Vec<String>>,
+    pub mentor_bio: Option<String>,
+    pub mentor_tokens_per_hour: Option<i32>,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct UserQuery {
@@ -36,6 +45,7 @@ pub fn user_routes() -> Router<AppState> {
         .route("/me/about", get(get_current_user_about))
         .route("/me/metrics", get(get_current_user_metrics))
         .route("/me/pending", get(get_current_user_pending))
+        .route("/me/mentoring-profile", put(update_mentor_profile))
         // Routes /:id après /me
         .route("/:id", get(get_user).put(update_user).delete(delete_user))
         .route("/:id/profile", get(get_user_profile))
@@ -540,6 +550,38 @@ pub async fn get_current_user_pending(
     }
 
     Ok(Json(pending))
+}
+
+/// PUT /api/users/me/mentoring-profile — mise à jour du profil mentor de l'utilisateur connecté
+pub async fn update_mentor_profile(
+    State(state): State<AppState>,
+    AuthUserExtractor(auth_user): AuthUserExtractor,
+    Json(payload): Json<MentorProfilePayload>,
+) -> Result<Json<User>, StatusCode> {
+    let update = UpdateUserRequest {
+        firstname: None,
+        lastname: None,
+        username: None,
+        bio: None,
+        avatar: None,
+        preferences: None,
+        is_onboarded: None,
+        is_mentor_active: payload.is_mentor_active,
+        mentor_topics: payload.mentor_topics,
+        learning_topics: payload.learning_topics,
+        mentor_bio: payload.mentor_bio,
+        mentor_tokens_per_hour: payload.mentor_tokens_per_hour,
+        is_graduated: None,
+        is_speaker: None,
+        is_staff: None,
+    };
+    let updated = state
+        .db
+        .update_user(&auth_user.id, update)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+    Ok(Json(updated))
 }
 
 pub async fn get_user_avatar(
