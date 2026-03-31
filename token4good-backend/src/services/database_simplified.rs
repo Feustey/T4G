@@ -1356,8 +1356,73 @@ impl DatabaseService {
         Ok(vec![])
     }
 
-    pub async fn increment_dashboard_access(&self, _user_id: &str) -> Result<u32, Box<dyn Error>> {
-        Ok(1)
+    pub async fn increment_dashboard_access(&self, user_id: &str) -> Result<u32, Box<dyn Error>> {
+        // Lire preferences et rôle actuels
+        let row = sqlx::query("SELECT preferences, role FROM users WHERE id = $1")
+            .bind(user_id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        let (current_prefs, role) = match row {
+            Some(r) => {
+                let prefs: serde_json::Value = r
+                    .try_get("preferences")
+                    .unwrap_or(serde_json::Value::Object(serde_json::Map::new()));
+                let role: String = r.try_get("role").unwrap_or_else(|_| "mentee".to_string());
+                (prefs, role)
+            }
+            None => return Err("User not found".into()),
+        };
+
+        // Lire le compteur actuel
+        let current_count = current_prefs
+            .get("dashboardAccessCount")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(0) as u32;
+
+        let new_count = current_count + 1;
+
+        // Mettre à jour preferences avec le nouveau compteur
+        let mut map = match current_prefs {
+            serde_json::Value::Object(m) => m,
+            _ => serde_json::Map::new(),
+        };
+        map.insert(
+            "dashboardAccessCount".to_string(),
+            serde_json::json!(new_count),
+        );
+        let new_prefs = serde_json::Value::Object(map);
+
+        if new_count == 1 {
+            // Première visite : créditer les tokens de bienvenue
+            // alumni = 20 T4G, autres rôles = 100 T4G
+            let welcome_tokens: i32 = if role == "alumni" { 20 } else { 100 };
+            sqlx::query(
+                "UPDATE users SET preferences = $1, score = score + $2, updated_at = NOW() WHERE id = $3",
+            )
+            .bind(&new_prefs)
+            .bind(welcome_tokens)
+            .bind(user_id)
+            .execute(&self.pool)
+            .await?;
+
+            tracing::info!(
+                "Bonus de bienvenue crédité : {} T4G pour l'utilisateur {} (rôle: {})",
+                welcome_tokens,
+                user_id,
+                role
+            );
+        } else {
+            sqlx::query(
+                "UPDATE users SET preferences = $1, updated_at = NOW() WHERE id = $2",
+            )
+            .bind(&new_prefs)
+            .bind(user_id)
+            .execute(&self.pool)
+            .await?;
+        }
+
+        Ok(new_count)
     }
 
     /// Obtenir les recommandations de services pour un utilisateur

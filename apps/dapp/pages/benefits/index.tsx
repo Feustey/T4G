@@ -66,7 +66,7 @@ const LEVELS = [
 ];
 
 const EARNING_TABLE = [
-  { action: 'Bonus bienvenue (1ère session)', tokens: 50, icon: '🎉' },
+  { action: 'Bonus bienvenue (1ère connexion)', tokens: 100, icon: '🎉' },
   { action: 'Session mentorat — 30 min', tokens: 20, icon: '⏱️' },
   { action: 'Session mentorat — 60 min', tokens: 40, icon: '⏰' },
   { action: 'Session mentorat — 90 min', tokens: 60, icon: '🕐' },
