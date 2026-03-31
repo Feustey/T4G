@@ -55,6 +55,15 @@ export function Page({ lang }: IPage) {
   const [isCheckingDazeno, setIsCheckingDazeno] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
+  // Afficher les erreurs OAuth renvoyées en query param (?error=...)
+  useEffect(() => {
+    if (!router.isReady) return;
+    const { error } = router.query;
+    if (error === 'github_callback_failed')  notify.error('Échec de la connexion GitHub. Veuillez réessayer.');
+    if (error === 'github_auth_failed')      notify.error('GitHub a refusé l\'autorisation.');
+    if (error === 'invalid_callback')        notify.error('Paramètres de callback invalides. Veuillez réessayer.');
+  }, [router.isReady, router.query.error]);
+
   // Magic Link
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
@@ -238,8 +247,9 @@ export function Page({ lang }: IPage) {
                   setIsLoggingIn(true);
                   try {
                     loginWithGitHub();
-                  } catch {
+                  } catch (err) {
                     setIsLoggingIn(false);
+                    notify.error(err instanceof Error ? err.message : 'Erreur lors de la connexion GitHub');
                   }
                 }}
                 style={{ background: '#24292e', color: 'white' }}

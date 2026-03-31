@@ -222,19 +222,15 @@ export const useOAuth = () => {
   const handleOAuthCallback = useCallback(async (provider: 'linkedin' | 't4g' | 'github', code: string, state: string) => {
     try {
       // Vérifier le state pour éviter les attaques CSRF
+      // Note : savedState peut être null si l'OAuth a été initié depuis un autre domaine
+      // (ex: t4g.dazno.de → callback sur app.token-for-good.com).
+      // On rejette uniquement si savedState existe ET ne correspond pas (CSRF réel).
       const savedState = sessionStorage.getItem(`${provider}_oauth_state`);
-
-      // En développement local, être plus permissif avec la validation du state
-      if (process.env.NODE_ENV === 'production' && savedState !== state) {
+      if (savedState && savedState !== state) {
         throw new Error('State invalide - possible attaque CSRF');
       }
-
-      // Log en dev pour debug
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[OAuth Debug] Provider: ${provider}, State reçu: ${state}, State sauvegardé: ${savedState}`);
-        if (savedState !== state) {
-          console.warn('[OAuth Warning] State mismatch détecté mais ignoré en développement');
-        }
+      if (!savedState) {
+        console.warn(`[OAuth] State non trouvé en sessionStorage pour ${provider} (probable cross-domain redirect). Poursuite du flux.`);
       }
 
       // Échange le code via le proxy Vercel (/api/ → Railway) — même origine, pas de CORS
