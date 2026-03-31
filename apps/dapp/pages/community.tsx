@@ -1,5 +1,4 @@
 import React from 'react';
-import getConfig from 'next/config';
 import Head from 'next/head';
 import useSwr from 'swr';
 import ConnectedLayout from '../layouts/ConnectedLayout';
@@ -34,7 +33,7 @@ const Page: React.FC<PageProps> & AuthPageType = ({
 }: // metrics,
 // smartContractAddress,
 PageProps) => {
-  const POLYGONSCAN_BASEURL = getConfig().publicRuntimeConfig.polygonScanUrl;
+  const POLYGONSCAN_BASEURL = process.env.NEXT_PUBLIC_POLYGONSCAN_BASEURL ?? 'https://mumbai.polygonscan.com';
   const { user } = useAuth();
   const { data: metrics } = useSwr<CommunityMetrics>(`/metrics`, apiFetcher);
   const {
@@ -73,12 +72,12 @@ PageProps) => {
               </p>
             </div>
 
-            {!isWalletLoading && wallet && metrics ? (
+            {metrics ? (
             <div className="o-card">
               <div className="u-d--flex u-justify-content-between u-width--fill">
                 <h2 className="subtitle-1">{lang.page.community.main.title2}</h2>
               </div>
-              
+
               <ul role="list" className="c-notifications">
                 <li>
                   <div className="flex items-center justify-around">
@@ -146,9 +145,7 @@ PageProps) => {
               </ul>
             </div>
             ) : (
-              <>
-                <Spinner lang={lang} spinnerText={'Loading...'} size="lg" />
-              </>
+              <Spinner lang={lang} spinnerText={'Loading...'} size="lg" />
             )}
           </section>
           {/* ── Section Nouveautés V2 ── */}
@@ -310,7 +307,7 @@ PageProps) => {
 
           </section>
 
-          {!isWalletLoading && wallet && metrics && (
+          {!isWalletLoading && wallet && (
           <aside className="c-metrics">
             <div className="o-card">
               <div className="About__Wallet__title flex justify-between">
